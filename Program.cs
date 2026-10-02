@@ -193,7 +193,10 @@ app.UseSession();           // ✅ must be BEFORE MapControllerRoute
 app.UseAuthentication();    // ✅ added — must be BEFORE UseAuthorization, was missing entirely
 app.UseAuthorization();
 
-
+//Currency in RANDS
+var cultureInfo = new System.Globalization.CultureInfo("en-ZA");
+System.Globalization.CultureInfo.DefaultThreadCurrentCulture = cultureInfo;
+System.Globalization.CultureInfo.DefaultThreadCurrentUICulture = cultureInfo;
 
 //route config for core
 app.MapControllerRoute(
