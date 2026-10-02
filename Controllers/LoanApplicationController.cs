@@ -507,5 +507,35 @@ namespace SkyTech.Controllers
                 _ => "application/octet-stream"
             };
         }
+
+
+        // ---------- Track applications (customer-side history/status view) ----------
+
+        [HttpGet]
+        public async Task<IActionResult> MyLoanApplications()
+        {
+            int? customerId = HttpContext.Session.GetInt32("UserId");
+
+            var applications = await _db.LoanApplications
+                .Include(a => a.Branch)
+                .Where(a => a.CustomerId == customerId)
+                .OrderByDescending(a => a.CreatedOn)
+                .ToListAsync();
+
+            return View(applications);
+        }
+
+
+        [HttpGet]
+        public async Task<IActionResult> ApplicationDetails(int id)
+        {
+            var application = await GetOwnedApplicationAsync(id, includeCollateral: true);
+            if (application == null) return NotFound();
+
+            return View(application);
+        }
+
+
+
     }
 }

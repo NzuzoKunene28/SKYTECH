@@ -12,8 +12,8 @@ using SkyTech.Models;
 namespace SkyTech.Migrations
 {
     [DbContext(typeof(ApplicationDbContext))]
-    [Migration("20261002212955_Ini")]
-    partial class Ini
+    [Migration("20261002210551_Initial")]
+    partial class Initial
     {
         /// <inheritdoc />
         protected override void BuildTargetModel(ModelBuilder modelBuilder)

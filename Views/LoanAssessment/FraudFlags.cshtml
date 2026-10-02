@@ -209,6 +209,123 @@
             color: var(--text);
         }
 
+    /* ── Dismiss reason modal ── */
+    .modal-overlay {
+        display: none;
+        position: fixed;
+        inset: 0;
+        background: rgba(14, 27, 53, 0.45);
+        z-index: 1000;
+        align-items: center;
+        justify-content: center;
+        padding: 20px;
+    }
+
+        .modal-overlay.active {
+            display: flex;
+        }
+
+    .modal-box {
+        background: white;
+        border-radius: 22px;
+        padding: 35px;
+        max-width: 440px;
+        width: 100%;
+        box-shadow: 0 25px 60px rgba(31, 79, 80, 0.25);
+        text-align: left;
+    }
+
+    .modal-icon {
+        width: 56px;
+        height: 56px;
+        margin: 0 auto 18px;
+        border-radius: 50%;
+        background: #f1f4f8;
+        color: var(--text-2);
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        font-size: 24px;
+        font-weight: 700;
+    }
+
+    .modal-title {
+        color: var(--text);
+        font-size: 20px;
+        font-weight: 750;
+        margin-bottom: 8px;
+        text-align: center;
+    }
+
+    .modal-text {
+        color: var(--text-2);
+        font-size: 14px;
+        margin-bottom: 18px;
+        line-height: 1.5;
+        text-align: center;
+    }
+
+    .modal-field-label {
+        display: block;
+        color: var(--text);
+        font-weight: 650;
+        font-size: 13px;
+        margin-bottom: 8px;
+    }
+
+    .modal-textarea {
+        width: 100%;
+        border: 1px solid var(--border);
+        border-radius: 10px;
+        padding: 12px;
+        font-family: inherit;
+        font-size: 14px;
+        min-height: 80px;
+        box-sizing: border-box;
+        resize: vertical;
+        margin-bottom: 8px;
+    }
+
+        .modal-textarea:focus {
+            outline: none;
+            border-color: var(--blue);
+            box-shadow: 0 0 0 3px rgba(95, 158, 160, 0.14);
+        }
+
+    .modal-error {
+        color: var(--red);
+        font-size: 12px;
+        margin-bottom: 10px;
+        display: none;
+    }
+
+    .modal-actions {
+        display: flex;
+        gap: 10px;
+        margin-top: 10px;
+    }
+
+    .modal-btn {
+        flex: 1;
+        border: none;
+        padding: 12px;
+        border-radius: 10px;
+        font-weight: 650;
+        cursor: pointer;
+        font-size: 14px;
+    }
+
+    .modal-btn-cancel {
+        background: white;
+        border: 1px solid var(--border);
+        color: var(--text-2);
+    }
+
+    .modal-btn-confirm {
+        background: var(--blue-dark);
+        color: white;
+    }
+
 </style>
 
 <div class="assess-page">
@@ -324,6 +441,32 @@
     </div>
 </div>
 
+<!-- Dismiss reason modal -->
+<div class="modal-overlay" id="dismissModal">
+
+    <div class="modal-box">
+
+        <div class="modal-icon">!</div>
+
+        <div class="modal-title">Dismiss this fraud flag?</div>
+
+        <p class="modal-text">
+            Please give a short reason. This will be kept on record for audit purposes.
+        </p>
+
+        <label class="modal-field-label" for="dismissReasonInput">Reason</label>
+        <textarea id="dismissReasonInput" class="modal-textarea" placeholder="e.g. Verified manually, not a genuine match"></textarea>
+        <div class="modal-error" id="dismissError">A reason is required to dismiss this flag.</div>
+
+        <div class="modal-actions">
+            <button type="button" class="modal-btn modal-btn-cancel" id="dismissCancelBtn">Cancel</button>
+            <button type="button" class="modal-btn modal-btn-confirm" id="dismissConfirmBtn">Dismiss Flag</button>
+        </div>
+
+    </div>
+
+</div>
+
 @Html.AntiForgeryToken()
 
 @section Scripts {
@@ -333,29 +476,66 @@
             return input ? input.value : "";
         }
 
+        const dismissModal = document.getElementById("dismissModal");
+        const dismissReasonInput = document.getElementById("dismissReasonInput");
+        const dismissError = document.getElementById("dismissError");
+        const dismissConfirmBtn = document.getElementById("dismissConfirmBtn");
+        const dismissCancelBtn = document.getElementById("dismissCancelBtn");
+
+        let pendingFlagId = null;
+
+        function openDismissModal(flagId) {
+            pendingFlagId = flagId;
+            dismissReasonInput.value = "";
+            dismissError.style.display = "none";
+            dismissModal.classList.add("active");
+            dismissReasonInput.focus();
+        }
+
+        function closeDismissModal() {
+            dismissModal.classList.remove("active");
+            pendingFlagId = null;
+        }
+
+        dismissCancelBtn.addEventListener("click", closeDismissModal);
+        dismissModal.addEventListener("click", function(e) {
+            if (e.target === dismissModal) closeDismissModal();
+        });
+
         document.querySelectorAll(".dismiss-flag-btn").forEach(function(button) {
-            button.addEventListener("click", async function() {
-                const reason = prompt("Reason for dismissing this fraud flag:");
-                if (!reason) return;
-
+            button.addEventListener("click", function() {
                 const flagId = button.closest(".flag-row").dataset.flagId;
-                const formData = new FormData();
-                formData.append("fraudFlagId", flagId);
-                formData.append("reason", reason);
-
-                const response = await fetch("@Url.Action("DismissFraudFlag", "LoanAssessment")", {
-                    method: "POST",
-                    headers: { "RequestVerificationToken": getAntiForgeryToken() },
-                    body: formData
-                });
-
-                const result = await response.json();
-                if (result.success) {
-                    window.location.reload();
-                } else {
-                    alert(result.message || "Could not dismiss the flag.");
-                }
+                openDismissModal(flagId);
             });
+        });
+
+        dismissConfirmBtn.addEventListener("click", async function() {
+            const reason = dismissReasonInput.value.trim();
+
+            if (!reason) {
+                dismissError.style.display = "block";
+                return;
+            }
+
+            const flagId = pendingFlagId;
+            closeDismissModal();
+
+            const formData = new FormData();
+            formData.append("fraudFlagId", flagId);
+            formData.append("reason", reason);
+
+            const response = await fetch("@Url.Action("DismissFraudFlag", "LoanAssessment")", {
+                method: "POST",
+                headers: { "RequestVerificationToken": getAntiForgeryToken() },
+                body: formData
+            });
+
+            const result = await response.json();
+            if (result.success) {
+                window.location.reload();
+            } else {
+                alert(result.message || "Could not dismiss the flag.");
+            }
         });
     </script>
 }
