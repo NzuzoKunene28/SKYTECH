@@ -8,7 +8,7 @@ using Microsoft.EntityFrameworkCore.Migrations;
 namespace SkyTech.Migrations
 {
     /// <inheritdoc />
-    public partial class InitialCreate : Migration
+    public partial class Initial : Migration
     {
         /// <inheritdoc />
         protected override void Up(MigrationBuilder migrationBuilder)
@@ -559,6 +559,8 @@ namespace SkyTech.Migrations
                     ScheduledDeliveryDate = table.Column<DateTime>(type: "datetime2", nullable: false),
                     DeliveryPin = table.Column<string>(type: "nvarchar(max)", nullable: false),
                     IsDelivered = table.Column<bool>(type: "bit", nullable: false),
+                    BankStatementDocPath = table.Column<string>(type: "nvarchar(max)", nullable: false),
+                    ProofOfResidenceDocPath = table.Column<string>(type: "nvarchar(max)", nullable: false),
                     PaystackCustomerCode = table.Column<string>(type: "nvarchar(max)", nullable: true),
                     PaystackPlanCode = table.Column<string>(type: "nvarchar(max)", nullable: true),
                     PaystackSubscriptionCode = table.Column<string>(type: "nvarchar(max)", nullable: true),

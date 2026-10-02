@@ -1,0 +1,374 @@
+﻿@model SkyTech.Models.SkytechWorkers.LoanApplication
+
+@{
+    ViewData["Title"] = "Application Details";
+    Layout = "~/Views/Shared/_MinimalLayout.cshtml";
+    var statusClass = "status-" + Model.Status.ToString().ToLowerInvariant();
+}
+
+<style>
+    :root {
+        --blue: #5f9ea0;
+        --blue-dark: #2d6b6d;
+        --blue-deep: #1f4f50;
+        --bg: #f0f4fc;
+        --border: #dde6f5;
+        --text: #0e1b35;
+        --text-2: #4a5878;
+        --text-m: #8a96b0;
+        --red: #dc2626;
+    }
+
+    .detail-page {
+        min-height: 80vh;
+        background: var(--bg);
+        padding: 45px 20px;
+    }
+
+    .detail-container {
+        max-width: 950px;
+        margin: auto;
+    }
+
+    .back-link {
+        display: inline-block;
+        margin-bottom: 20px;
+        color: var(--blue-dark);
+        text-decoration: none;
+        font-weight: 600;
+        font-size: 14px;
+    }
+
+    .step-label {
+        color: var(--blue-dark);
+        font-size: 13px;
+        font-weight: 700;
+        text-transform: uppercase;
+        letter-spacing: 1px;
+    }
+
+    .page-title {
+        color: var(--text);
+        font-size: 34px;
+        font-weight: 750;
+        margin: 7px 0;
+    }
+
+    .page-subtitle {
+        color: var(--text-2);
+        margin-bottom: 25px;
+    }
+
+    .result-card {
+        background: white;
+        border: 1px solid var(--border);
+        border-radius: 22px;
+        padding: 35px;
+        margin-bottom: 22px;
+        box-shadow: 0 12px 35px rgba(31, 79, 80, 0.07);
+    }
+
+    .section-title {
+        color: var(--text);
+        font-size: 19px;
+        font-weight: 700;
+        margin-bottom: 18px;
+    }
+
+    .information-grid {
+        display: grid;
+        grid-template-columns: repeat(3, 1fr);
+        gap: 15px;
+    }
+
+    .information-box {
+        border: 1px solid var(--border);
+        border-radius: 15px;
+        padding: 18px;
+        background: #fbfcff;
+    }
+
+    .information-label {
+        color: var(--text-m);
+        font-size: 13px;
+        margin-bottom: 6px;
+    }
+
+    .information-value {
+        color: var(--text);
+        font-size: 19px;
+        font-weight: 700;
+    }
+
+    .status-badge {
+        display: inline-block;
+        padding: 6px 12px;
+        border-radius: 20px;
+        font-size: 12px;
+        font-weight: 700;
+    }
+
+    .status-started {
+        background: #f1f4f8;
+        color: var(--text-2);
+    }
+
+    .status-awaitingcollateral {
+        background: #fff4d6;
+        color: #8a6100;
+    }
+
+    .status-submitted {
+        background: #e6f3f3;
+        color: var(--blue-deep);
+    }
+
+    .status-understaffreview {
+        background: #e6f3f3;
+        color: var(--blue-deep);
+    }
+
+    .status-approved {
+        background: #e1f4e9;
+        color: #177245;
+    }
+
+    .status-rejected {
+        background: #fde8e8;
+        color: var(--red);
+    }
+
+    .status-disbursed {
+        background: #e1f4e9;
+        color: #177245;
+    }
+
+    .clear {
+        color: #198754;
+    }
+
+    .unclear {
+        color: var(--red);
+    }
+
+    .items-grid {
+        display: grid;
+        grid-template-columns: repeat(2, 1fr);
+        gap: 22px;
+    }
+
+    .collateral-card {
+        background: #fbfcff;
+        border: 1px solid var(--border);
+        border-radius: 18px;
+        overflow: hidden;
+    }
+
+    .collateral-image {
+        width: 100%;
+        height: 200px;
+        object-fit: contain;
+        background: white;
+        padding: 10px;
+    }
+
+    .collateral-body {
+        padding: 20px;
+    }
+
+    .collateral-name {
+        color: var(--text);
+        font-weight: 700;
+        margin-bottom: 10px;
+    }
+
+    .detail {
+        color: var(--text-2);
+        font-size: 13px;
+        margin-bottom: 6px;
+    }
+
+        .detail strong {
+            color: var(--text);
+        }
+
+    .badge {
+        display: inline-block;
+        padding: 6px 10px;
+        border-radius: 20px;
+        font-size: 12px;
+        font-weight: 700;
+        margin: 8px 6px 0 0;
+    }
+
+    .accepted {
+        background: #e1f4e9;
+        color: #177245;
+    }
+
+    .rejected {
+        background: #fde8e8;
+        color: var(--red);
+    }
+
+    .manual {
+        background: #fff4d6;
+        color: #8a6100;
+    }
+
+    @@media (max-width: 800px) {
+        .information-grid, .items-grid {
+            grid-template-columns: 1fr;
+        }
+    }
+</style>
+
+<div class="detail-page">
+
+    <div class="detail-container">
+
+        <a asp-action="MyLoanApplications" class="back-link">← Back to Loan Applications</a>
+
+        <div class="step-label">
+            My Account
+        </div>
+
+        <h1 class="page-title">
+            Application #@Model.LoanApplicationId
+        </h1>
+
+        <p class="page-subtitle">
+            Full details and current status of this loan application.
+        </p>
+
+        <div class="result-card">
+
+            <div class="section-title">
+                Overview
+            </div>
+
+            <div class="information-grid">
+
+                <div class="information-box">
+                    <div class="information-label">Status</div>
+                    <div class="information-value">
+                        <span class="status-badge @statusClass">@Model.Status</span>
+                    </div>
+                </div>
+
+                <div class="information-box">
+                    <div class="information-label">Requested Amount</div>
+                    <div class="information-value">@Model.RequestedAmount.ToString("C")</div>
+                </div>
+
+                <div class="information-box">
+                    <div class="information-label">Branch</div>
+                    <div class="information-value">@(Model.Branch?.BranchName ?? "—")</div>
+                </div>
+
+                <div class="information-box">
+                    <div class="information-label">Credit Score at Application</div>
+                    <div class="information-value">@Model.CreditScoreAtApplication</div>
+                </div>
+
+                <div class="information-box">
+                    <div class="information-label">Clearance Status</div>
+                    <div class="information-value @(Model.ClearanceStatusAtApplication == SkyTech.Models.SkytechWorkers.ClearanceStatus.Clear ? "clear" : "unclear")">
+                        @Model.ClearanceStatusAtApplication
+                    </div>
+                </div>
+
+                <div class="information-box">
+                    <div class="information-label">Eligibility Result</div>
+                    <div class="information-value">@Model.EligibilityResult</div>
+                </div>
+
+                <div class="information-box">
+                    <div class="information-label">Monthly Salary</div>
+                    <div class="information-value">@Model.MonthlySalary.ToString("C")</div>
+                </div>
+
+                <div class="information-box">
+                    <div class="information-label">Purpose</div>
+                    <div class="information-value">@(Model.Purpose?.ToString() ?? "Not specified")</div>
+                </div>
+
+                <div class="information-box">
+                    <div class="information-label">Total Declared Collateral</div>
+                    <div class="information-value">@Model.TotalDeclaredCollateralValue.ToString("C")</div>
+                </div>
+
+                <div class="information-box">
+                    <div class="information-label">Applied On</div>
+                    <div class="information-value" style="font-size: 15px;">
+                        @Model.CreatedOn.ToLocalTime().ToString("f")
+                    </div>
+                </div>
+
+                <div class="information-box">
+                    <div class="information-label">Submitted On</div>
+                    <div class="information-value" style="font-size: 15px;">
+                        @(Model.SubmittedOn?.ToLocalTime().ToString("f") ?? "Not yet submitted")
+                    </div>
+                </div>
+
+            </div>
+
+        </div>
+
+        @if (Model.CollateralItems.Any())
+        {
+            <div class="result-card">
+
+                <div class="section-title">
+                    Collateral Items
+                </div>
+
+                <div class="items-grid">
+
+                    @foreach (var item in Model.CollateralItems)
+                    {
+                        var badgeClass = item.AiScanResult switch
+                        {
+                            SkyTech.Models.SkytechWorkers.AiScanResult.Accepted => "accepted",
+                            SkyTech.Models.SkytechWorkers.AiScanResult.Rejected => "rejected",
+                            SkyTech.Models.SkytechWorkers.AiScanResult.NeedsManualReview => "manual",
+                            _ => "manual"
+                        };
+
+                        <div class="collateral-card">
+
+                            <img src="@item.ImagePath" class="collateral-image" alt="@item.Description" />
+
+                            <div class="collateral-body">
+
+                                <div class="collateral-name">@item.Description</div>
+
+                                <div class="detail"><strong>Declared value:</strong> @item.DeclaredValue.ToString("C")</div>
+                                <div class="detail"><strong>Condition:</strong> @item.Condition</div>
+
+                                @if (!string.IsNullOrWhiteSpace(item.SerialNumber))
+                                {
+                                    <div class="detail"><strong>Serial number:</strong> @item.SerialNumber</div>
+                                }
+
+                                <span class="badge @badgeClass">@item.AiScanResult</span>
+
+                                @if (!string.IsNullOrWhiteSpace(item.AiScanNotes))
+                                {
+                                    <div class="detail" style="margin-top: 10px;">@item.AiScanNotes</div>
+                                }
+
+                            </div>
+
+                        </div>
+                    }
+
+                </div>
+
+            </div>
+        }
+
+    </div>
+
+</div>

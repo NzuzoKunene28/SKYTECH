@@ -134,6 +134,99 @@
         text-decoration: none;
         margin-top: 20px;
     }
+
+    /* ── Confirmation modal ── */
+    .modal-overlay {
+        display: none;
+        position: fixed;
+        inset: 0;
+        background: rgba(14, 27, 53, 0.45);
+        z-index: 1000;
+        align-items: center;
+        justify-content: center;
+        padding: 20px;
+    }
+
+        .modal-overlay.active {
+            display: flex;
+        }
+
+    .modal-box {
+        background: white;
+        border-radius: 22px;
+        padding: 35px;
+        max-width: 420px;
+        width: 100%;
+        box-shadow: 0 25px 60px rgba(31, 79, 80, 0.25);
+        text-align: center;
+    }
+
+    .modal-icon {
+        width: 60px;
+        height: 60px;
+        margin: 0 auto 18px;
+        border-radius: 50%;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        font-size: 26px;
+        font-weight: 700;
+    }
+
+    .modal-icon-approve {
+        background: #e1f4e9;
+        color: #198754;
+    }
+
+    .modal-icon-reject {
+        background: #fde8e8;
+        color: var(--red);
+    }
+
+    .modal-title {
+        color: var(--text);
+        font-size: 21px;
+        font-weight: 750;
+        margin-bottom: 10px;
+    }
+
+    .modal-text {
+        color: var(--text-2);
+        font-size: 14px;
+        margin-bottom: 25px;
+        line-height: 1.6;
+    }
+
+    .modal-actions {
+        display: flex;
+        gap: 10px;
+    }
+
+    .modal-btn {
+        flex: 1;
+        border: none;
+        padding: 12px;
+        border-radius: 10px;
+        font-weight: 650;
+        cursor: pointer;
+        font-size: 14px;
+    }
+
+    .modal-btn-cancel {
+        background: white;
+        border: 1px solid var(--border);
+        color: var(--text-2);
+    }
+
+    .modal-btn-confirm-approve {
+        background: #198754;
+        color: white;
+    }
+
+    .modal-btn-confirm-reject {
+        background: var(--red);
+        color: white;
+    }
 </style>
 
 <div class="assess-page">
@@ -161,13 +254,6 @@
                 </strong>
             </div>
 
-            @* <div class="summary-row">
-                <span>All collateral verified</span>
-                <strong style="color: @(Model.AllCollateralVerified ? "#198754" : "var(--red)")">
-                    @(Model.AllCollateralVerified ? "Yes" : "No")
-                </strong>
-            </div> *@
-
             <div class="summary-row">
                 <span>Requested Amount</span>
                 <strong>@app.RequestedAmount.ToString("C")</strong>
@@ -194,51 +280,119 @@
     </div>
 </div>
 
+<!-- Confirmation modal -->
+<div class="modal-overlay" id="confirmModal">
+
+    <div class="modal-box">
+
+        <div class="modal-icon" id="modalIcon">!</div>
+
+        <div class="modal-title" id="modalTitle">Confirm Decision</div>
+
+        <p class="modal-text" id="modalText">
+            Are you sure you want to proceed?
+        </p>
+
+        <div class="modal-actions">
+            <button type="button" class="modal-btn modal-btn-cancel" id="modalCancelBtn">Cancel</button>
+            <button type="button" class="modal-btn" id="modalConfirmBtn">Confirm</button>
+        </div>
+
+    </div>
+
+</div>
+
 @Html.AntiForgeryToken()
 
 @section Scripts {
     <script>
         const loanAssessmentId = @Model.LoanAssessmentId;
+        let pendingDecision = null;
 
         function getAntiForgeryToken() {
             const input = document.querySelector('input[name="__RequestVerificationToken"]');
             return input ? input.value : "";
         }
 
+        const modal = document.getElementById("confirmModal");
+        const modalIcon = document.getElementById("modalIcon");
+        const modalTitle = document.getElementById("modalTitle");
+        const modalText = document.getElementById("modalText");
+        const modalConfirmBtn = document.getElementById("modalConfirmBtn");
+        const modalCancelBtn = document.getElementById("modalCancelBtn");
+
+        function openModal(decision) {
+            pendingDecision = decision;
+
+            if (decision === "Approved") {
+                modalIcon.className = "modal-icon modal-icon-approve";
+                modalIcon.innerText = "✓";
+                modalTitle.innerText = "Approve this application?";
+                modalText.innerText = "This will mark the application as Approved. You can disburse the payment afterwards.";
+                modalConfirmBtn.className = "modal-btn modal-btn-confirm-approve";
+                modalConfirmBtn.innerText = "Approve";
+            } else {
+                modalIcon.className = "modal-icon modal-icon-reject";
+                modalIcon.innerText = "!";
+                modalTitle.innerText = "Reject this application?";
+                modalText.innerText = "This will mark the application as Rejected. This action cannot be undone.";
+                modalConfirmBtn.className = "modal-btn modal-btn-confirm-reject";
+                modalConfirmBtn.innerText = "Reject";
+            }
+
+            modal.classList.add("active");
+        }
+
+        function closeModal() {
+            modal.classList.remove("active");
+            pendingDecision = null;
+        }
+
+        modalCancelBtn.addEventListener("click", closeModal);
+        modal.addEventListener("click", function(e) {
+            if (e.target === modal) closeModal();
+        });
+
         document.querySelectorAll(".decide-btn").forEach(function(button) {
-            button.addEventListener("click", async function() {
-                const decision = button.dataset.decision;
-                const notes = document.getElementById("decisionNotes").value;
-                const errorsBox = document.getElementById("decisionErrors");
-                errorsBox.style.display = "none";
-                errorsBox.innerHTML = "";
-
-                if (!confirm(`Confirm decision: ${decision}?`)) return;
-
-                const formData = new FormData();
-                formData.append("loanAssessmentId", loanAssessmentId);
-                formData.append("decision", decision);
-                formData.append("notes", notes);
-
-                const response = await fetch("@Url.Action("Decide", "LoanAssessment")", {
-                    method: "POST",
-                    headers: { "RequestVerificationToken": getAntiForgeryToken() },
-                    body: formData
-                });
-
-                if (response.redirected) {
-                    window.location.href = response.url;
-                    return;
-                }
-
-                const result = await response.json().catch(() => null);
-                if (result && result.errors) {
-                    errorsBox.innerHTML = result.errors.join("<br/>");
-                    errorsBox.style.display = "block";
-                } else {
-                    alert("Could not record the decision.");
-                }
+            button.addEventListener("click", function() {
+                openModal(button.dataset.decision);
             });
+        });
+
+        modalConfirmBtn.addEventListener("click", async function() {
+            const decision = pendingDecision;
+            if (!decision) return;
+
+            closeModal();
+
+            const notes = document.getElementById("decisionNotes").value;
+            const errorsBox = document.getElementById("decisionErrors");
+            errorsBox.style.display = "none";
+            errorsBox.innerHTML = "";
+
+            const formData = new FormData();
+            formData.append("loanAssessmentId", loanAssessmentId);
+            formData.append("decision", decision);
+            formData.append("notes", notes);
+
+            const response = await fetch("@Url.Action("Decide", "LoanAssessment")", {
+                method: "POST",
+                headers: { "RequestVerificationToken": getAntiForgeryToken() },
+                body: formData
+            });
+
+            if (response.redirected) {
+                window.location.href = response.url;
+                return;
+            }
+
+            const result = await response.json().catch(() => null);
+            if (result && result.errors) {
+                errorsBox.innerHTML = result.errors.join("<br/>");
+                errorsBox.style.display = "block";
+            } else {
+                alert("Could not record the decision.");
+            }
         });
     </script>
 }

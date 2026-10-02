@@ -1,0 +1,244 @@
+﻿@model List<SkyTech.Models.SkytechWorkers.LoanApplication>
+
+@{
+    ViewData["Title"] = "Loan Applications";
+    Layout = "~/Views/Shared/_MinimalLayout.cshtml";
+}
+
+<style>
+    :root {
+        --blue: #5f9ea0;
+        --blue-dark: #2d6b6d;
+        --blue-deep: #1f4f50;
+        --bg: #f0f4fc;
+        --border: #dde6f5;
+        --text: #0e1b35;
+        --text-2: #4a5878;
+        --text-m: #8a96b0;
+        --red: #dc2626;
+    }
+
+    .loan-page {
+        min-height: 80vh;
+        background: var(--bg);
+        padding: 45px 20px;
+    }
+
+    .loan-container {
+        max-width: 950px;
+        margin: auto;
+    }
+
+    .step-label {
+        color: var(--blue-dark);
+        font-size: 13px;
+        font-weight: 700;
+        text-transform: uppercase;
+        letter-spacing: 1px;
+    }
+
+    .page-title {
+        color: var(--text);
+        font-size: 35px;
+        font-weight: 750;
+        margin: 7px 0;
+    }
+
+    .page-subtitle {
+        color: var(--text-2);
+        margin-bottom: 30px;
+    }
+
+    .empty-card {
+        background: white;
+        border: 1px solid var(--border);
+        border-radius: 22px;
+        padding: 45px;
+        text-align: center;
+        color: var(--text-2);
+        box-shadow: 0 12px 35px rgba(31, 79, 80, 0.07);
+    }
+
+    .apply-link {
+        display: inline-block;
+        margin-top: 18px;
+        background: var(--blue-dark);
+        color: white;
+        padding: 12px 22px;
+        border-radius: 10px;
+        text-decoration: none;
+        font-weight: 650;
+    }
+
+        .apply-link:hover {
+            background: var(--blue-deep);
+            color: white;
+        }
+
+    .app-card {
+        background: white;
+        border: 1px solid var(--border);
+        border-radius: 20px;
+        padding: 25px 28px;
+        margin-bottom: 18px;
+        box-shadow: 0 8px 25px rgba(31, 79, 80, 0.06);
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        gap: 20px;
+        flex-wrap: wrap;
+    }
+
+    .app-info {
+        flex: 1;
+        min-width: 220px;
+    }
+
+    .app-number {
+        color: var(--text);
+        font-size: 19px;
+        font-weight: 700;
+        margin-bottom: 6px;
+    }
+
+    .app-detail {
+        color: var(--text-2);
+        font-size: 14px;
+        margin-bottom: 3px;
+    }
+
+        .app-detail strong {
+            color: var(--text);
+        }
+
+    .status-badge {
+        display: inline-block;
+        padding: 6px 12px;
+        border-radius: 20px;
+        font-size: 12px;
+        font-weight: 700;
+        margin-top: 8px;
+    }
+
+    .status-started {
+        background: #f1f4f8;
+        color: var(--text-2);
+    }
+
+    .status-awaitingcollateral {
+        background: #fff4d6;
+        color: #8a6100;
+    }
+
+    .status-submitted {
+        background: #e6f3f3;
+        color: var(--blue-deep);
+    }
+
+    .status-understaffreview {
+        background: #e6f3f3;
+        color: var(--blue-deep);
+    }
+
+    .status-approved {
+        background: #e1f4e9;
+        color: #177245;
+    }
+
+    .status-rejected {
+        background: #fde8e8;
+        color: var(--red);
+    }
+
+    .status-disbursed {
+        background: #e1f4e9;
+        color: #177245;
+    }
+
+    .view-button {
+        background: var(--blue-dark);
+        color: white;
+        border: none;
+        padding: 12px 22px;
+        border-radius: 10px;
+        font-weight: 650;
+        white-space: nowrap;
+        text-decoration: none;
+    }
+
+        .view-button:hover {
+            background: var(--blue-deep);
+            color: white;
+        }
+</style>
+
+<div class="loan-page">
+
+    <div class="loan-container">
+
+        <div class="step-label">
+            My Account
+        </div>
+
+        <h1 class="page-title">
+            Loan Applications
+        </h1>
+
+        <p class="page-subtitle">
+            Track the status of every loan application you've submitted.
+        </p>
+
+        @if (!Model.Any())
+        {
+            <div class="empty-card">
+                You haven't applied for a loan yet.
+                <br />
+                <a asp-action="Apply" class="apply-link">Apply for a Loan</a>
+            </div>
+        }
+        else
+        {
+            @foreach (var app in Model)
+            {
+                var statusClass = "status-" + app.Status.ToString().ToLowerInvariant();
+
+                <div class="app-card">
+
+                    <div class="app-info">
+
+                        <div class="app-number">
+                            Application #@app.LoanApplicationId
+                        </div>
+
+                        <div class="app-detail">
+                            <strong>Requested Amount:</strong>
+                            @app.RequestedAmount.ToString("C")
+                        </div>
+
+                        <div class="app-detail">
+                            <strong>Branch:</strong>
+                            @(app.Branch?.BranchName ?? "—")
+                        </div>
+
+                        <div class="app-detail">
+                            <strong>Submitted:</strong>
+                            @(app.SubmittedOn?.ToLocalTime().ToString("f") ?? "Not yet submitted")
+                        </div>
+
+                        <span class="status-badge @statusClass">
+                            @app.Status
+                        </span>
+
+                    </div>
+
+                    <a asp-action="ApplicationDetails" asp-route-id="@app.LoanApplicationId" class="view-button">
+                        View Details →
+                    </a>
+
+                </div>
+            }
+        }
+
+    </div>
+
+</div>
