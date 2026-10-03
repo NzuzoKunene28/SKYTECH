@@ -314,6 +314,19 @@
 
             </div>
 
+            @if (Model.Status == SkyTech.Models.SkytechWorkers.LoanApplicationStatus.Rejected
+                && !string.IsNullOrWhiteSpace(ViewBag.RejectionReason as string))
+            {
+                <div style="background:#fde8e8; border:1px solid #f0b7b7; border-radius:14px; padding:18px 20px; margin-top:18px;">
+                    <div style="color:var(--red); font-weight:700; font-size:14px; margin-bottom:6px;">
+                        Reason for rejection
+                    </div>
+                    <div style="color:var(--text-2); font-size:14px; line-height:1.5;">
+                        @ViewBag.RejectionReason
+                    </div>
+                </div>
+            }
+
         </div>
 
         @if (Model.CollateralItems.Any())

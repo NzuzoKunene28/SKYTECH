@@ -1,6 +1,7 @@
 
 using Hangfire;
 using Microsoft.AspNetCore.Authentication.JwtBearer;
+using Microsoft.AspNetCore.Localization;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.IdentityModel.Tokens;
 using SkyTech.JobPostServices;
@@ -13,7 +14,13 @@ using SkyTech.Services;
 using System.Globalization;
 using System.Text;
 
+
+
 var builder = WebApplication.CreateBuilder(args);
+
+var defaultCulture = new CultureInfo("en-ZA");
+CultureInfo.DefaultThreadCurrentCulture = defaultCulture;
+CultureInfo.DefaultThreadCurrentUICulture = defaultCulture;
 
 // Force dot as decimal separator for model binding
 CultureInfo.DefaultThreadCurrentCulture = CultureInfo.InvariantCulture;
@@ -179,6 +186,14 @@ using (var scope = app.Services.CreateScope())
 // coordinates need to be set individually (via a Branch edit screen, or a
 // direct DB update for now) rather than a single global seeded row.
 
+var supportedCultures = new[] { new CultureInfo("en-ZA") };
+app.UseRequestLocalization(new RequestLocalizationOptions
+{
+    DefaultRequestCulture = new RequestCulture("en-ZA"),
+    SupportedCultures = supportedCultures,
+    SupportedUICultures = supportedCultures
+});
+
 
 if (!app.Environment.IsDevelopment())
 {
@@ -204,3 +219,4 @@ app.MapControllerRoute(
     pattern: "{controller=Customer}/{action=ShoppingPage}/{id?}"); // starts on the shopping page
 
 app.Run();
+

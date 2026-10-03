@@ -266,7 +266,12 @@
 
             <div id="decisionErrors" class="decision-errors"></div>
 
-            <textarea id="decisionNotes" class="decision-notes" placeholder="Optional notes about this decision..."></textarea>
+            <div id="notesSection" style="display: none;">
+                <label class="modal-field-label" style="display:block; margin-bottom:8px;">
+                    Reason for rejection
+                </label>
+                <textarea id="decisionNotes" class="decision-notes" placeholder="Briefly explain why this application is being rejected — the customer will see this."></textarea>
+            </div>
 
             <div class="decision-actions">
                 <button type="button" class="decision-button decision-approve decide-btn" data-decision="Approved">Approve</button>
@@ -293,6 +298,12 @@
             Are you sure you want to proceed?
         </p>
 
+        <div id="modalNotesWrapper" style="display: none; text-align: left; margin-bottom: 15px;">
+            <label class="modal-field-label" for="modalReasonInput">Reason for rejection</label>
+            <textarea id="modalReasonInput" class="modal-textarea" placeholder="Briefly explain why — the customer will see this."></textarea>
+            <div class="modal-error" id="modalReasonError">A reason is required when rejecting an application.</div>
+        </div>
+
         <div class="modal-actions">
             <button type="button" class="modal-btn modal-btn-cancel" id="modalCancelBtn">Cancel</button>
             <button type="button" class="modal-btn" id="modalConfirmBtn">Confirm</button>
@@ -318,11 +329,16 @@
         const modalIcon = document.getElementById("modalIcon");
         const modalTitle = document.getElementById("modalTitle");
         const modalText = document.getElementById("modalText");
+        const modalNotesWrapper = document.getElementById("modalNotesWrapper");
+        const modalReasonInput = document.getElementById("modalReasonInput");
+        const modalReasonError = document.getElementById("modalReasonError");
         const modalConfirmBtn = document.getElementById("modalConfirmBtn");
         const modalCancelBtn = document.getElementById("modalCancelBtn");
 
         function openModal(decision) {
             pendingDecision = decision;
+            modalReasonInput.value = "";
+            modalReasonError.style.display = "none";
 
             if (decision === "Approved") {
                 modalIcon.className = "modal-icon modal-icon-approve";
@@ -331,13 +347,15 @@
                 modalText.innerText = "This will mark the application as Approved. You can disburse the payment afterwards.";
                 modalConfirmBtn.className = "modal-btn modal-btn-confirm-approve";
                 modalConfirmBtn.innerText = "Approve";
+                modalNotesWrapper.style.display = "none";
             } else {
                 modalIcon.className = "modal-icon modal-icon-reject";
                 modalIcon.innerText = "!";
                 modalTitle.innerText = "Reject this application?";
-                modalText.innerText = "This will mark the application as Rejected. This action cannot be undone.";
+                modalText.innerText = "This will mark the application as Rejected. The reason below will be shown to the customer.";
                 modalConfirmBtn.className = "modal-btn modal-btn-confirm-reject";
                 modalConfirmBtn.innerText = "Reject";
+                modalNotesWrapper.style.display = "block";
             }
 
             modal.classList.add("active");
@@ -349,23 +367,32 @@
         }
 
         modalCancelBtn.addEventListener("click", closeModal);
-        modal.addEventListener("click", function(e) {
+        modal.addEventListener("click", function (e) {
             if (e.target === modal) closeModal();
         });
 
-        document.querySelectorAll(".decide-btn").forEach(function(button) {
-            button.addEventListener("click", function() {
+        document.querySelectorAll(".decide-btn").forEach(function (button) {
+            button.addEventListener("click", function () {
                 openModal(button.dataset.decision);
             });
         });
 
-        modalConfirmBtn.addEventListener("click", async function() {
+        modalConfirmBtn.addEventListener("click", async function () {
             const decision = pendingDecision;
             if (!decision) return;
 
+            let notes = "";
+
+            if (decision === "Rejected") {
+                notes = modalReasonInput.value.trim();
+                if (!notes) {
+                    modalReasonError.style.display = "block";
+                    return;
+                }
+            }
+
             closeModal();
 
-            const notes = document.getElementById("decisionNotes").value;
             const errorsBox = document.getElementById("decisionErrors");
             errorsBox.style.display = "none";
             errorsBox.innerHTML = "";
@@ -395,4 +422,5 @@
             }
         });
     </script>
+}
 }

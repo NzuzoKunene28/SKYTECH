@@ -128,6 +128,134 @@
             padding: 25px;
         }
     }
+
+    .proof-link {
+        display: inline-block;
+        cursor: pointer;
+    }
+
+    .proof-thumb {
+        max-width: 280px;
+        max-height: 200px;
+        border: 1px solid var(--border);
+        border-radius: 14px;
+        display: block;
+    }
+
+    .proof-pdf-box {
+        display: flex;
+        align-items: center;
+        gap: 14px;
+        border: 1px solid var(--border);
+        border-radius: 14px;
+        padding: 18px 20px;
+        background: #fbfcff;
+        cursor: pointer;
+        max-width: 320px;
+    }
+
+    .proof-pdf-icon {
+        width: 46px;
+        height: 46px;
+        border-radius: 12px;
+        background: #fde8e8;
+        color: var(--red);
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        font-weight: 700;
+        font-size: 13px;
+        flex-shrink: 0;
+    }
+
+    .proof-pdf-text {
+        color: var(--text);
+        font-weight: 650;
+        font-size: 14px;
+    }
+
+    .proof-pdf-sub {
+        color: var(--text-m);
+        font-size: 12px;
+        margin-top: 2px;
+    }
+
+    /* ── Proof of income modal ── */
+    .modal-overlay {
+        display: none;
+        position: fixed;
+        inset: 0;
+        background: rgba(14, 27, 53, 0.55);
+        z-index: 1000;
+        align-items: center;
+        justify-content: center;
+        padding: 20px;
+    }
+
+        .modal-overlay.active {
+            display: flex;
+        }
+
+    .modal-box-large {
+        background: white;
+        border-radius: 22px;
+        padding: 25px;
+        max-width: 800px;
+        width: 100%;
+        max-height: 90vh;
+        display: flex;
+        flex-direction: column;
+        box-shadow: 0 25px 60px rgba(31, 79, 80, 0.3);
+    }
+
+    .modal-header {
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        margin-bottom: 15px;
+    }
+
+    .modal-header-title {
+        color: var(--text);
+        font-size: 18px;
+        font-weight: 750;
+    }
+
+    .modal-close-btn {
+        background: #f1f4f8;
+        border: none;
+        color: var(--text-2);
+        width: 34px;
+        height: 34px;
+        border-radius: 50%;
+        cursor: pointer;
+        font-size: 16px;
+        font-weight: 700;
+    }
+
+    .modal-body-scroll {
+        overflow-y: auto;
+        flex: 1;
+        display: flex;
+        justify-content: center;
+        align-items: flex-start;
+        background: #f7f9fc;
+        border-radius: 14px;
+        padding: 15px;
+    }
+
+        .modal-body-scroll img {
+            max-width: 100%;
+            border-radius: 10px;
+        }
+
+        .modal-body-scroll iframe {
+            width: 100%;
+            height: 70vh;
+            border: none;
+            border-radius: 10px;
+        }
+
 </style>
 
 <div class="assess-page">
@@ -182,7 +310,48 @@
                     <div class="information-value">@app.TotalDeclaredCollateralValue.ToString("C")</div>
                 </div>
 
+                <div class="information-box">
+                    <div class="information-label">Monthly Income</div>
+                    <div class="information-value">@app.MonthlySalary.ToString("C")</div>
+                </div>
+
             </div>
+
+            <div class="result-card" style="margin-top: 22px;">
+
+                <div class="section-title" style="color: var(--text); font-size: 19px; font-weight: 700; margin-bottom: 18px;">
+                    Proof of Income
+                </div>
+
+                @{
+                    var proofPath = app.ProofOfIncomeDocPath;
+                    var proofExtension = System.IO.Path.GetExtension(proofPath).ToLowerInvariant();
+                    var isImage = proofExtension == ".jpg" || proofExtension == ".jpeg" || proofExtension == ".png";
+                }
+
+                @if (string.IsNullOrWhiteSpace(proofPath))
+                {
+                    <p style="color: var(--text-m); font-size: 14px;">No proof of income document was uploaded.</p>
+                }
+                else if (isImage)
+                {
+                    <div class="proof-link" id="openProofBtn">
+                        <img src="@proofPath" alt="Proof of income" class="proof-thumb" />
+                    </div>
+                }
+                else
+                {
+                    <div class="proof-pdf-box" id="openProofBtn">
+                        <div class="proof-pdf-icon">PDF</div>
+                        <div>
+                            <div class="proof-pdf-text">Proof of Income Document</div>
+                            <div class="proof-pdf-sub">Click to view</div>
+                        </div>
+                    </div>
+                }
+
+            </div>
+
 
             @if (!Model.StillMeetsCreditThreshold)
             {
@@ -199,4 +368,60 @@
         </div>
 
     </div>
+
+    <div class="modal-overlay" id="proofModal">
+
+        <div class="modal-box-large">
+
+            <div class="modal-header">
+                <div class="modal-header-title">Proof of Income</div>
+                <button type="button" class="modal-close-btn" id="proofCloseBtn">✕</button>
+            </div>
+
+            <div class="modal-body-scroll" id="proofModalBody">
+                <!-- content injected by JS -->
+            </div>
+
+        </div>
+
+    </div>
+
+    @section Scripts {
+        <script>
+                const proofPath = @Html.Raw(System.Text.Json.JsonSerializer.Serialize(Model.LoanApplication.ProofOfIncomeDocPath));
+                const proofIsImage = @(isImage ? "true" : "false");
+
+                const proofModal = document.getElementById("proofModal");
+                const proofModalBody = document.getElementById("proofModalBody");
+                const openProofBtn = document.getElementById("openProofBtn");
+                const proofCloseBtn = document.getElementById("proofCloseBtn");
+
+                if (openProofBtn) {
+                    openProofBtn.addEventListener("click", function() {
+                        if (!proofPath) return;
+
+                        if (proofIsImage) {
+                            proofModalBody.innerHTML = '<img src="' + proofPath + '" alt="Proof of income" />';
+                        } else {
+                            proofModalBody.innerHTML = '<iframe src="' + proofPath + '"></iframe>';
+                        }
+
+                        proofModal.classList.add("active");
+                    });
+                }
+
+                proofCloseBtn.addEventListener("click", function() {
+                    proofModal.classList.remove("active");
+                    proofModalBody.innerHTML = "";
+                });
+
+                proofModal.addEventListener("click", function(e) {
+                    if (e.target === proofModal) {
+                        proofModal.classList.remove("active");
+                        proofModalBody.innerHTML = "";
+                    }
+                });
+        </script>
+    }
+
 </div>
