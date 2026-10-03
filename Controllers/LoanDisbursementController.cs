@@ -137,7 +137,7 @@ namespace SkyTech.Controllers
 
                 await _db.SaveChangesAsync();
 
-                return RedirectToAction(nameof(DisburseComplete), new { id = application.LoanApplicationId });
+                return RedirectToAction(nameof(DisburseLoading), new { id = application.LoanApplicationId });
             }
 
             // ── Real PayStack transfer path (used once account is a Registered Business) ──
@@ -198,8 +198,23 @@ namespace SkyTech.Controllers
                 return RedirectToAction(nameof(DisburseForm), new { id = application.LoanApplicationId });
             }
 
-            return RedirectToAction(nameof(DisburseComplete), new { id = application.LoanApplicationId });
+            return RedirectToAction(nameof(DisburseLoading), new { id = application.LoanApplicationId });
         }
+
+        [HttpGet]
+        public async Task<IActionResult> DisburseLoading(int id)
+        {
+            var branchId = await GetCurrentBranchIdAsync();
+
+            var application = await _db.LoanApplications
+                .FirstOrDefaultAsync(a => a.LoanApplicationId == id);
+
+            if (application is null) return NotFound();
+            if (application.BranchId != branchId) return Forbid();
+
+            return View(application);
+        }
+
 
         [HttpGet]
         public async Task<IActionResult> DisburseComplete(int id)
