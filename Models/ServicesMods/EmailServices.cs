@@ -423,6 +423,22 @@ Send(
                 "You can view full details of this decision by logging in to your account.\n\n" +
                 "Kind Regards,\nSkyTech Team");
 
+        //EMAIL TO PAY LOAN TO THE CUSTOMER
+        public void LoanDisbursed(string toEmail, string firstName, decimal amountDisbursed, string transferCode)
+        {
+            Send(toEmail,
+                "SkyTech — Your Loan Has Been Disbursed",
+                $"Dear {firstName},\n\n" +
+                $"Great news! Your approved loan of {amountDisbursed:C} has been successfully transferred to your bank account.\n\n" +
+                $"Transfer reference: {transferCode}\n\n" +
+                "Please allow 1–2 business days for the funds to reflect in your account.\n\n" +
+                "Important: When you are ready to settle your loan and collect your collateral, " +
+                "you will need to present this transfer reference code at the store so that the " +
+                "correct collateral items can be returned to you.\n\n" +
+                "You can also view your loan details and repayment schedule by logging in to your SkyTech account.\n\n" +
+                "Kind Regards,\nSkyTech Team");
+        }
+
 
     }
 

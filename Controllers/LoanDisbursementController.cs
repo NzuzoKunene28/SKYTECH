@@ -8,27 +8,36 @@ using SkyTech.Services;
 
 namespace SkyTech.Controllers
 {
-   
     [AuthorizeUser]
     public class LoanDisbursementController : Controller
     {
         private readonly ApplicationDbContext _db;
         private readonly PayStackTransferService _transferService;
         private readonly bool _simulateTransfers;
+        private readonly EmailServices _services;
 
-        public LoanDisbursementController(ApplicationDbContext db, PayStackTransferService transferService, IConfiguration config)
+        public LoanDisbursementController(
+            ApplicationDbContext db,
+            EmailServices services,
+            PayStackTransferService transferService,
+            IConfiguration config)
         {
             _db = db;
             _transferService = transferService;
+            _services = services;
             _simulateTransfers = config.GetValue<bool>("PayStack:SimulateTransfers");
         }
 
-    
+        // ----------------------------------------------------------------
+        // Helpers
+        // ----------------------------------------------------------------
+
         private int GetCurrentOwnerId()
         {
             var ownerId = HttpContext.Session.GetInt32("UserId");
             if (ownerId is null)
-                throw new InvalidOperationException("Could not resolve the current shop owner's OwnerId from the session.");
+                throw new InvalidOperationException(
+                    "Could not resolve the current shop owner's OwnerId from the session.");
             return ownerId.Value;
         }
 
@@ -41,8 +50,23 @@ namespace SkyTech.Controllers
                 .FirstAsync(ct);
         }
 
+        /// <summary>
+        /// Loads the customer directly by CustomerId — avoids relying on
+        /// .Include(a => a.Customer) which can return null when Customer
+        /// lives in a different namespace to LoanApplication.
+        /// </summary>
+        private async Task<Customer?> GetCustomerForApplicationAsync(LoanApplication application)
+        {
+            return await _db.Customers
+                .FirstOrDefaultAsync(c => c.CustomerId == application.CustomerId);
+        }
+
+        // ----------------------------------------------------------------
+        // GET: DisburseForm
+        // ----------------------------------------------------------------
+
         [HttpGet]
-        public async Task<IActionResult> DisburseForm(int id) // id = LoanApplicationId
+        public async Task<IActionResult> DisburseForm(int id)
         {
             var branchId = await GetCurrentBranchIdAsync();
 
@@ -72,7 +96,9 @@ namespace SkyTech.Controllers
             return View(model);
         }
 
-      
+        // ----------------------------------------------------------------
+        // POST: Disburse
+        // ----------------------------------------------------------------
 
         [HttpPost]
         [ValidateAntiForgeryToken]
@@ -80,6 +106,7 @@ namespace SkyTech.Controllers
         {
             var branchId = await GetCurrentBranchIdAsync();
 
+            // Load application WITHOUT Include — customer loaded separately below
             var application = await _db.LoanApplications
                 .FirstOrDefaultAsync(a => a.LoanApplicationId == model.LoanApplicationId);
 
@@ -110,6 +137,7 @@ namespace SkyTech.Controllers
                 AmountDisbursed = application.RequestedAmount
             };
 
+            // ── Simulated transfer path ──────────────────────────────────
             if (_simulateTransfers)
             {
                 disbursement.RecipientCode = "SIMULATED";
@@ -120,39 +148,57 @@ namespace SkyTech.Controllers
                 _db.LoanDisbursements.Add(disbursement);
                 application.Status = LoanApplicationStatus.Disbursed;
 
-
-                // ── Create the repayment record (UC-05) ──
-                var loan = new Loan
+                _db.Loans.Add(new Loan
                 {
                     LoanApplicationId = application.LoanApplicationId,
                     PrincipalAmount = application.RequestedAmount,
-                    InterestRate = 0.05m, // ASSUMPTION — confirm with team
+                    InterestRate = 0.05m,
                     TotalRepayable = application.RequestedAmount * 1.05m,
                     OutstandingBalance = application.RequestedAmount * 1.05m,
                     DisbursedOn = DateTime.UtcNow,
                     DueDate = DateTime.UtcNow.AddMonths(6),
                     Status = LoanRepaymentStatus.Active
-                };
-                _db.Loans.Add(loan);
+                });
 
                 await _db.SaveChangesAsync();
 
-                return RedirectToAction(nameof(DisburseComplete), new { id = application.LoanApplicationId });
+                // Direct customer query — does not rely on navigation property
+                var customer = await GetCustomerForApplicationAsync(application);
+
+                if (customer != null)
+                {
+                    _services.LoanDisbursed(
+                        customer.Email,
+                        customer.FirstName,
+                        disbursement.AmountDisbursed,
+                        disbursement.TransferCode);
+                }
+                else
+                {
+                    System.Diagnostics.Debug.WriteLine(
+                        $"[LoanDisbursement] WARNING: Customer not found for CustomerId {application.CustomerId} — email not sent.");
+                }
+
+                return RedirectToAction(nameof(DisburseComplete),
+                    new { id = application.LoanApplicationId });
             }
 
-            // ── Real PayStack transfer path (used once account is a Registered Business) ──
+            // ── Real PayStack transfer path ──────────────────────────────
             var recipientResult = await _transferService.CreateRecipient(
                 model.AccountHolderName, model.AccountNumber, model.BankCode);
 
             if (!recipientResult.Success)
             {
                 disbursement.Success = false;
-                disbursement.FailureMessage = $"Could not create PayStack recipient: {recipientResult.Message}";
+                disbursement.FailureMessage =
+                    $"Could not create PayStack recipient: {recipientResult.Message}";
+
                 _db.LoanDisbursements.Add(disbursement);
                 await _db.SaveChangesAsync();
 
                 TempData["Error"] = disbursement.FailureMessage;
-                return RedirectToAction(nameof(DisburseForm), new { id = application.LoanApplicationId });
+                return RedirectToAction(nameof(DisburseForm),
+                    new { id = application.LoanApplicationId });
             }
 
             disbursement.RecipientCode = recipientResult.RecipientCode;
@@ -175,31 +221,51 @@ namespace SkyTech.Controllers
             {
                 application.Status = LoanApplicationStatus.Disbursed;
 
-                // ── Create the repayment record (UC-05) ──
-                var loan = new Loan
+                _db.Loans.Add(new Loan
                 {
                     LoanApplicationId = application.LoanApplicationId,
                     PrincipalAmount = application.RequestedAmount,
-                    InterestRate = 0.05m, // ASSUMPTION — confirm with team
+                    InterestRate = 0.05m,
                     TotalRepayable = application.RequestedAmount * 1.05m,
                     OutstandingBalance = application.RequestedAmount * 1.05m,
                     DisbursedOn = DateTime.UtcNow,
                     DueDate = DateTime.UtcNow.AddMonths(6),
                     Status = LoanRepaymentStatus.Active
-                };
-                _db.Loans.Add(loan);
+                });
+
+                await _db.SaveChangesAsync();
+
+                // Direct customer query — does not rely on navigation property
+                var customer = await GetCustomerForApplicationAsync(application);
+
+                if (customer != null)
+                {
+                    _services.LoanDisbursed(
+                        customer.Email,
+                        customer.FirstName,
+                        disbursement.AmountDisbursed,
+                        disbursement.TransferCode);
+                }
+                else
+                {
+                    System.Diagnostics.Debug.WriteLine(
+                        $"[LoanDisbursement] WARNING: Customer not found for CustomerId {application.CustomerId} — email not sent.");
+                }
+
+                return RedirectToAction(nameof(DisburseComplete),
+                    new { id = application.LoanApplicationId });
             }
 
             await _db.SaveChangesAsync();
 
-            if (!transferResult.Success)
-            {
-                TempData["Error"] = $"Transfer could not be completed: {transferResult.Message}";
-                return RedirectToAction(nameof(DisburseForm), new { id = application.LoanApplicationId });
-            }
-
-            return RedirectToAction(nameof(DisburseComplete), new { id = application.LoanApplicationId });
+            TempData["Error"] = $"Transfer could not be completed: {transferResult.Message}";
+            return RedirectToAction(nameof(DisburseForm),
+                new { id = application.LoanApplicationId });
         }
+
+        // ----------------------------------------------------------------
+        // GET: DisburseComplete
+        // ----------------------------------------------------------------
 
         [HttpGet]
         public async Task<IActionResult> DisburseComplete(int id)
