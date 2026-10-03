@@ -424,6 +424,46 @@ Send(
                 "Kind Regards,\nSkyTech Team");
 
 
+         public void LoanDisbursed(
+         string toEmail,
+         string firstName,
+         int loanApplicationId,
+         decimal amount,
+         string accountHolderName,
+         string bankName,
+         string accountNumber,
+         string transferReference,
+         string transferStatus,
+         DateTime disbursedOn) =>
+          Send(toEmail,
+         "SkyTech - Loan Payment Receipt",
+         $"Dear {firstName},\n\n" +
+         "Your loan has been disbursed. Here is your payment receipt:\n\n" +
+         "------------------------------------\n" +
+         $"Application Reference:  #{loanApplicationId}\n" +
+         $"Amount Disbursed:       {amount:C}\n" +
+         $"Paid To:                {accountHolderName}\n" +
+         $"Bank:                   {bankName}\n" +
+         $"Account Number:         {MaskAccountNumber(accountNumber)}\n" +
+         $"Transfer Reference:     {transferReference}\n" +
+         $"Transfer Status:        {transferStatus}\n" +
+         $"Date:                   {disbursedOn:dd MMM yyyy HH:mm}\n" +
+         "------------------------------------\n\n" +
+         "Please keep this email for your records. If you have any questions about this payment, " +
+         "contact your branch directly.\n\n" +
+         "Warm Regards,\nSkyTech Team");
+        
+         /// <summary>Shows only the last 4 digits in the receipt email — full account
+         /// numbers shouldn't be echoed back in plain-text email bodies.</summary>
+         private static string MaskAccountNumber(string accountNumber)
+         {
+             if (string.IsNullOrWhiteSpace(accountNumber) || accountNumber.Length <= 4)
+                 return accountNumber ?? "";
+        
+             return new string('*', accountNumber.Length - 4) + accountNumber[^4..];
+         }
+
+
     }
 
 
