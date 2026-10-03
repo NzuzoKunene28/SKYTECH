@@ -258,7 +258,7 @@
 
                 <div class="information-box">
                     <div class="information-label">Requested Amount</div>
-                    <div class="information-value">@Model.RequestedAmount.ToString("C")</div>
+                    <div class="information-value">@Model.RequestedAmount.ToString("R0.00")</div>
                 </div>
 
                 <div class="information-box">
@@ -285,7 +285,7 @@
 
                 <div class="information-box">
                     <div class="information-label">Monthly Salary</div>
-                    <div class="information-value">@Model.MonthlySalary.ToString("C")</div>
+                    <div class="information-value">@Model.MonthlySalary.ToString("R0.00")</div>
                 </div>
 
                 <div class="information-box">
@@ -295,7 +295,7 @@
 
                 <div class="information-box">
                     <div class="information-label">Total Declared Collateral</div>
-                    <div class="information-value">@Model.TotalDeclaredCollateralValue.ToString("C")</div>
+                    <div class="information-value">@Model.TotalDeclaredCollateralValue.ToString("R0.00")</div>
                 </div>
 
                 <div class="information-box">
@@ -344,7 +344,7 @@
 
                                 <div class="collateral-name">@item.Description</div>
 
-                                <div class="detail"><strong>Declared value:</strong> @item.DeclaredValue.ToString("C")</div>
+                                <div class="detail"><strong>Declared value:</strong> @item.DeclaredValue.ToString("R0.00")</div>
                                 <div class="detail"><strong>Condition:</strong> @item.Condition</div>
 
                                 @if (!string.IsNullOrWhiteSpace(item.SerialNumber))
