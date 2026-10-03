@@ -1,0 +1,100 @@
+﻿@model List<SkyTech.ViewModels.AssessmentListViewModel>
+
+@{
+    ViewData["Title"] = "Manage Assessments";
+}
+
+<link rel="stylesheet" href="~/CSS/HRCSS/ManageAssessments.css" />
+
+<div class="ma-main">
+
+    <p class="ma-eyebrow">Recruitment</p>
+    <h2 class="ma-title">Manage Assessments</h2>
+    <p class="ma-sub">Review, publish, and manage assessments tied to your vacancies.</p>
+
+    @if (!Model.Any())
+    {
+        <div class="ma-empty">
+            No assessments have been created yet.
+        </div>
+    }
+    else
+    {
+        <div class="ma-table-wrap">
+            <table class="ma-table">
+
+                <thead>
+                    <tr>
+                        <th>Vacancy</th>
+                        <th>Assessment</th>
+                        <th>Questions</th>
+                        <th>Pass Mark</th>
+                        <th>Time Limit</th>
+                        <th>Status</th>
+                        <th>Action</th>
+                    </tr>
+                </thead>
+
+                <tbody>
+
+                    @foreach (var assessment in Model)
+                    {
+                        <tr>
+
+                            <td>
+                                <span class="ma-job-title">@assessment.JobTitle</span>
+                            </td>
+
+                            <td>
+                                <span class="ma-assessment-title">@assessment.AssessmentTitle</span>
+                            </td>
+
+                            <td>
+                                @assessment.QuestionCount
+                            </td>
+
+                            <td>
+                                @($"{assessment.PassMark}%")
+                            </td>
+
+                            <td>
+                                @assessment.TimeLimit minutes
+                            </td>
+
+                            <td>
+                                @if (assessment.IsPublished)
+                                {
+                                    <span class="ma-badge ma-badge-published">
+                                        Published
+                                    </span>
+                                }
+                                else
+                                {
+                                    <span class="ma-badge ma-badge-draft">
+                                        Draft
+                                    </span>
+                                }
+                            </td>
+
+                            <td>
+                                <a asp-action="ManageAssessment"
+                                   asp-route-id="@assessment.AssessmentId"
+                                   class="ma-manage-btn">
+                                    Manage
+                                </a>
+                            </td>
+
+                        </tr>
+                    }
+
+                </tbody>
+
+            </table>
+        </div>
+    }
+
+    <a asp-action="CreateAssessment" class="ma-create-btn">
+        + Create New Assessment
+    </a>
+
+</div>

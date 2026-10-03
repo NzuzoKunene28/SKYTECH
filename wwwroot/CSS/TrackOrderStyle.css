@@ -1,0 +1,610 @@
+﻿﻿ /* =============================================================
+   Order Tracking Page — TrackOrderStyle.css
+   Place this file in: Content/css/TrackOrderStyle.css
+   ============================================================= */
+*, *::before, *::after {
+    box-sizing: border-box;
+    margin: 0;
+    padding: 0;
+}
+
+/* ── CSS Variables ─────────────────────────────────────────── */
+:root {
+    --green: #1D9E75;
+    --green-light: #E1F5EE;
+    --green-dark: #0F6E56;
+    --green-darker: #085041;
+    --amber: #EF9F27;
+    --amber-dark: #BA7517;
+    --bg-page: #F2F1EC;
+    --bg-card: #FFFFFF;
+    --bg-muted: #F5F5F3;
+    --text-primary: #111111;
+    --text-secondary: #666666;
+    --text-muted: #AAAAAA;
+    --border: rgba(0, 0, 0, 0.09);
+    --border-strong: rgba(0, 0, 0, 0.18);
+    --radius-card: 14px;
+    --radius-md: 8px;
+    --radius-sm: 6px;
+    --shadow-card: 0 1px 3px rgba(0,0,0,0.06), 0 1px 2px rgba(0,0,0,0.04);
+}
+
+/* ── Base ──────────────────────────────────────────────────── */
+body {
+    font-family: 'DM Sans', sans-serif;
+    /*    background: var(--bg-page);*/
+    background-color: cadetblue;
+    min-height: 100vh;
+    color: var(--text-primary);
+    -webkit-font-smoothing: antialiased;
+}
+
+/* ── Header ────────────────────────────────────────────────── */
+.ot-header {
+    background: var(--bg-card);
+    border-bottom: 1px solid var(--border);
+    padding: 14px 20px;
+    display: flex;
+    align-items: center;
+    gap: 14px;
+    position: sticky;
+    top: 0;
+    z-index: 100;
+}
+
+.ot-back-btn {
+    width: 34px;
+    height: 34px;
+    border-radius: 50%;
+    border: 1px solid var(--border-strong);
+    background: transparent;
+    cursor: pointer;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    color: var(--text-primary);
+    font-size: 15px;
+    text-decoration: none;
+    transition: background 0.15s;
+}
+
+    .ot-back-btn:hover {
+        background: var(--bg-muted);
+    }
+
+.ot-header-title {
+    font-size: 15px;
+    font-weight: 500;
+    color: var(--text-primary);
+}
+
+.ot-header-sub {
+    font-size: 12px;
+    color: var(--text-secondary);
+    margin-top: 1px;
+}
+
+/* ── Page Body ─────────────────────────────────────────────── */
+.ot-body {
+    max-width: 520px;
+    margin: 0 auto;
+    padding: 20px 16px 48px;
+    display: flex;
+    flex-direction: column;
+    gap: 12px;
+}
+
+/* ── Card ──────────────────────────────────────────────────── */
+.ot-card {
+    background: var(--bg-card);
+    border-radius: var(--radius-card);
+    border: 1px solid var(--border);
+    box-shadow: var(--shadow-card);
+    padding: 18px 20px;
+}
+
+/* ── Order Summary ─────────────────────────────────────────── */
+.ot-summary {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 12px;
+}
+
+.ot-order-id {
+    font-family: 'Space Mono', monospace;
+    font-size: 14px;
+    font-weight: 700;
+    color: var(--text-primary);
+}
+
+.ot-order-meta {
+    font-size: 12px;
+    color: var(--text-secondary);
+    margin-top: 4px;
+}
+
+.ot-eta-box {
+    text-align: right;
+}
+
+.ot-eta-label {
+    font-size: 10px;
+    color: var(--text-secondary);
+    text-transform: uppercase;
+    letter-spacing: 0.07em;
+    font-weight: 500;
+}
+
+.ot-eta-value {
+    font-family: 'Space Mono', monospace;
+    font-size: 19px;
+    font-weight: 700;
+    color: var(--green);
+    margin-top: 2px;
+    transition: color 0.3s;
+}
+
+    .ot-eta-value.delivered {
+        color: var(--green-dark);
+    }
+
+/* ── Status Strip ──────────────────────────────────────────── */
+.ot-status-strip {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 4px;
+    margin-top: 16px;
+}
+
+.ot-strip-step {
+    flex: 1;
+    height: 4px;
+    border-radius: 4px;
+    background: #E0E0D8;
+    overflow: hidden;
+    position: relative;
+}
+
+.ot-strip-fill {
+    position: absolute;
+    top: 0;
+    left: 0;
+    bottom: 0;
+    border-radius: 4px;
+    background: var(--green);
+    transition: width 0.8s cubic-bezier(0.4, 0, 0.2, 1);
+}
+
+/* ── Section Label ─────────────────────────────────────────── */
+.ot-section-label {
+    font-size: 11px;
+    font-weight: 600;
+    color: var(--text-secondary);
+    text-transform: uppercase;
+    letter-spacing: 0.09em;
+    margin-bottom: 24px;
+}
+
+/* ── Timeline ──────────────────────────────────────────────── */
+.ot-timeline {
+    display: flex;
+    flex-direction: column;
+}
+
+.ot-step {
+    display: flex;
+    gap: 16px;
+    position: relative;
+}
+
+    .ot-step:not(:last-child) {
+        padding-bottom: 30px;
+    }
+
+/* Left column: icon + connector */
+.ot-step-left {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    width: 38px;
+    flex-shrink: 0;
+}
+
+/* Step icon circle */
+.ot-icon {
+    width: 38px;
+    height: 38px;
+    border-radius: 50%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    flex-shrink: 0;
+    position: relative;
+    z-index: 2;
+    transition: background 0.4s, border-color 0.4s;
+}
+
+    .ot-icon svg {
+        width: 17px;
+        height: 17px;
+        transition: stroke 0.4s;
+    }
+
+    /* Icon — done */
+    .ot-icon.done {
+        background: var(--green);
+        border: none;
+    }
+
+        .ot-icon.done svg {
+            stroke: #ffffff;
+        }
+
+    /* Icon — active */
+    .ot-icon.active {
+        background: var(--green-light);
+        border: 2.5px solid var(--green);
+        /* FIX 6: removed invalid "ms" unit — animation-delay must use s or ms with a number, not bare "ms" */
+        animation: pulseRing 2.2s ease-in-out infinite;
+    }
+
+        .ot-icon.active svg {
+            stroke: var(--green);
+        }
+
+    /* Icon — pending */
+    .ot-icon.pending {
+        background: var(--bg-muted);
+        border: 1.5px solid #D0CFC8;
+    }
+
+        .ot-icon.pending svg {
+            stroke: #C0BFB8;
+        }
+
+/* Pulsing ring animation for active step */
+@keyframes pulseRing {
+    0%, 100% {
+        box-shadow: 0 0 0 0 rgba(29, 158, 117, 0.35);
+    }
+
+    50% {
+        box-shadow: 0 0 0 7px rgba(29, 158, 117, 0);
+    }
+}
+
+/* Vertical connector line between steps */
+.ot-connector {
+    width: 2px;
+    flex: 1;
+    min-height: 18px;
+    margin-top: 5px;
+    border-radius: 2px;
+    background: #E0E0D8;
+    overflow: hidden;
+    position: relative;
+}
+
+.ot-connector-fill {
+    position: absolute;
+    top: 0;
+    left: 0;
+    right: 0;
+    border-radius: 2px;
+    background: var(--green);
+    transition: height 1.3s cubic-bezier(0.4, 0, 0.2, 1);
+}
+
+/* Right column: text content */
+.ot-step-content {
+    padding-top: 7px;
+    flex: 1;
+    min-width: 0;
+}
+
+.ot-step-name {
+    font-size: 14px;
+    font-weight: 500;
+    color: var(--text-primary);
+    transition: color 0.3s, font-weight 0.3s;
+}
+
+    .ot-step-name.active {
+        color: var(--green-dark);
+        font-weight: 600;
+    }
+
+    .ot-step-name.pending {
+        color: var(--text-muted);
+        font-weight: 400;
+    }
+
+.ot-step-desc {
+    font-size: 12px;
+    color: var(--text-secondary);
+    margin-top: 3px;
+    line-height: 1.55;
+}
+
+.ot-step-time {
+    font-family: 'Space Mono', monospace;
+    font-size: 11px;
+    color: var(--text-muted);
+    margin-top: 5px;
+}
+
+/* In-progress badge */
+.ot-badge {
+    display: inline-block;
+    font-size: 10px;
+    font-weight: 600;
+    padding: 3px 9px;
+    border-radius: 20px;
+    margin-top: 6px;
+    text-transform: uppercase;
+    letter-spacing: 0.05em;
+    background: var(--green-light);
+    color: var(--green-dark);
+}
+
+/* ── Driver Card ───────────────────────────────────────────── */
+.ot-driver-card {
+    background: var(--bg-muted);
+    border-radius: var(--radius-md);
+    border: 1px solid var(--border);
+    padding: 11px 14px;
+    display: flex;
+    align-items: center;
+    gap: 11px;
+    margin-top: 12px;
+    transition: opacity 0.5s;
+}
+
+.ot-driver-avatar {
+    width: 36px;
+    height: 36px;
+    border-radius: 50%;
+    background: #9FE1CB;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 13px;
+    font-weight: 600;
+    color: var(--green-darker);
+    flex-shrink: 0;
+}
+
+.ot-driver-name {
+    font-size: 13px;
+    font-weight: 500;
+    color: var(--text-primary);
+}
+
+.ot-driver-vehicle {
+    font-size: 11px;
+    color: var(--text-secondary);
+    margin-top: 1px;
+}
+
+.ot-driver-rating {
+    margin-left: auto;
+    display: flex;
+    align-items: center;
+    gap: 3px;
+    font-size: 12px;
+    font-weight: 600;
+    color: var(--amber-dark);
+    white-space: nowrap;
+}
+
+.ot-star {
+    color: var(--amber);
+    font-size: 14px;
+}
+
+/* ── Help Buttons ──────────────────────────────────────────── */
+.ot-help {
+    display: flex;
+    gap: 10px;
+}
+
+.ot-help-btn {
+    flex: 1;
+    padding: 11px 0;
+    border-radius: var(--radius-md);
+    border: 1px solid var(--border-strong);
+    background: var(--bg-card);
+    font-family: 'DM Sans', sans-serif;
+    font-size: 13px;
+    font-weight: 500;
+    color: var(--text-primary);
+    cursor: pointer;
+    text-align: center;
+    transition: background 0.15s;
+    text-decoration: none;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 6px;
+}
+
+    .ot-help-btn:hover {
+        background: var(--bg-muted);
+    }
+
+    .ot-help-btn.primary {
+        background: var(--green);
+        border-color: var(--green);
+        color: #ffffff;
+    }
+
+        .ot-help-btn.primary:hover {
+            background: var(--green-dark);
+        }
+
+/* ── Delivered Banner ──────────────────────────────────────── */
+.ot-delivered-banner {
+    background: var(--green-light);
+    border: 1px solid rgba(29, 158, 117, 0.25);
+    border-radius: var(--radius-card);
+    padding: 16px 20px;
+    display: none;
+    align-items: center;
+    gap: 12px;
+}
+
+    .ot-delivered-banner.visible {
+        display: flex;
+        animation: fadeSlideIn 0.5s ease;
+    }
+
+.ot-delivered-icon {
+    width: 42px;
+    height: 42px;
+    border-radius: 50%;
+    background: var(--green);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    flex-shrink: 0;
+}
+
+    .ot-delivered-icon svg {
+        width: 20px;
+        height: 20px;
+        stroke: #ffffff;
+    }
+
+.ot-delivered-title {
+    font-size: 14px;
+    font-weight: 600;
+    color: var(--green-dark);
+}
+
+.ot-delivered-sub {
+    font-size: 12px;
+    color: var(--green-dark);
+    opacity: 0.75;
+    margin-top: 2px;
+}
+
+@keyframes fadeSlideIn {
+    from {
+        opacity: 0;
+        transform: translateY(-8px);
+    }
+
+    to {
+        opacity: 1;
+        transform: translateY(0);
+    }
+}
+
+/* ── Help card padding override ────────────────────────────── */
+.ot-help-card {
+    padding: 14px 18px;
+}
+
+/* ── Order items table ─────────────────────────────────────── */
+.ot-items-table {
+    width: 100%;
+    border-collapse: collapse;
+    font-size: 13px;
+}
+
+    .ot-items-table thead tr {
+        border-bottom: 1px solid var(--border);
+    }
+
+    .ot-items-table th {
+        text-align: left;
+        font-size: 11px;
+        font-weight: 600;
+        color: var(--text-secondary);
+        text-transform: uppercase;
+        letter-spacing: 0.07em;
+        padding: 0 0 10px;
+    }
+
+        .ot-items-table th:last-child,
+        .ot-items-table td:last-child {
+            text-align: right;
+        }
+
+    .ot-items-table tbody td {
+        padding: 9px 0;
+        color: var(--text-primary);
+        border-bottom: 1px solid var(--border);
+    }
+
+    .ot-items-table tfoot td {
+        padding-top: 10px;
+    }
+
+.ot-total-label {
+    font-size: 12px;
+    font-weight: 600;
+    color: var(--text-secondary);
+    text-transform: uppercase;
+    letter-spacing: 0.05em;
+}
+
+.ot-total-value {
+    font-family: 'Space Mono', monospace;
+    font-size: 14px;
+    font-weight: 700;
+    color: var(--text-primary);
+    text-align: right;
+}
+
+/* ── Payment row ───────────────────────────────────────────── */
+.ot-payment-row {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+}
+
+.ot-payment-label {
+    font-size: 13px;
+    color: var(--text-secondary);
+}
+
+.ot-payment-ref {
+    font-family: 'Space Mono', monospace;
+    font-size: 12px;
+    color: var(--text-primary);
+}
+
+.ot-payment-badge {
+    display: inline-block;
+    font-size: 11px;
+    font-weight: 600;
+    padding: 3px 10px;
+    border-radius: 20px;
+    text-transform: uppercase;
+    letter-spacing: 0.05em;
+}
+
+    .ot-payment-badge.paid {
+        background: var(--green-light);
+        color: var(--green-dark);
+    }
+
+    .ot-payment-badge.unpaid {
+        background: #FAECE7;
+        color: #993C1D;
+    }
+
+/* ── Responsive ────────────────────────────────────────────── */
+@media (max-width: 400px) {
+    .ot-body {
+        padding: 14px 10px 40px;
+    }
+
+    .ot-card {
+        padding: 16px 14px;
+    }
+}

@@ -1,0 +1,253 @@
+@model List<Quotation>
+@{
+    ViewBag.Title = "My Quotations";
+    Layout = "~/Views/Shared/_MinimalLayout.cshtml";
+}
+
+@section Styles {
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+    <link href="https://api.fontshare.com/v2/css?f[]=clash-display@400,500,600,700&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="~/CSS/DashboardStyle.css">
+    <style>
+        .quotation-card {
+            background: white;
+            border: 1px solid var(--border);
+            border-radius: var(--radius);
+            padding: 1.5rem;
+            margin-bottom: 1.5rem;
+            transition: all 0.3s;
+        }
+        .quotation-card:hover {
+            box-shadow: var(--shadow-md);
+            border-color: var(--blue);
+        }
+        .quotation-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 1rem;
+            padding-bottom: 1rem;
+            border-bottom: 1px solid var(--border);
+        }
+        .quotation-id {
+            font-size: 1.1rem;
+            font-weight: 700;
+            color: var(--text);
+        }
+        .status-badge {
+            display: inline-block;
+            padding: 0.4rem 0.8rem;
+            border-radius: var(--radius-pill);
+            font-size: 0.75rem;
+            font-weight: 600;
+            text-transform: uppercase;
+        }
+        .status-pending { background: #fef3c7; color: #92400e; }
+        .status-approved { background: #bbf7d0; color: #065f46; }
+        .status-rejected { background: #fee2e2; color: #991b1b; }
+        .status-expired { background: #f3f4f6; color: #374151; }
+        .quotation-details {
+            display: grid;
+            grid-template-columns: repeat(3, 1fr);
+            gap: 1rem;
+            margin-bottom: 1rem;
+            font-size: 0.95rem;
+        }
+        .detail-item {
+            display: flex;
+            flex-direction: column;
+        }
+        .detail-label {
+            font-weight: 600;
+            color: var(--text-muted);
+            font-size: 0.85rem;
+            margin-bottom: 0.25rem;
+        }
+        .detail-value {
+            color: var(--text);
+        }
+        .cost-amount {
+            font-size: 1.3rem;
+            font-weight: 700;
+            color: var(--green);
+        }
+        .quotation-actions {
+            display: flex;
+            gap: 0.75rem;
+            margin-top: 1rem;
+        }
+        .btn-small {
+            padding: 0.5rem 1rem;
+            border-radius: var(--radius-sm);
+            border: none;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.3s;
+            font-size: 0.9rem;
+        }
+        .btn-edit {
+            background: var(--blue);
+            color: white;
+        }
+        .btn-edit:hover {
+            background: var(--blue-dark);
+            transform: translateY(-2px);
+        }
+        .btn-view {
+            background: transparent;
+            color: var(--blue);
+            border: 1px solid var(--blue);
+        }
+        .btn-view:hover {
+            background: var(--blue-soft);
+        }
+    </style>
+}
+
+<div class="dash-wrap">
+    <!-- ══ SIDEBAR ══ -->
+    <aside class="dash-sidebar">
+        <div class="dash-brand">
+            <div class="dash-brand-icon"><i class="fas fa-tools"></i></div>
+            <div>
+                <div class="dash-brand-name">SkyTech</div>
+                <div class="dash-brand-sub">Technician Portal</div>
+            </div>
+        </div>
+        <nav class="dash-nav">
+            <div class="dash-nav-label">OVERVIEW</div>
+            <a href="@Url.Action("Dashboard", "Technician")" class="dash-link">
+                <i class="fas fa-grid-2"></i><span>Dashboard</span>
+            </a>
+
+            <div class="dash-nav-label">WORK</div>
+            <a href="@Url.Action("MyAssignments", "Technician")" class="dash-link">
+                <i class="fas fa-tasks"></i><span>My Assignments</span>
+            </a>
+            <a href="@Url.Action("ActiveRepairs", "Technician")" class="dash-link">
+                <i class="fas fa-wrench"></i><span>Active Repairs</span>
+            </a>
+            <a href="@Url.Action("ViewQuotations", "Technician")" class="dash-link active">
+                <i class="fas fa-file-invoice-dollar"></i><span>Quotations</span>
+            </a>
+            <a href="@Url.Action("CompletedRepairs", "Technician")" class="dash-link">
+                <i class="fas fa-check-double"></i><span>Completed</span>
+            </a>
+
+            <div class="dash-nav-label">ACCOUNT</div>
+            <a href="@Url.Action("Profile", "Technician")" class="dash-link">
+                <i class="fas fa-user"></i><span>Profile</span>
+            </a>
+        </nav>
+
+        <div class="dash-sidebar-foot">
+            <div class="dash-foot-avatar"><i class="fas fa-user-tie"></i></div>
+            <div>
+                <div class="dash-foot-name">Technician</div>
+                <div class="dash-foot-role">Account</div>
+            </div>
+        </div>
+
+        <div style="padding:.8rem 1.2rem;margin-top:1rem">
+            @using (Html.BeginForm("Logout", "Authentication", FormMethod.Post))
+            {
+                @Html.AntiForgeryToken()
+                <button type="submit" style="width:100%;background:rgba(220,38,38,.08);border:1.5px solid rgba(220,38,38,.25);border-radius:8px;padding:.6rem 1rem;cursor:pointer;color:#dc2626;font-weight:600;font-size:.85rem;display:flex;align-items:center;gap:.5rem;justify-content:center">
+                    <i class="fas fa-right-from-bracket"></i> Log Out
+                </button>
+            }
+        </div>
+    </aside>
+
+    <!-- ══ MAIN ══ -->
+    <main class="dash-main">
+        <div class="dash-header">
+            <div>
+                <h1 class="dash-title">My Quotations</h1>
+                <p class="dash-subtitle">Manage and track all your quotations</p>
+            </div>
+        </div>
+
+        <div class="dash-content">
+            @if (Model.Count == 0)
+            {
+                <div class="dash-card" style="padding: 2rem; text-align: center;">
+                    <i class="fas fa-file-invoice-dollar" style="font-size: 3rem; color: var(--text-muted); margin-bottom: 1rem;"></i>
+                    <p style="color: var(--text-muted);">No quotations yet. Start by assessing a repair request.</p>
+                </div>
+            }
+            else
+            {
+                @foreach (var quotation in Model)
+                {
+                    <div class="quotation-card">
+                        <div class="quotation-header">
+                            <div>
+                                <div class="quotation-id">Quotation #@quotation.QuotationId</div>
+                                <p style="margin: 0.5rem 0 0; color: var(--text-muted); font-size: 0.9rem;">
+                                    Repair #@quotation.RepairRequestId - @quotation.RepairRequest?.ItemName
+                                </p>
+                            </div>
+                            <span class="status-badge status-@quotation.Status.ToString().ToLower()">@quotation.Status</span>
+                        </div>
+
+                        <div class="quotation-details">
+                            <div class="detail-item">
+                                <span class="detail-label">Customer</span>
+                                <span class="detail-value">@quotation.RepairRequest?.Customers?.FirstName @quotation.RepairRequest?.Customers?.LastName</span>
+                            </div>
+                            <div class="detail-item">
+                                <span class="detail-label">Created Date</span>
+                                <span class="detail-value">@quotation.CreatedDate.ToString("MMM dd, yyyy")</span>
+                            </div>
+                            <div class="detail-item">
+                                <span class="detail-label">Total Cost</span>
+                                <span class="cost-amount">@($"R{quotation.TotalCost:N2}")</span>
+                            </div>
+                        </div>
+
+                        @if (quotation.QuotationItems?.Count > 0)
+                        {
+                            <div style="background: var(--blue-soft); padding: 1rem; border-radius: var(--radius-sm); margin-bottom: 1rem;">
+                                <strong style="display: block; margin-bottom: 0.5rem;">Items:</strong>
+                                @foreach (var item in quotation.QuotationItems)
+                                {
+                                    <div style="display: flex; justify-content: space-between; padding: 0.5rem 0; border-bottom: 1px solid var(--border);">
+                                        <span>@item.ItemDescription (x@(item.Quantity))</span>
+                                        <span style="font-weight: 600;">R@(item.UnitCost * item.Quantity)</span>
+                                    </div>
+                                }
+                            </div>
+                        }
+
+                        @if (!string.IsNullOrEmpty(quotation.TechnicianNotes))
+                        {
+                            <div style="background: var(--blue-soft); border-left: 4px solid var(--blue); padding: 1rem; border-radius: var(--radius-sm); margin-bottom: 1rem;">
+                                <strong>Notes:</strong>
+                                <p style="margin: 0.5rem 0 0; color: var(--text);">@quotation.TechnicianNotes</p>
+                            </div>
+                        }
+
+                        <div class="quotation-actions">
+                            @if (quotation.Status == QuotationStatus.Pending)
+                            {
+                                <a href="@Url.Action("EditQuotation", "Technician", new { id = quotation.QuotationId })" class="btn-small btn-edit">
+                                    <i class="fas fa-edit"></i> Edit
+                                </a>
+                            }
+                            <a href="@Url.Action("RepairDetail", "Technician", new { id = quotation.RepairRequestId })" class="btn-small btn-view">
+                                <i class="fas fa-eye"></i> View Repair
+                            </a>
+                        </div>
+                    </div>
+                }
+            }
+        </div>
+    </main>
+</div>
+
+@section Scripts {
+    <script src="~/JS/DashboardScript.js"></script>
+}

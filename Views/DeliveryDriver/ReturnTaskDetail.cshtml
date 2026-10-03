@@ -1,0 +1,201 @@
+﻿@using SkyTech.Models
+@model SkyTech.Models.OrderItem
+@{
+    ViewBag.Title = (ViewBag.TaskType == "Collection" ? "Collection" : "Re-delivery") + " #" + Model.OrderItemId;
+    Layout = "~/Views/Shared/_MinimalLayout.cshtml";
+    string taskType = ViewBag.TaskType;
+    string taskIcon = ViewBag.TaskIcon;
+    string taskColor = ViewBag.TaskColor;
+}
+
+@section Styles {
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+    <link href="https://api.fontshare.com/v2/css?f[]=clash-display@400,500,600,700&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="~/CSS/DriverStyle.css">
+    <link rel="stylesheet" href="https://unpkg.com/leaflet/dist/leaflet.css" />
+    <style>
+        .leaflet-top, .leaflet-bottom { z-index: 400; }
+        .map-container #map { height: 460px; }
+    </style>
+}
+
+@section Scripts{
+    <script src="https://unpkg.com/leaflet/dist/leaflet.js"></script>
+    <script src="~/MyScripts/DriverReturnTask.js"></script>
+}
+
+<div class="d-wrap">
+    <!-- ══ SIDEBAR ══ -->
+    <<aside class="d-sidebar">
+        <div class="d-brand">
+            <div class="d-brand-icon"><i class="fas fa-truck-fast"></i></div>
+            <div>
+                <div class="d-brand-name">SkyTech</div>
+                <div class="d-brand-sub">Driver Portal</div>
+            </div>
+        </div>
+        <nav class="d-nav">
+            <div class="d-nav-label">NAVIGATION</div>
+            <a href="@Url.Action("DriverDash", "DeliveryDriver")" class="d-link @(ViewBag.ActivePage == "Dashboard" ? "active" : "")">
+                <i class="fas fa-grid-2"></i><span>Dashboard</span>
+            </a>
+
+            <!-- My Deliveries with dropdown -->
+            <div class="nav-item-dropdown">
+                <a href="#" class="d-link d-dropdown-toggle @(ViewBag.ActivePage == "HomeDeliveries" || ViewBag.ActivePage == "BranchTransfers" ? "open" : "")" id="deliveriesDropdown">
+                    <i class="fas fa-bag-shopping"></i>
+                    <span>My Deliveries</span>
+                    <i class="fas fa-chevron-down dropdown-icon"></i>
+                </a>
+                <div class="d-dropdown-menu" id="deliveriesSubmenu" style="display: @(ViewBag.ActivePage == "HomeDeliveries" || ViewBag.ActivePage == "BranchTransfers" ? "block" : "none")">
+                    <a href="@Url.Action("HomeDeliveries", "DeliveryDriver")" class="d-link d-sub-link @(ViewBag.ActivePage == "HomeDeliveries" ? "active" : "")">
+                        <i class="fas fa-truck"></i> Home Deliveries
+                    </a>
+                    <a href="@Url.Action("BranchTransfers", "DeliveryDriver")" class="d-link d-sub-link @(ViewBag.ActivePage == "BranchTransfers" ? "active" : "")">
+                        <i class="fas fa-arrow-right-arrow-left"></i> Branch Transfers
+                    </a>
+                </div>
+            </div>
+            <a href="@Url.Action("MyDeliveries","DeliveryDriver")" class="d-link">
+                <i class="fas fa-bag-shopping"></i><span>My Deliveries</span>
+            </a>
+            <a href="@Url.Action("MyTasks", "DeliveryDriver")" class="d-link">
+                <i class="fas fa-bag-shopping"></i><span>Returned Order Items</span>
+            </a>
+
+            <div class="d-nav-label" style="margin-top:1rem">ACCOUNT</div>
+            <a href="@Url.Action("DriverProfile", "DeliveryDriver")" class="d-link @(ViewBag.ActivePage == "Profile" ? "active" : "")">
+                <i class="fas fa-circle-user"></i><span>Profile</span>
+            </a>
+        </nav>
+        <div class="d-sidebar-foot">
+            <div class="d-foot-avatar"><i class="fas fa-user-tie"></i></div>
+            <div>
+                <div class="d-foot-name">@(ViewBag.DriverName ?? "Delivery Driver")</div>
+                <div class="d-foot-role">Delivery Driver</div>
+            </div>
+        </div>
+        <div style="padding:.8rem 1.2rem">
+            @using (Html.BeginForm("Logout", "Authentication", FormMethod.Post))
+            {
+                @Html.AntiForgeryToken()
+                <button type="submit" style="width:100%;background:rgba(239,68,68,.08);
+                        border:1.5px solid rgba(239,68,68,.25);border-radius:8px;
+                        padding:.6rem 1rem;cursor:pointer;color:#ef4444;
+                        font-weight:600;font-size:.85rem;display:flex;
+                        align-items:center;gap:.5rem;justify-content:center">
+                    <i class="fas fa-right-from-bracket"></i> Log Out
+                </button>
+            }
+        </div>
+    </aside>
+
+    <main class="d-main">
+        <input type="hidden" id="js-orderitem-id" value="@Model.OrderItemId" />
+        <input type="hidden" id="js-task-type" value="@taskType" />
+        <input type="hidden" id="js-address" value="@(Model.Order?.DeliveryAddress ?? "")" />
+        @Html.AntiForgeryToken()
+
+        <div class="d-topbar">
+            <div>
+                <div class="d-page-title">
+                    <i class="fas @taskIcon" style="color:@taskColor"></i> 
+                    @taskType #@Model.OrderItemId
+                </div>
+                <div class="d-page-sub">
+                    Status: <span id="task-status" style="font-weight:700;color:@taskColor">@Model.ReturnPStatus</span>
+                </div>
+            </div>
+            <a href="@Url.Action("MyTasks")" class="btn btn-outline">
+                <i class="fas fa-arrow-left"></i> Back
+            </a>
+        </div>
+
+        <!-- Task Details Card -->
+        <div class="d-card" style="margin-bottom:1.3rem">
+            <div class="d-card-head">
+                <div class="d-card-title">
+                    <i class="fas fa-info-circle" style="color:var(--blue);margin-right:.4rem"></i>
+                    @taskType Details
+                </div>
+                <span class="badge" id="statusBadge">@Model.ReturnPStatus</span>
+            </div>
+
+            <div class="d-card-body">
+                <div class="order-meta-grid">
+                    <div class="meta-block">
+                        <div class="mk"><i class="fas fa-user"></i> CUSTOMER</div>
+                        <div class="mv">@(Model.Order?.Customers?.FirstName) @(Model.Order?.Customers?.LastName)</div>
+                    </div>
+                    <div class="meta-block">
+                        <div class="mk"><i class="fas fa-map-pin"></i> ADDRESS</div>
+                        <div class="mv">@(Model.Order?.DeliveryAddress ?? "—")</div>
+                    </div>
+                    <div class="meta-block">
+                        <div class="mk"><i class="fas fa-box"></i> PRODUCT</div>
+                        <div class="mv">@Model.ProdName</div>
+                    </div>
+                    <div class="meta-block">
+                        <div class="mk"><i class="fas fa-hashtag"></i> QUANTITY</div>
+                        <div class="mv">@Model.QuantityReturned of @Model.Quantity</div>
+                    </div>
+                    @if (taskType == "Collection")
+                    {
+                        <div class="meta-block">
+                            <div class="mk"><i class="fas fa-calendar"></i> COLLECTION BY</div>
+                            <div class="mv">@(Model.CollectionDate?.ToString("dd MMM yyyy") ?? "ASAP")</div>
+                        </div>
+                    }
+                    else
+                    {
+                        <div class="meta-block">
+                            <div class="mk"><i class="fas fa-calendar"></i> DELIVERY BY</div>
+                            <div class="mv">@(Model.NewDeliveryDate?.ToString("dd MMM yyyy") ?? "ASAP")</div>
+                        </div>
+                    }
+                    <div class="meta-block">
+                        <div class="mk"><i class="fas fa-comment"></i> REASON</div>
+                        <div class="mv">@(Model.RetunReason ?? "Not provided")</div>
+                    </div>
+                </div>
+
+                <!-- Action Buttons -->
+                <div class="delivery-btn-row">
+                    @if (taskType == "Collection")
+                    {
+                        <button type="button" id="collectedBtn" onclick="markCollected()" class="btn btn-warning">
+                            <i class="fas fa-box-open"></i> Mark as Collected
+                        </button>
+                    }
+                    else
+                    {
+                        <button type="button" id="deliveredBtn" onclick="markReDelivered()" class="btn btn-success">
+                            <i class="fas fa-circle-check"></i> Mark as Delivered
+                        </button>
+                    }
+                </div>
+
+                <div id="completionBanner" style="display:none;align-items:center;gap:.6rem;
+                     margin-top:1rem;padding:.8rem 1rem;background:#dcfce7;
+                     border-radius:8px;color:#16a34a;font-weight:600;">
+                    <i class="fas fa-circle-check"></i> Task completed successfully!
+                </div>
+            </div>
+        </div>
+
+        <!-- Map -->
+        <div class="map-container d-card" style="margin-top:.9rem">
+            <div class="d-card-head">
+                <div class="d-card-title">
+                    <i class="fas fa-map-location-dot" style="color:var(--blue);margin-right:.4rem"></i>Location Map
+                </div>
+                <button class="btn btn-outline btn-sm" onclick="loadMapRoute()">
+                    <i class="fas fa-arrows-rotate"></i> Show Route
+                </button>
+            </div>
+            <div id="map"></div>
+        </div>
+    </main>
+</div>

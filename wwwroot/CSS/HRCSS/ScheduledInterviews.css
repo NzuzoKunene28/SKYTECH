@@ -1,0 +1,199 @@
+/* ScheduledInterviews.css — belongs to Views/Recruitment/ScheduledInterviews.cshtml
+   (adjust path to match your actual view location)
+   Path: ~/CSS/HRCSS/ScheduledInterviews.css
+   Color tokens match ~/CSS/HRCSS/HRDash.css, ShiftChangeRequests.css and
+   JobDraftReview.css so all pages read as one product. */
+
+:root {
+    --blue: #5f9ea0;
+    --blue-dark: #2d6b6d;
+    --blue-deep: #1f4f50;
+    --bg: #f0f4fc;
+    --border: #dde6f5;
+    --text: #0e1b35;
+    --text-2: #4a5878;
+    --text-m: #8a96b0;
+}
+
+* , *::before, *::after {
+    box-sizing: border-box;
+}
+
+body {
+    margin: 0;
+    font-family: 'Plus Jakarta Sans', sans-serif;
+    background-color: var(--bg);
+    color: var(--text);
+}
+
+.si-page {
+    max-width: 1080px;
+    margin: 0 auto;
+    padding: 2.5rem 3rem 4rem;
+}
+
+.si-eyebrow {
+    font-size: .72rem;
+    font-weight: 700;
+    color: var(--text-m);
+    text-transform: uppercase;
+    letter-spacing: 1.2px;
+    margin: 0 0 .4rem;
+}
+
+.si-header-row {
+    display: flex;
+    align-items: flex-end;
+    justify-content: space-between;
+    gap: 1rem;
+    margin-bottom: 1.8rem;
+}
+
+.si-title {
+    font-family: 'Clash Display', 'Plus Jakarta Sans', sans-serif;
+    font-weight: 700;
+    font-size: 1.9rem;
+    letter-spacing: -.5px;
+    color: var(--text);
+    margin: 0;
+}
+
+.si-link {
+    display: inline-flex;
+    align-items: center;
+    gap: .4rem;
+    font-size: .82rem;
+    font-weight: 700;
+    color: var(--blue-deep);
+    text-decoration: none;
+    background: rgba(95, 158, 160, .12);
+    padding: .55rem 1rem;
+    border-radius: 9px;
+    transition: background .15s;
+    white-space: nowrap;
+}
+
+    .si-link:hover {
+        background: rgba(95, 158, 160, .22);
+        color: var(--blue-deep);
+    }
+
+    .si-link:focus-visible {
+        outline: 2px solid var(--blue-deep);
+        outline-offset: 2px;
+    }
+
+/* ══ CARD + TABLE ══ */
+.si-card {
+    background: #fff;
+    border: 1.5px solid var(--border);
+    border-radius: 14px;
+    overflow: hidden;
+}
+
+.si-empty {
+    padding: 3rem 1.5rem;
+    text-align: center;
+    color: var(--text-m);
+    font-size: .9rem;
+}
+
+.si-table {
+    width: 100%;
+    border-collapse: collapse;
+    font-size: .85rem;
+}
+
+    .si-table thead th {
+        text-align: left;
+        font-size: .68rem;
+        font-weight: 700;
+        color: var(--text-m);
+        text-transform: uppercase;
+        letter-spacing: .8px;
+        background: var(--bg);
+        padding: .85rem 1.1rem;
+        border-bottom: 1.5px solid var(--border);
+    }
+
+    .si-table tbody td {
+        padding: .95rem 1.1rem;
+        border-bottom: 1px solid var(--border);
+        color: var(--text-2);
+        vertical-align: middle;
+    }
+
+    .si-table tbody tr:last-child td {
+        border-bottom: none;
+    }
+
+    .si-table tbody tr:hover {
+        background: rgba(95, 158, 160, .05);
+    }
+
+.si-candidate {
+    font-weight: 700;
+    color: var(--text);
+}
+
+.si-join-link {
+    color: var(--blue-deep);
+    font-weight: 700;
+    text-decoration: none;
+}
+
+    .si-join-link:hover {
+        text-decoration: underline;
+    }
+
+.si-muted {
+    color: var(--text-m);
+    font-size: .82rem;
+}
+
+.si-btn {
+    display: inline-block;
+    border: none;
+    border-radius: 8px;
+    padding: .45rem .95rem;
+    font-size: .78rem;
+    font-weight: 700;
+    text-decoration: none;
+    background: linear-gradient(135deg, var(--blue), var(--blue-dark));
+    color: #fff;
+    cursor: pointer;
+    transition: filter .15s, transform .05s;
+}
+
+    .si-btn:hover {
+        filter: brightness(.94);
+        color: #fff;
+    }
+
+    .si-btn:active {
+        transform: translateY(1px);
+    }
+
+    .si-btn:focus-visible {
+        outline: 2px solid var(--blue-deep);
+        outline-offset: 2px;
+    }
+
+@media (max-width: 860px) {
+    .si-page {
+        padding: 1.75rem 1.25rem 3rem;
+    }
+
+    .si-header-row {
+        flex-direction: column;
+        align-items: flex-start;
+    }
+
+    .si-card {
+        overflow-x: auto;
+    }
+
+    .si-table {
+        min-width: 640px;
+    }
+}

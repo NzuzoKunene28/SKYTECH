@@ -1,0 +1,96 @@
+﻿@model SkyTech.Models.JobPostServices.ApplicationForm
+
+@{
+    ViewData["Title"] = "Review Your Application";
+    Layout = "~/Views/Shared/_MinimalLayout.cshtml";
+}
+
+@section Styles {
+     <link rel="stylesheet" href="~/CSS/CUSTOMERCSS/ReviewApplication.css" />
+}
+
+@if (TempData["cvError"] != null)
+{
+    <p>@TempData["cvError"]</p>
+}
+
+<div class="form-container">
+
+    <h2>Review Your Application</h2>
+    <p>Please check the details below and correct anything that wasn't picked up accurately from your CV.</p>
+
+    <form asp-controller="CustomerApplications" asp-action="SubmitApplication" method="post">
+
+        <input type="hidden" asp-for="PostId" />
+
+        <div class="form-group">
+            <label asp-for="FirstName">First Name</label>
+            <input asp-for="FirstName" type="text" />
+            <span asp-validation-for="FirstName"></span>
+        </div>
+
+        <div class="form-group">
+            <label asp-for="LastName">Last Name</label>
+            <input asp-for="LastName" type="text" />
+            <span asp-validation-for="LastName"></span>
+        </div>
+
+        <div class="form-group">
+            <label asp-for="IDNumber">ID Number</label>
+            <input asp-for="IDNumber" type="text" />
+            <span asp-validation-for="IDNumber"></span>
+        </div>
+        <div class="form-group">
+            <label asp-for="PhoneNumber">Phone Number</label>
+            <input asp-for="PhoneNumber" type="text" />
+            <span asp-validation-for="PhoneNumber"></span>
+        </div>
+
+        <div class="form-group">
+            <label asp-for="Email">Email</label>
+            <input asp-for="Email" type="email" />
+            <span asp-validation-for="Email"></span>
+        </div>
+
+        <div class="form-group">
+            <label asp-for="Location">Location</label>
+            <input asp-for="Location" type="text" />
+            <span asp-validation-for="Location"></span>
+        </div>
+
+        <div class="form-group">
+            <label asp-for="Experience">Experience</label>
+            <textarea asp-for="Experience" rows="5"></textarea>
+            <span asp-validation-for="Experience"></span>
+        </div>
+
+        <div class="form-group">
+            <label asp-for="Skills">Skills</label>
+            <textarea asp-for="Skills" rows="4"></textarea>
+            <span asp-validation-for="Skills"></span>
+        </div>
+        <div class="form-group">
+            <label asp-for="Certificates">Certificates</label>
+            <textarea asp-for="Certificates" rows="4"></textarea>
+            <span asp-validation-for="Certificates"></span>
+        </div>
+
+        <div class="form-group">
+            <label asp-for="Links">Links (LinkedIn, portfolio, etc.)</label>
+            <input asp-for="Links" type="text" />
+            <span asp-validation-for="Links"></span>
+        </div>
+
+        <div class="from-group">
+            <label asp-for="HasInternertAccess" class="form-group">Do you have internert access</label>
+            <input asp-for="HasInternertAccess" type="checkbox" />
+            <span asp-validation-for="HasInternertAccess"></span>
+        </div>
+
+        <div class="btn-submit">
+            <button type="submit">Submit Application</button>
+        </div>
+
+    </form>
+
+</div>

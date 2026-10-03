@@ -1,0 +1,182 @@
+/* HRDash.css — belongs to Views/HR/HRDash.cshtml
+   Path: ~/CSS/HRCSS/HRDash.css
+   Standalone — this page loads ONLY this file (plus fonts/icons), nothing else. */
+
+:root {
+    --blue: #5f9ea0;
+    --blue-dark: #2d6b6d;
+    --blue-deep: #1f4f50;
+    --bg: #f0f4fc;
+    --border: #dde6f5;
+    --text: #0e1b35;
+    --text-2: #4a5878;
+    --text-m: #8a96b0;
+}
+
+* , *::before, *::after {
+    box-sizing: border-box;
+}
+
+body {
+    margin: 0;
+    font-family: 'Plus Jakarta Sans', sans-serif;
+    background-color: var(--bg);
+    color: var(--text);
+}
+
+.hr-wrap {
+    display: grid;
+    grid-template-columns: 260px 1fr;
+    min-height: 100vh;
+}
+
+@media (max-width: 860px) {
+    .hr-wrap {
+        grid-template-columns: 1fr;
+    }
+
+    .hr-sidebar {
+        position: static;
+        height: auto;
+    }
+}
+
+/* ══ SIDEBAR ══ */
+.hr-sidebar {
+    background: #fff;
+    border-right: 1.5px solid var(--border);
+    display: flex;
+    flex-direction: column;
+    padding: 1.6rem 0;
+    position: sticky;
+    top: 0;
+    height: 100vh;
+}
+
+.hr-brand {
+    display: flex;
+    align-items: center;
+    gap: .75rem;
+    padding: 0 1.3rem 1.4rem;
+    border-bottom: 1.5px solid var(--border);
+    margin-bottom: 1rem;
+}
+
+.hr-brand-icon {
+    width: 40px;
+    height: 40px;
+    border-radius: 12px;
+    background: linear-gradient(135deg, var(--blue), var(--blue-dark));
+    color: #fff;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 1.1rem;
+    flex: none;
+}
+
+.hr-brand-name {
+    font-family: 'Clash Display', 'Plus Jakarta Sans', sans-serif;
+    font-weight: 700;
+    font-size: 1rem;
+    color: var(--text);
+}
+
+.hr-brand-sub {
+    font-size: .72rem;
+    color: var(--text-m);
+}
+
+.hr-nav {
+    flex: 1;
+    display: flex;
+    flex-direction: column;
+    gap: .15rem;
+    padding: 0 .85rem;
+    overflow-y: auto;
+}
+
+.hr-nav-label {
+    font-size: .68rem;
+    font-weight: 700;
+    color: var(--text-m);
+    text-transform: uppercase;
+    letter-spacing: 1px;
+    margin: 1.1rem .55rem .4rem;
+}
+
+    .hr-nav-label:first-child {
+        margin-top: 0;
+    }
+
+.hr-link {
+    display: flex;
+    align-items: center;
+    gap: .75rem;
+    padding: .68rem .9rem;
+    border-radius: 10px;
+    color: var(--text-2);
+    font-weight: 600;
+    font-size: .85rem;
+    text-decoration: none;
+    transition: background .2s, color .2s;
+}
+
+    .hr-link i {
+        width: 18px;
+        text-align: center;
+        color: var(--text-m);
+        font-size: .9rem;
+    }
+
+    .hr-link:hover {
+        background: var(--bg);
+        color: var(--blue-dark);
+    }
+
+        .hr-link:hover i {
+            color: var(--blue-dark);
+        }
+
+    .hr-link.active {
+        background: linear-gradient(135deg, rgba(95,158,160,.12), rgba(45,107,109,.12));
+        color: var(--blue-dark);
+    }
+
+        .hr-link.active i {
+            color: var(--blue-dark);
+        }
+
+    .hr-link:focus-visible {
+        outline: 2px solid var(--blue-deep);
+        outline-offset: 2px;
+    }
+
+/* ══ MAIN CONTENT ══ */
+.hr-main {
+    padding: 2.5rem 3rem;
+}
+
+.hr-eyebrow {
+    font-size: .72rem;
+    font-weight: 700;
+    color: var(--text-m);
+    text-transform: uppercase;
+    letter-spacing: 1.2px;
+    margin: 0 0 .4rem;
+}
+
+.hr-title {
+    font-family: 'Clash Display', 'Plus Jakarta Sans', sans-serif;
+    font-weight: 700;
+    font-size: 1.9rem;
+    letter-spacing: -.5px;
+    color: var(--text);
+    margin: 0 0 .4rem;
+}
+
+.hr-sub {
+    font-size: .9rem;
+    color: var(--text-m);
+    margin: 0;
+}

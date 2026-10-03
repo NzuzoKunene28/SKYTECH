@@ -1,0 +1,195 @@
+@model List<Repair_Request>
+@{
+    ViewBag.Title = "My Repair Requests";
+    Layout = "~/Views/Shared/_MinimalLayout.cshtml";
+}
+
+@section Styles {
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+    <link href="https://api.fontshare.com/v2/css?f[]=clash-display@400,500,600,700&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="~/CSS/DashboardStyle.css">
+    <style>
+        .repair-card {
+            background: white;
+            border: 1px solid var(--border);
+            border-radius: var(--radius);
+            padding: 1.5rem;
+            margin-bottom: 1.5rem;
+            transition: all 0.3s;
+        }
+        .repair-card:hover {
+            box-shadow: var(--shadow-md);
+            border-color: var(--blue);
+        }
+        .repair-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: start;
+            margin-bottom: 1rem;
+        }
+        .repair-title {
+            font-size: 1.1rem;
+            font-weight: 700;
+            color: var(--text);
+        }
+        .status-badge {
+            display: inline-block;
+            padding: 0.4rem 0.8rem;
+            border-radius: var(--radius-pill);
+            font-size: 0.75rem;
+            font-weight: 600;
+            text-transform: uppercase;
+        }
+        .status-pending { background: #fef3c7; color: #92400e; }
+        .status-assigned { background: #dbeafe; color: #0c4a6e; }
+        .status-quoted { background: #c7d2fe; color: #312e81; }
+        .status-inprogress { background: #fed7aa; color: #92400e; }
+        .status-completed { background: #bbf7d0; color: #065f46; }
+        .repair-detail {
+            display: grid;
+            grid-template-columns: repeat(2, 1fr);
+            gap: 1rem;
+            margin-bottom: 1rem;
+            font-size: 0.95rem;
+        }
+        .repair-detail-item {
+            display: flex;
+            flex-direction: column;
+        }
+        .repair-detail-label {
+            font-weight: 600;
+            color: var(--text-muted);
+            font-size: 0.85rem;
+            margin-bottom: 0.25rem;
+        }
+        .repair-detail-value {
+            color: var(--text);
+        }
+        .repair-actions {
+            display: flex;
+            gap: 0.75rem;
+            margin-top: 1rem;
+        }
+        .btn-small {
+            padding: 0.5rem 1rem;
+            border-radius: var(--radius-sm);
+            border: none;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.3s;
+            font-size: 0.9rem;
+        }
+        .btn-primary {
+            background: var(--blue);
+            color: white;
+        }
+        .btn-primary:hover {
+            background: var(--blue-dark);
+            transform: translateY(-2px);
+        }
+        .btn-secondary {
+            background: transparent;
+            color: var(--blue);
+            border: 1px solid var(--blue);
+        }
+        .btn-secondary:hover {
+            background: var(--blue-soft);
+        }
+    </style>
+}
+
+<div class="dash-wrap">
+    <!-- ══ SIDEBAR ══ -->
+    <aside class="dash-sidebar">
+        <div class="dash-brand">
+            <div class="dash-brand-icon"><i class="fas fa-user"></i></div>
+            <div>
+                <div class="dash-brand-name">SkyTech</div>
+                <div class="dash-brand-sub">Customer Portal</div>
+            </div>
+        </div>
+        <nav class="dash-nav">
+            <div class="dash-nav-label">REPAIRS</div>
+            <a href="@Url.Action("MyRepairRequests", "Customer")" class="dash-link active">
+                <i class="fas fa-tools"></i><span>My Repairs</span>
+            </a>
+        </nav>
+
+        <div class="dash-sidebar-foot">
+            <div class="dash-foot-avatar"><i class="fas fa-user-circle"></i></div>
+            <div>
+                <div class="dash-foot-name">Customer</div>
+                <div class="dash-foot-role">Account</div>
+            </div>
+        </div>
+
+        <div style="padding:.8rem 1.2rem;margin-top:1rem">
+            @using (Html.BeginForm("Logout", "Authentication", FormMethod.Post))
+            {
+                @Html.AntiForgeryToken()
+                <button type="submit" class="dash-logout-btn">
+                    <i class="fas fa-sign-out-alt"></i> Logout
+                </button>
+            }
+        </div>
+    </aside>
+
+    <!-- ══ MAIN ══ -->
+    <main class="dash-main">
+        <div class="dash-header">
+            <div>
+                <h1 class="dash-title">My Repair Requests</h1>
+                <p class="dash-subtitle">Track the status of your repair requests</p>
+            </div>
+        </div>
+
+        <div class="dash-content">
+            @if (Model == null)
+            {
+                <div class="dash-card" style="padding: 2rem; text-align: center;">
+                    <i class="fas fa-inbox" style="font-size: 3rem; color: var(--text-muted); margin-bottom: 1rem;"></i>
+                    <p style="color: var(--text-muted);">No repair requests yet.</p>
+                </div>
+            }
+            else
+            {
+                @foreach (var repair in (List<Repair_Request>)Model)
+                {
+                    <div class="repair-card">
+                        <div class="repair-header">
+                            <div>
+                                <div class="repair-title">#@repair.RequestId - @repair.ItemName</div>
+                                <p style="margin: 0.5rem 0 0; color: var(--text-muted); font-size: 0.9rem;">@repair.IssueDescription</p>
+                            </div>
+                            <span class="status-badge status-@repair.Status.ToString().ToLower().Replace(" ", "")">@repair.Status</span>
+                        </div>
+
+                        <div class="repair-detail">
+                            <div class="repair-detail-item">
+                                <span class="repair-detail-label">Category</span>
+                                <span class="repair-detail-value">@repair.Category?.CategoryName</span>
+                            </div>
+                            <div class="repair-detail-item">
+                                <span class="repair-detail-label">Date Requested</span>
+                                <span class="repair-detail-value">@repair.DateCreated.ToString("MMM dd, yyyy")</span>
+                            </div>
+                        </div>
+
+                        <div class="repair-actions">
+                            <a href="@Url.Action("ViewRepairDetail", "Customer", new { id = repair.RequestId })" 
+                               class="btn-small btn-primary">
+                                <i class="fas fa-eye"></i> View Details
+                            </a>
+                        </div>
+                    </div>
+                }
+            }
+        </div>
+    </main>
+</div>
+
+@section Scripts {
+    <script src="~/JS/DashboardScript.js"></script>
+}

@@ -1,0 +1,36 @@
+﻿@model List<SkyTech.Models.Interviews.Interview>
+@{
+    ViewData["Title"] = "HR Review";
+}
+
+<h2>Shortlisted candidates</h2>
+
+@foreach (var interview in Model)
+{
+    <div class="card mb-3 p-3">
+        <h5>@interview.Customer.FirstName @interview.Customer.LastName</h5>
+        <p>Score: @interview.EvaluationScore</p>
+        <p>@interview.EvaluationNotes</p>
+
+        <form asp-action="Hire" method="post" class="row g-2">
+            <input type="hidden" name="interviewId" value="@interview.InterviewId" />
+            <div class="col-auto">
+                <input type="text" name="jobTitle" class="form-control" placeholder="Job title" required />
+            </div>
+            <div class="col-auto">
+                <input type="number" name="salary" step="0.01" class="form-control" placeholder="Salary" required />
+            </div>
+            <div class="col-auto">
+                <input type="date" name="startDate" class="form-control" required />
+            </div>
+            <div class="col-auto">
+                <button type="submit" class="btn btn-success">Hire</button>
+            </div>
+        </form>
+
+        <form asp-action="RejectAtHR" method="post" class="mt-2">
+            <input type="hidden" name="interviewId" value="@interview.InterviewId" />
+            <button type="submit" class="btn btn-outline-danger btn-sm">Reject</button>
+        </form>
+    </div>
+}

@@ -1,0 +1,545 @@
+@model SkyTech.Models.LeaseAgreement
+@{
+    @await Html.PartialAsync("_RenewalBanner", Model)
+
+    ViewData["Title"] = "Your Lease Agreement";
+
+    var status = Model.Status;
+    bool showOngoingSections = status == SkyTech.Models.LeaseAgreementStatus.Active
+                             || status == SkyTech.Models.LeaseAgreementStatus.Overdue;
+    bool showCard = status != SkyTech.Models.LeaseAgreementStatus.PendingApproval
+                 && status != SkyTech.Models.LeaseAgreementStatus.Rejected
+                 && status != SkyTech.Models.LeaseAgreementStatus.Cancelled
+                 && status != SkyTech.Models.LeaseAgreementStatus.Defaulted;
+}
+
+<style>
+    :root {
+        --st-teal-dark: #3d7873;
+        --st-teal: #4a8f8c;
+        --st-teal-light: #eaf5f4;
+        --st-teal-pale: #d7ece9;
+        --st-orange: #f5820d;
+        --st-ink: #1b2a2f;
+        --st-muted: #6b8481;
+        --st-border: #e1eeec;
+        --st-white: #ffffff;
+        --st-field-bg: #eef1fb;
+    }
+
+    .la-page {
+        background: linear-gradient(160deg, var(--st-teal) 0%, var(--st-teal-dark) 100%);
+        min-height: 100%;
+        padding: 32px 20px 60px;
+        font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
+    }
+
+    .la-shell {
+        max-width: 900px;
+        margin: 0 auto;
+    }
+
+    .la-header {
+        display: flex;
+        align-items: center;
+        gap: 14px;
+        margin-bottom: 22px;
+        padding: 0 4px;
+        opacity: 0;
+        animation: la-fade-down .4s ease forwards;
+    }
+
+        .la-header .la-icon {
+            width: 48px;
+            height: 48px;
+            border-radius: 12px;
+            background: var(--st-white);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            color: var(--st-teal-dark);
+            flex-shrink: 0;
+            box-shadow: 0 4px 12px rgba(0, 0, 0, 0.12);
+        }
+
+        .la-header h2 {
+            margin: 0;
+            font-weight: 800;
+            font-size: 1.55rem;
+            color: var(--st-white);
+        }
+
+        .la-status-pill {
+            display: inline-block;
+            margin-left: 4px;
+            padding: 4px 12px;
+            border-radius: 999px;
+            font-size: 0.72rem;
+            font-weight: 700;
+            text-transform: uppercase;
+            letter-spacing: 0.4px;
+            background: rgba(255,255,255,0.22);
+            color: var(--st-white);
+            vertical-align: middle;
+        }
+
+    /* Alerts */
+    .la-alert {
+        border-radius: 14px;
+        padding: 15px 18px;
+        margin-bottom: 20px;
+        font-weight: 500;
+        display: flex;
+        align-items: flex-start;
+        gap: 10px;
+        line-height: 1.5;
+        box-shadow: 0 4px 14px rgba(0, 0, 0, 0.08);
+        opacity: 0;
+        animation: la-fade-up .35s ease forwards;
+        animation-delay: .1s;
+    }
+
+        .la-alert svg {
+            flex-shrink: 0;
+            margin-top: 2px;
+        }
+
+    .la-alert-danger { background: #fdeceb; border: 1px solid #f3bcb9; color: #b3261e; }
+    .la-alert-info { background: var(--st-white); border: 1px solid var(--st-teal-pale); color: var(--st-teal-dark); }
+    .la-alert-success { background: #eafaf0; border: 1px solid #bfe7cd; color: #1e7a44; }
+    .la-alert-muted { background: var(--st-white); border: 1px solid var(--st-border); color: var(--st-muted); }
+
+    /* Main white card, matching the Propose-an-Item panel */
+    .la-card {
+        background: var(--st-white);
+        border-radius: 20px;
+        padding: 30px 32px;
+        margin-bottom: 20px;
+        box-shadow: 0 12px 32px rgba(0, 0, 0, 0.14);
+        opacity: 0;
+        transform: translateY(16px);
+        animation: la-fade-up .45s ease forwards;
+        animation-delay: .08s;
+    }
+
+    .la-section + .la-section {
+        margin-top: 26px;
+        padding-top: 26px;
+        border-top: 1px solid var(--st-border);
+    }
+
+    .la-section-title {
+        display: flex;
+        align-items: center;
+        gap: 8px;
+        font-weight: 800;
+        font-size: 0.82rem;
+        text-transform: uppercase;
+        letter-spacing: 0.6px;
+        color: var(--st-teal-dark);
+        margin-bottom: 18px;
+    }
+
+        .la-section-title svg {
+            color: var(--st-orange);
+            flex-shrink: 0;
+        }
+
+    /* Terms grid, styled like form fields */
+    .la-terms {
+        display: grid;
+        grid-template-columns: repeat(2, 1fr);
+        gap: 14px 18px;
+    }
+
+    .la-term-item {
+        background: var(--st-field-bg);
+        border-radius: 14px;
+        padding: 12px 16px;
+        display: flex;
+        flex-direction: column;
+        gap: 3px;
+        transition: transform .15s ease, box-shadow .15s ease;
+    }
+    .la-term-item:hover { transform: translateY(-2px); box-shadow: 0 4px 10px rgba(0,0,0,0.06); }
+
+        .la-term-item.full { grid-column: 1 / -1; }
+
+    .la-term-label { font-size: 0.72rem; font-weight: 700; text-transform: uppercase; letter-spacing: 0.4px; color: var(--st-muted); }
+    .la-term-value { font-size: 0.98rem; font-weight: 700; color: var(--st-ink); }
+    .la-term-value.positive { color: #17845a; }
+    .la-term-value.negative { color: #b3261e; }
+
+    /* Items table */
+    .la-table-wrap { overflow-x: auto; border: 1px solid var(--st-border); border-radius: 14px; }
+    .la-table { width: 100%; border-collapse: collapse; min-width: 480px; }
+
+        .la-table thead th {
+            background: var(--st-teal-light); color: var(--st-teal-dark); text-align: left;
+            font-size: 0.76rem; text-transform: uppercase; letter-spacing: 0.3px; font-weight: 700;
+            padding: 12px 16px; border-bottom: 1px solid var(--st-border);
+        }
+        .la-table tbody td { padding: 12px 16px; font-size: 0.92rem; border-bottom: 1px solid var(--st-border); color: var(--st-ink); }
+        .la-table tbody tr:last-child td { border-bottom: none; }
+        .la-table tbody tr:hover { background: #fbfefe; }
+        .la-table tfoot th { padding: 14px 16px; font-size: 0.94rem; background: var(--st-teal-light); color: var(--st-teal-dark); border-top: 1px solid var(--st-border); }
+        .la-table tfoot th:last-child { color: var(--st-orange); font-size: 1.05rem; font-weight: 800; }
+
+    .la-disclaimer { margin: 22px 0 0; font-size: 0.86rem; color: var(--st-muted); line-height: 1.6; }
+
+    /* Checkbox / form */
+    .la-form-check { display: flex; align-items: flex-start; gap: 10px; margin-bottom: 18px; background: var(--st-field-bg); border-radius: 14px; padding: 14px 16px; }
+        .la-form-check input[type="checkbox"] { width: 18px; height: 18px; accent-color: var(--st-teal-dark); margin-top: 2px; flex-shrink: 0; }
+        .la-form-check label { font-size: 0.92rem; color: var(--st-ink); line-height: 1.5; }
+
+    /* Bottom actions bar */
+    .la-actions { display: flex; justify-content: flex-end; align-items: center; gap: 12px; padding-top: 22px; margin-top: 22px; border-top: 1px solid var(--st-border); }
+
+    .la-btn {
+        display: inline-flex; align-items: center; gap: 8px; padding: 12px 26px; border-radius: 999px;
+        font-weight: 700; font-size: 0.92rem; text-decoration: none; border: none; cursor: pointer;
+        transition: filter 0.15s ease, background 0.15s ease, color 0.15s ease, box-shadow 0.15s ease, transform .1s ease;
+    }
+    .la-btn:active { transform: scale(0.97); }
+    .la-btn[disabled] { opacity: 0.7; cursor: wait; }
+
+    .la-btn-primary { background: linear-gradient(135deg, var(--st-teal) 0%, var(--st-teal-dark) 100%); color: var(--st-white); box-shadow: 0 6px 16px rgba(61, 120, 115, 0.35); }
+        .la-btn-primary:hover { filter: brightness(1.08); color: var(--st-white); }
+
+    .la-btn-outline { background: var(--st-white); color: var(--st-teal-dark); border: 1.5px solid var(--st-border); }
+        .la-btn-outline:hover { background: var(--st-teal-light); color: var(--st-teal-dark); }
+
+    .la-back-standalone { background: var(--st-white); color: var(--st-teal-dark); box-shadow: 0 6px 16px rgba(0, 0, 0, 0.12); }
+        .la-back-standalone:hover { background: var(--st-teal-light); color: var(--st-teal-dark); }
+
+    .la-spinner { display: inline-block; width: 14px; height: 14px; border: 2px solid rgba(255,255,255,0.5); border-top-color: #fff; border-radius: 50%; animation: la-spin .7s linear infinite; }
+
+    @@keyframes la-fade-up { to { opacity: 1; transform: translateY(0); } }
+    @@keyframes la-fade-down { to { opacity: 1; } }
+    @@keyframes la-spin { to { transform: rotate(360deg); } }
+
+    @@media (max-width: 560px) {
+        .la-terms { grid-template-columns: 1fr; }
+        .la-card { padding: 24px 20px; }
+        .la-actions { flex-direction: column-reverse; align-items: stretch; }
+        .la-actions .la-btn { justify-content: center; }
+    }
+</style>
+
+<div class="la-page">
+    <div class="la-shell">
+        <div class="la-header">
+            <div class="la-icon">
+                <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M9 12h6M9 16h6M9 8h6M5 4h14a1 1 0 0 1 1 1v14a1 1 0 0 1-1 1H5a1 1 0 0 1-1-1V5a1 1 0 0 1 1-1z" /></svg>
+            </div>
+            <h2>Lease Agreement #@Model.LeaseAgreementId <span class="la-status-pill">@status</span></h2>
+        </div>
+
+        @if (TempData["Error"] != null)
+        {
+            <div class="la-alert la-alert-danger">
+                <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10" /><line x1="12" y1="8" x2="12" y2="12" /><line x1="12" y1="16" x2="12.01" y2="16" /></svg>
+                <span>@TempData["Error"]</span>
+            </div>
+        }
+        @if (TempData["Message"] != null)
+        {
+            <div class="la-alert la-alert-success">
+                <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M22 11.08V12a10 10 0 1 1-5.93-9.14" /><polyline points="22 4 12 14.01 9 11.01" /></svg>
+                <span>@TempData["Message"]</span>
+            </div>
+        }
+
+        @if (status == SkyTech.Models.LeaseAgreementStatus.PendingApproval)
+        {
+            <div class="la-alert la-alert-info">
+                <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10" /><line x1="12" y1="16" x2="12" y2="12" /><line x1="12" y1="8" x2="12.01" y2="8" /></svg>
+                <span>Your lease request is still awaiting admin approval. You'll be able to review and sign this agreement once it's approved.</span>
+            </div>
+        }
+        else if (status == SkyTech.Models.LeaseAgreementStatus.Rejected)
+        {
+            <div class="la-alert la-alert-danger">
+                <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10" /><line x1="15" y1="9" x2="9" y2="15" /><line x1="9" y1="9" x2="15" y2="15" /></svg>
+                <span>This lease request was not approved. If you believe this is a mistake, please contact support.</span>
+            </div>
+        }
+        else if (status == SkyTech.Models.LeaseAgreementStatus.Cancelled)
+        {
+            <div class="la-alert la-alert-muted">
+                <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10" /><line x1="15" y1="9" x2="9" y2="15" /><line x1="9" y1="9" x2="15" y2="15" /></svg>
+                <span>This lease agreement was cancelled.</span>
+            </div>
+        }
+        else if (status == SkyTech.Models.LeaseAgreementStatus.Defaulted)
+        {
+            <div class="la-alert la-alert-danger">
+                <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M10.29 3.86 1.82 18a2 2 0 0 0 1.71 3h16.94a2 2 0 0 0 1.71-3L13.71 3.86a2 2 0 0 0-3.42 0z" /><line x1="12" y1="9" x2="12" y2="13" /><line x1="12" y1="17" x2="12.01" y2="17" /></svg>
+                <span>This lease has been marked as defaulted due to non-payment. Please contact support to resolve this.</span>
+            </div>
+        }
+
+        @if (showCard)
+        {
+            <div class="la-card">
+                <div class="la-section">
+                    <div class="la-section-title">
+                        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="4" width="18" height="18" rx="2" /><line x1="16" y1="2" x2="16" y2="6" /><line x1="8" y1="2" x2="8" y2="6" /><line x1="3" y1="10" x2="21" y2="10" /></svg>
+                        Lease Terms
+                    </div>
+
+                    <div class="la-terms">
+                        <div class="la-term-item">
+                            <span class="la-term-label">Start Date</span>
+                            <span class="la-term-value">@Model.StartDate.ToString("dd MMM yyyy")</span>
+                        </div>
+                        <div class="la-term-item">
+                            <span class="la-term-label">End Date</span>
+                            <span class="la-term-value">@Model.EndDate.ToString("dd MMM yyyy")</span>
+                        </div>
+                        <div class="la-term-item">
+                            <span class="la-term-label">Term Length</span>
+                            <span class="la-term-value">@Model.TermMonths month(s)</span>
+                        </div>
+                        <div class="la-term-item full">
+                            <span class="la-term-label">Delivery</span>
+                            <span class="la-term-value">@Model.DeliveryType &mdash; @Model.DeliveryAddress</span>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="la-section">
+                    <div class="la-section-title">
+                        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M3 3h18v18H3z" /><path d="M3 9h18M9 21V9" /></svg>
+                        Items &amp; Pricing
+                    </div>
+
+                    <div class="la-table-wrap">
+                        <table class="la-table">
+                            <thead>
+                                <tr><th>Item</th><th>Serial Number</th><th>Monthly Rate</th><th>Deposit</th></tr>
+                            </thead>
+                            <tbody>
+                                @foreach (var item in Model.Items)
+                                {
+                                    <tr>
+                                        <td>@item.LeaseUnit?.LeaseProduct?.LeaseProdName</td>
+                                        <td>@item.LeaseUnit?.SerialNumber</td>
+                                        <td>R@(item.MonthlyRateAtLease.ToString("N2"))</td>
+                                        <td>R@(item.DepositAtLease.ToString("N2"))</td>
+                                    </tr>
+                                }
+                            </tbody>
+                            <tfoot>
+                                @if (status == SkyTech.Models.LeaseAgreementStatus.PendingPayment)
+                                {
+                                    var totalDue = Model.Items.Sum(i => i.MonthlyRateAtLease + i.DepositAtLease).ToString("N2");
+                                    <tr>
+                                        <th colspan="2" class="text-end">Due today (deposit + first month):</th>
+                                        <th colspan="2">R@(totalDue)</th>
+                                    </tr>
+                                }
+                                else if (status != SkyTech.Models.LeaseAgreementStatus.Completed)
+                                {
+                                    var monthlyTotal = Model.Items.Sum(i => i.MonthlyRateAtLease).ToString("N2");
+                                    <tr>
+                                        <th colspan="2" class="text-end">Monthly rate:</th>
+                                        <th colspan="2">R@(monthlyTotal)</th>
+                                    </tr>
+                                }
+                            </tfoot>
+                        </table>
+                    </div>
+                </div>
+
+                @if (showOngoingSections)
+                {
+                    var pendingPayment = Model.Payments?
+                        .Where(p => p.Status == SkyTech.Models.LeasePaymentStatus.Pending)
+                        .OrderBy(p => p.DueDate)
+                        .FirstOrDefault();
+
+                    <div class="la-section">
+                        <div class="la-section-title">
+                            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="1" y="4" width="22" height="16" rx="2" /><line x1="1" y1="10" x2="23" y2="10" /></svg>
+                            Payment Status
+                        </div>
+
+                        @if (pendingPayment != null)
+                        {
+                            bool isOverdue = pendingPayment.DueDate < DateTime.Now;
+                            bool isRenewal = pendingPayment.Type == SkyTech.Models.LeasePaymentType.RenewalFee;
+
+                            <div class="la-terms">
+                                <div class="la-term-item">
+                                    <span class="la-term-label">@(isRenewal ? "Renewal Fee Due" : "This Month's Payment Due")</span>
+                                    <span class="la-term-value @(isOverdue ? "negative" : "")">
+                                        @(pendingPayment.DueDate.ToString("dd MMM yyyy"))
+                                        @if (isOverdue) { <text> (overdue)</text> }
+                                    </span>
+                                </div>
+                                <div class="la-term-item">
+                                    <span class="la-term-label">Amount Due</span>
+                                    <span class="la-term-value">R@(pendingPayment.AmountDue.ToString("N2"))</span>
+                                </div>
+                            </div>
+
+                            <div class="la-actions" style="border-top:none;margin-top:14px;padding-top:0;">
+                                <a asp-controller="Payment"
+                                   asp-action="@(isRenewal ? "RenewLeasePaymentPage" : "PayMonthlyInstallmentPage")"
+                                   asp-route-leasePaymentId="@(pendingPayment.LeasePaymentId)"
+                                   class="la-btn la-btn-primary la-nav-btn">
+                                    Pay Now
+                                    <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><line x1="5" y1="12" x2="19" y2="12" /><polyline points="12 5 19 12 12 19" /></svg>
+                                </a>
+                            </div>
+                        }
+                        else
+                        {
+                            <div class="la-alert la-alert-success" style="margin:0;animation:none;opacity:1;">
+                                <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M22 11.08V12a10 10 0 1 1-5.93-9.14" /><polyline points="22 4 12 14.01 9 11.01" /></svg>
+                                <span>You're all caught up — no payments currently due.</span>
+                            </div>
+                        }
+                    </div>
+
+                    
+                        bool returnScheduled = Model.Items?.Any(i => i.ReturnStatus != SkyTech.Models.LeaseReturnStatus.Not_Due) ?? false;
+                        var returnStageLabel = returnScheduled
+                            ? Model.Items.Min(i => i.ReturnStatus) switch
+                            {
+                                SkyTech.Models.LeaseReturnStatus.Return_Pending => "Awaiting collection",
+                                SkyTech.Models.LeaseReturnStatus.Collection_Assigned => "Collection driver assigned",
+                                SkyTech.Models.LeaseReturnStatus.Item_Collected => "Received — inspection pending",
+                                SkyTech.Models.LeaseReturnStatus.Inspection_Complete => "Inspection complete — refund pending",
+                                _ => "In progress"
+                            }
+                            : null;
+                    
+
+                    <div class="la-section">
+                        <div class="la-section-title">
+                            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="1 4 1 10 7 10" /><path d="M3.51 15a9 9 0 1 0 2.13-9.36L1 10" /></svg>
+                            Return
+                        </div>
+
+                        @if (!returnScheduled)
+                        {
+                            <p style="color:#6b8481;font-size:0.9rem;margin:0 0 14px;">
+                                Done with this equipment? You can schedule a return at any time — no need to wait until your lease ends.
+                            </p>
+                            <div class="la-actions" style="border-top:none;margin-top:0;padding-top:0;">
+                                <a asp-controller="Customer" asp-action="ScheduleReturn" asp-route-id="@Model.LeaseAgreementId" class="la-btn la-btn-outline la-nav-btn">
+                                    Schedule Return
+                                    <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><line x1="5" y1="12" x2="19" y2="12" /><polyline points="12 5 19 12 12 19" /></svg>
+                                </a>
+                            </div>
+                        }
+                        else
+                        {
+                            <div class="la-alert la-alert-info" style="margin:0;animation:none;opacity:1;">
+                                <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10" /><polyline points="12 6 12 12 16 14" /></svg>
+                                <span>Return status: <strong>@returnStageLabel</strong></span>
+                            </div>
+                        }
+                    </div>
+                }
+
+                @if (status == SkyTech.Models.LeaseAgreementStatus.Completed)
+                {
+                    double deposit = Model.Items.Sum(i => i.DepositAtLease);
+                    double damage = Model.Items.Sum(i => i.DamageFee ?? 0);
+                    double earlyFee = Model.Items.Sum(i => i.EarlyReturnFee ?? 0);
+                    double refunded = Model.Items.Sum(i => i.DepositRefunded ?? 0);
+
+                    <div class="la-section">
+                        <div class="la-section-title">
+                            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M22 11.08V12a10 10 0 1 1-5.93-9.14" /><polyline points="22 4 12 14.01 9 11.01" /></svg>
+                            Lease Completed
+                        </div>
+                        <div class="la-terms">
+                            <div class="la-term-item"><span class="la-term-label">Deposit Held</span><span class="la-term-value">R@(deposit.ToString("N2"))</span></div>
+                            @if (damage > 0)
+                            {
+                                <div class="la-term-item"><span class="la-term-label">Damage Fees</span><span class="la-term-value negative">R@(damage.ToString("N2"))</span></div>
+                            }
+                            @if (earlyFee > 0)
+                            {
+                                <div class="la-term-item"><span class="la-term-label">Early Return Fee</span><span class="la-term-value negative">R@(earlyFee.ToString("N2"))</span></div>
+                            }
+                            <div class="la-term-item"><span class="la-term-label">Deposit Refunded</span><span class="la-term-value positive">R@(refunded.ToString("N2"))</span></div>
+                        </div>
+                    </div>
+                }
+
+                @if (status == SkyTech.Models.LeaseAgreementStatus.PendingPayment)
+                {
+                    <p class="la-disclaimer">
+                        By clicking "I Agree" below, you confirm you've read and accept the terms of this
+                        lease agreement, including the monthly rate, deposit, and term length shown above.
+                    </p>
+
+                    @if (Model.CustomerAgreed)
+                    {
+                        <div class="la-actions">
+                            <a asp-controller="Payment" asp-action="LeasePaymentPage" asp-route-leaseAgreementId="@Model.LeaseAgreementId" class="la-btn la-btn-primary la-nav-btn">
+                                Proceed to Payment
+                                <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><line x1="5" y1="12" x2="19" y2="12" /><polyline points="12 5 19 12 12 19" /></svg>
+                            </a>
+                        </div>
+                    }
+                    else
+                    {
+                        <form asp-action="AgreeToLease" asp-route-id="@Model.LeaseAgreementId" method="post" class="la-section la-agree-form">
+                            <div class="la-form-check">
+                                <input type="checkbox" id="agreeCheck" required>
+                                <label for="agreeCheck">I have read and agree to the terms of this lease agreement.</label>
+                            </div>
+                            <div class="la-actions" style="border-top:none;margin-top:0;padding-top:0;">
+                                <button type="submit" class="la-btn la-btn-primary">
+                                    I Agree
+                                    <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="20 6 9 17 4 12" /></svg>
+                                </button>
+                            </div>
+                        </form>
+                    }
+                }
+            </div>
+
+            @if (Model.CustomerAgreed && status != SkyTech.Models.LeaseAgreementStatus.Completed)
+            {
+                <div class="la-alert la-alert-success">
+                    <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M22 11.08V12a10 10 0 1 1-5.93-9.14" /><polyline points="22 4 12 14.01 9 11.01" /></svg>
+                    <span>You agreed to this lease on @Model.AgreedDate?.ToString("dd MMM yyyy, HH:mm").</span>
+                </div>
+            }
+        }
+
+        <a asp-action="MyLeaseAgreements" class="la-btn la-btn-outline la-back-standalone">
+            <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><line x1="19" y1="12" x2="5" y2="12" /><polyline points="12 19 5 12 12 5" /></svg>
+            Back to My Requests
+        </a>
+    </div>
+</div>
+
+<script>
+    // "I Agree" form — brief spinner while it posts.
+    const agreeForm = document.querySelector('.la-agree-form');
+    if (agreeForm) {
+        agreeForm.addEventListener('submit', () => {
+            const btn = agreeForm.querySelector('button[type="submit"]');
+            btn.disabled = true;
+            btn.innerHTML = '<span class="la-spinner"></span> Submitting...';
+        });
+    }
+
+    // Plain <a> navigations to Payment/Return pages — a quick visual cue that
+    // the click registered, since there's no ajax here, just a normal
+    // full-page navigation that can take a moment.
+    document.querySelectorAll('.la-nav-btn').forEach(link => {
+        link.addEventListener('click', function () {
+            const icon = this.querySelector('svg');
+            if (icon) icon.outerHTML = '<span class="la-spinner"></span>';
+        });
+    });
+</script>

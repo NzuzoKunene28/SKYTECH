@@ -1,0 +1,122 @@
+﻿@using SkyTech.Models
+@model List<SkyTech.Models.ProposeItem>
+@{
+    Layout = "~/Views/Shared/_MinimalLayout.cshtml";
+    ViewData["Title"] = "Pending Proposals";
+}
+
+@section Styles {
+    <link rel="stylesheet" href="~/CSS/EvaluateProposal.css">
+}
+
+<script>
+    function openAcceptModal(id) {
+        fetch('/ShopOwner/AcceptProposal?id=' + id)
+            .then(res => {
+                if (!res.ok) throw new Error('Failed to load modal');
+                return res.text();
+            })
+            .then(html => {
+                document.getElementById('modalContainer').innerHTML = html;
+            })
+            .catch(err => alert('Error loading modal: ' + err.message));
+    }
+</script>
+
+<div class="orb orb-1"></div>
+<div class="orb orb-2"></div>
+
+<div class="page-wrapper">
+
+    <!-- Top bar -->
+    <div class="page-topbar">
+        <div class="page-title-group">
+            <div class="page-title-icon">📋</div>
+            <div>
+                <h1>Pending Proposals</h1>
+                <p>Review and evaluate customer submissions</p>
+            </div>
+        </div>
+        <a asp-action="AcceptedProposals" asp-controller="ShopOwner" class="btn-primary-pill">
+            ✅ View Accepted Proposals
+        </a>
+    </div>
+
+    <!-- Content -->
+    @if (!Model.Any())
+    {
+        <div class="empty-card">
+            <div class="empty-icon">📭</div>
+            <h3>No pending proposals</h3>
+            <p>New customer proposals will appear here for review.</p>
+        </div>
+    }
+    else
+    {
+        <div class="proposals-grid">
+            @foreach (var item in Model)
+            {
+                <div class="proposal-card">
+
+                    <div class="proposal-card-header">
+                        <div>
+                            <div class="prod-name">@item.ProdName</div>
+                            <div class="prod-badges">
+                                <span class="badge-pill badge-category">@item.ProdCategory</span>
+                                <span class="badge-pill badge-condition">@item.ProdCondition</span>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="proposal-card-body">
+
+                        <p class="prod-desc">@item.ProdDescription</p>
+
+                        @if (item.ReceiptPics != null && item.ReceiptPics.Any())
+                        {
+                            <div class="img-section">
+                                <div class="img-section-label">🧾 Receipts</div>
+                                <div class="img-row">
+                                    @foreach (var pic in item.ReceiptPics)
+                                    {
+                                        <img src="@pic.FilePath" alt="Receipt" />
+                                    }
+                                </div>
+                            </div>
+                        }
+
+                        @if (item.ProposedProdPics != null && item.ProposedProdPics.Any())
+                        {
+                            <div class="img-section">
+                                <div class="img-section-label">📸 Product Photos</div>
+                                <div class="img-row">
+                                    @foreach (var pic in item.ProposedProdPics)
+                                    {
+                                        <img src="@pic.FilePath" alt="Product" />
+                                    }
+                                </div>
+                            </div>
+                        }
+
+                    </div>
+
+                    <div class="proposal-card-footer">
+                        <form asp-action="DeclineProposal" asp-controller="ShopOwner"
+                              method="post" style="margin:0;">
+                            <input type="hidden" name="id" value="@item.PropItemId" />
+                            <button type="submit" class="btn-decline">✕ Decline</button>
+                        </form>
+                        <button class="btn-accept" onclick="openAcceptModal(@item.PropItemId)">
+                            ✓ Accept
+                        </button>
+                    </div>
+
+                </div>
+            }
+        </div>
+    }
+
+</div>
+
+<!-- Modal container -->
+<div id="modalContainer"></div>

@@ -1,0 +1,498 @@
+﻿@using SkyTech.Models
+@model List<SkyTech.Models.ProposeItem>
+@{
+    Layout = "~/Views/Shared/_MinimalLayout.cshtml";
+    ViewData["Title"] = "My Collection Tasks";
+}
+
+@section Styles {
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+    <link href="https://api.fontshare.com/v2/css?f[]=clash-display@400,500,600,700&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" />
+    <link rel="stylesheet" href="~/CSS/SharedLayout.css">
+    <link rel="stylesheet" href="~/CSS/DriverProposalCollection.css">
+
+    
+    }
+
+    <div class="page">
+
+        <div class="pg-title">Collection Tasks</div>
+        <div class="pg-sub">@Model.Count task@(Model.Count != 1 ? "s" : "") assigned to you</div>
+
+        @if (!Model.Any())
+        {
+            <div class="empty">
+                <i class="fas fa-truck"></i>
+                <h3>No collection tasks</h3>
+                <p>You have no proposals scheduled for collection right now.</p>
+            </div>
+        }
+        else
+        {
+            int idx = 1;
+            foreach (var item in Model)
+            {
+                string destAddr = item.CustomerAddress ?? item.Checkout?.Address ?? "";
+                string storeAddr = item.StoreAddress ?? "";
+                string mapId = "map_" + item.PropItemId;
+                string delivMapId = "dmap_" + item.PropItemId;
+
+                <div class="task-card">
+
+                    <!-- Header -->
+                    <div class="tc-head">
+                        <div class="tc-num">@idx</div>
+                        <div style="position:relative;z-index:1">
+                            <div class="tc-name">@item.ProdName</div>
+                            <div class="tc-cat">@item.ProdCategory &nbsp;·&nbsp; @item.ProdCondition</div>
+                        </div>
+                    </div>
+
+                    <!-- Info grid -->
+                    <div class="tc-grid">
+                        <div class="tc-cell">
+                            <div class="cell-lbl"><i class="fas fa-calendar"></i> COLLECTION DATE</div>
+                            <div class="cell-val blue">
+                                @(item.CollectionDate.HasValue
+                                    ? item.CollectionDate.Value.ToString("dd MMM yyyy")
+                                    : "Not set")
+                            </div>
+                        </div>
+                        <div class="tc-cell">
+                            <div class="cell-lbl"><i class="fas fa-user"></i> CUSTOMER</div>
+                            <div class="cell-val">
+                                @item.Customer?.FirstName @item.Customer?.LastName
+                                @if (item.Checkout?.PhoneNumber != null)
+                                {
+                                    <div style="font-size:.75rem;color:#8a96b0;margin-top:.1rem">
+                                        <i class="fas fa-phone" style="color:#1a73e8;font-size:.68rem"></i>
+                                        @item.Checkout.PhoneNumber
+                                    </div>
+                                }
+                            </div>
+                        </div>
+                        <div class="tc-cell">
+                            <div class="cell-lbl"><i class="fas fa-tag"></i> DESCRIPTION</div>
+                            <div class="cell-val" style="font-size:.82rem">@item.ProdDescription</div>
+                        </div>
+                        <div class="tc-cell">
+                            <div class="cell-lbl"><i class="fas fa-location-dot"></i> COLLECT AT</div>
+                            <div class="cell-val" style="font-size:.82rem">
+                                @(destAddr != "" ? destAddr : "—")
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Product images -->
+                    @if (item.ProposedProdPics.Any())
+                    {
+                        <div class="tc-imgs">
+                            <div class="imgs-lbl">PRODUCT IMAGES</div>
+                            @foreach (var pic in item.ProposedProdPics)
+                            {
+                                <div class="tc-img"><img src="@pic.FilePath" alt="product" /></div>
+                            }
+                        </div>
+                    }
+
+                    <!-- Footer with navigate + deliver buttons -->
+                    <div class="tc-footer">
+                        <div class="dest-addr">
+                            <i class="fas fa-location-dot"></i>
+                            @(destAddr != "" ? destAddr : "No address set")
+                        </div>
+                        @if (destAddr != "")
+                        {
+                            <button class="btn-navigate"
+                                    onclick="startNavigation(this, '@mapId', '@destAddr.Replace("'","\\'")')">
+                                <i class="fas fa-diamond-turn-right"></i> Navigate
+                            </button>
+                        }
+                        @if (storeAddr != "")
+                        {
+                            <button class="btn-deliver"
+                                    onclick="startDelivery(this, '@delivMapId', '@storeAddr.Replace("'","\\'")')">
+                                <i class="fas fa-store"></i> Deliver Item
+                            </button>
+                        }
+                    </div>
+
+                    <!-- Map panel — hidden until Navigate is pressed -->
+                    <div class="map-panel" id="panel_@mapId">
+                        <div class="map-info">
+                            <div class="map-addr">
+                                <i class="fas fa-circle-dot" style="color:#1a73e8"></i>
+                                <div><div class="ma-lbl">YOUR LOCATION</div><div class="ma-val" id="your_loc_@mapId">Detecting…</div></div>
+                            </div>
+                            <div class="map-addr">
+                                <i class="fas fa-location-dot" style="color:#dc2626"></i>
+                                <div><div class="ma-lbl">DESTINATION</div><div class="ma-val">@destAddr</div></div>
+                            </div>
+                        </div>
+                        <div id="@mapId" class="leaflet-map"></div>
+                    </div>
+
+                    <!-- Delivery map panel — hidden until Deliver Item is pressed -->
+                    <div class="map-panel deliver-panel" id="panel_@delivMapId">
+                        <div class="map-info">
+                            <div class="map-addr">
+                                <i class="fas fa-circle-dot" style="color:#16a34a"></i>
+                                <div><div class="ma-lbl">YOUR LOCATION</div><div class="ma-val" id="your_loc_@delivMapId">Detecting…</div></div>
+                            </div>
+                            <div class="map-addr">
+                                <i class="fas fa-store" style="color:#16a34a"></i>
+                                <div><div class="ma-lbl">STORE / DROP-OFF</div><div class="ma-val">@storeAddr</div></div>
+                            </div>
+                        </div>
+                        <div id="@delivMapId" class="leaflet-map"></div>
+                    </div>
+
+                </div>
+
+                idx++;
+            }
+        }
+    </div>
+
+    <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
+    <script>
+        var activeMaps = {};
+
+        function startNavigation(btn, mapId, destAddr) {
+        var panel = document.getElementById('panel_' + mapId);
+
+        // If already open — close it
+        if (panel.classList.contains('open')) {
+        panel.classList.remove('open');
+        btn.innerHTML = '<i class="fas fa-diamond-turn-right"></i> Navigate';
+        return;
+        }
+
+        // Show loading state
+        btn.classList.add('loading');
+        btn.innerHTML = '<i class="fas fa-spinner fa-spin"></i> Locating…';
+
+        if (!navigator.geolocation) {
+        alert('Geolocation is not supported by your browser.');
+        resetBtn(btn);
+        return;
+        }
+
+        navigator.geolocation.getCurrentPosition(
+        function(pos) {
+        var driverLat = pos.coords.latitude;
+        var driverLng = pos.coords.longitude;
+
+        // Show the map panel
+        panel.classList.add('open');
+        btn.classList.remove('loading');
+        btn.innerHTML = '<i class="fas fa-xmark"></i> Close Map';
+
+        // Only init the map once
+        if (activeMaps[mapId]) {
+        activeMaps[mapId].invalidateSize();
+        return;
+        }
+
+        // Geocode destination address
+        fetch('https://nominatim.openstreetmap.org/search?format=json&q='
+        + encodeURIComponent(destAddr) + '&limit=1')
+        .then(function(r) { return r.json(); })
+        .then(function(data) {
+        if (!data || !data.length) {
+        document.getElementById(mapId).innerHTML =
+        '<div style="display:flex;align-items:center;justify-content:center;height:100%;color:#8a96b0;font-size:.85rem;padding:1rem">' +
+        '<i class="fas fa-triangle-exclamation" style="color:#d97706;margin-right:.4rem"></i>' +
+        'Could not find the destination address.</div>';
+        return;
+        }
+
+        var destLat = parseFloat(data[0].lat);
+        var destLng = parseFloat(data[0].lon);
+
+        // Reverse geocode driver position for display
+        fetch('https://nominatim.openstreetmap.org/reverse?format=json&lat='
+        + driverLat + '&lon=' + driverLng)
+        .then(function(r) { return r.json(); })
+        .then(function(rev) {
+        var locEl = document.getElementById('your_loc_' + mapId);
+        if (locEl) locEl.textContent = rev.display_name
+        ? rev.display_name.split(',').slice(0,3).join(', ')
+        : 'Current location';
+        });
+
+        // Build map
+        var map = L.map(mapId).setView([driverLat, driverLng], 13);
+        activeMaps[mapId] = map;
+
+        L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
+        attribution: '© OpenStreetMap', maxZoom: 19
+        }).addTo(map);
+
+        // Driver marker — blue pulsing dot
+        var driverIcon = L.divIcon({
+        html: '<div style="width:16px;height:16px;background:#1a73e8;border:3px solid #fff;border-radius:50%;box-shadow:0 0 0 4px rgba(26,115,232,.25)"></div>',
+        className:'', iconAnchor:[8,8]
+        });
+
+        // Destination marker — red pin
+        var destIcon = L.divIcon({
+        html: '<div style="position:relative">' +
+        '<div style="width:14px;height:14px;background:#dc2626;border:3px solid #fff;border-radius:50%;box-shadow:0 2px 8px rgba(220,38,38,.4)"></div>' +
+        '</div>',
+        className:'', iconAnchor:[7,7]
+        });
+
+        L.marker([driverLat, driverLng], { icon: driverIcon })
+        .addTo(map)
+        .bindPopup('<strong>You are here</strong>').openPopup();
+
+        L.marker([destLat, destLng], { icon: destIcon })
+        .addTo(map)
+        .bindPopup('<strong>Collect here</strong><br>' + destAddr);
+
+        // ── Street route via OSRM (free, no API key) ──────────────────
+        var osrmUrl = 'https://router.project-osrm.org/route/v1/driving/'
+        + driverLng + ',' + driverLat + ';'
+        + destLng   + ',' + destLat
+        + '?overview=full&geometries=geojson';
+
+        fetch(osrmUrl)
+        .then(function(r) { return r.json(); })
+        .then(function(route) {
+        if (!route.routes || !route.routes.length) {
+        // Fallback to straight line if OSRM fails
+        var fallback = L.polyline(
+        [[driverLat, driverLng], [destLat, destLng]],
+        { color:'#1a73e8', weight:4, opacity:.75, dashArray:'10 6' }
+        ).addTo(map);
+        map.fitBounds(fallback.getBounds(), { padding:[50,50] });
+        return;
+        }
+
+        // Draw the actual road route
+        var roadLine = L.geoJSON(route.routes[0].geometry, {
+        style: {
+        color:   '#1a73e8',
+        weight:  5,
+        opacity: .85,
+        lineJoin:'round',
+        lineCap: 'round'
+        }
+        }).addTo(map);
+
+        map.fitBounds(roadLine.getBounds(), { padding:[50,50] });
+
+        // Distance + duration badge
+        var dist = (route.routes[0].distance / 1000).toFixed(1) + ' km';
+        var mins = Math.round(route.routes[0].duration / 60);
+        var eta  = mins >= 60
+        ? Math.floor(mins/60) + 'h ' + (mins%60) + 'm'
+        : mins + ' min';
+
+        var badge = L.control({ position: 'bottomleft' });
+        badge.onAdd = function() {
+        var d = L.DomUtil.create('div');
+        d.style.cssText = 'background:#fff;border:1.5px solid #dde6f5;border-radius:12px;padding:.55rem 1rem;font-family:Plus Jakarta Sans,sans-serif;font-size:.82rem;font-weight:700;color:#0e1b35;box-shadow:0 4px 14px rgba(15,35,90,.12);display:flex;gap:.75rem;align-items:center';
+        d.innerHTML = '<span style="color:#1a73e8"><i class="fas fa-road" style="margin-right:.3rem"></i>' + dist + '</span>'
+        + '<span style="color:#16a34a"><i class="fas fa-clock" style="margin-right:.3rem"></i>' + eta + '</span>';
+        return d;
+        };
+        badge.addTo(map);
+        })
+        .catch(function() {
+        // Fallback to straight line on network error
+        var fallback = L.polyline(
+        [[driverLat, driverLng], [destLat, destLng]],
+        { color:'#1a73e8', weight:4, opacity:.75, dashArray:'10 6' }
+        ).addTo(map);
+        map.fitBounds(fallback.getBounds(), { padding:[50,50] });
+        });
+        })
+        .catch(function() {
+        document.getElementById(mapId).innerHTML =
+        '<div style="padding:1rem;text-align:center;color:#8a96b0">Could not load map.</div>';
+        });
+        },
+        function(err) {
+        alert('Location access denied. Please allow location access to navigate.');
+        resetBtn(btn);
+        },
+        { enableHighAccuracy: true, timeout: 10000 }
+        );
+        }
+
+        function resetBtn(btn) {
+        btn.classList.remove('loading');
+        btn.innerHTML = '<i class="fas fa-diamond-turn-right"></i> Navigate';
+        }
+
+        function resetDeliverBtn(btn) {
+        btn.classList.remove('loading');
+        btn.innerHTML = '<i class="fas fa-store"></i> Deliver Item';
+        }
+
+        function startDelivery(btn, mapId, storeAddr) {
+        var panel = document.getElementById('panel_' + mapId);
+
+        // If already open — close it
+        if (panel.classList.contains('open')) {
+        panel.classList.remove('open');
+        btn.innerHTML = '<i class="fas fa-store"></i> Deliver Item';
+        return;
+        }
+
+        // Show loading state
+        btn.classList.add('loading');
+        btn.innerHTML = '<i class="fas fa-spinner fa-spin"></i> Locating…';
+
+        if (!navigator.geolocation) {
+        alert('Geolocation is not supported by your browser.');
+        resetDeliverBtn(btn);
+        return;
+        }
+
+        navigator.geolocation.getCurrentPosition(
+        function(pos) {
+        var driverLat = pos.coords.latitude;
+        var driverLng = pos.coords.longitude;
+
+        // Show the map panel
+        panel.classList.add('open');
+        btn.classList.remove('loading');
+        btn.innerHTML = '<i class="fas fa-xmark"></i> Close Map';
+
+        // Only init the map once
+        if (activeMaps[mapId]) {
+        activeMaps[mapId].invalidateSize();
+        return;
+        }
+
+        // Geocode store address
+        fetch('https://nominatim.openstreetmap.org/search?format=json&q='
+        + encodeURIComponent(storeAddr) + '&limit=1')
+        .then(function(r) { return r.json(); })
+        .then(function(data) {
+        if (!data || !data.length) {
+        document.getElementById(mapId).innerHTML =
+        '<div style="display:flex;align-items:center;justify-content:center;height:100%;color:#8a96b0;font-size:.85rem;padding:1rem">' +
+        '<i class="fas fa-triangle-exclamation" style="color:#d97706;margin-right:.4rem"></i>' +
+        'Could not find the store address.</div>';
+        return;
+        }
+
+        var storeLat = parseFloat(data[0].lat);
+        var storeLng = parseFloat(data[0].lon);
+
+        // Reverse geocode driver position for display
+        fetch('https://nominatim.openstreetmap.org/reverse?format=json&lat='
+        + driverLat + '&lon=' + driverLng)
+        .then(function(r) { return r.json(); })
+        .then(function(rev) {
+        var locEl = document.getElementById('your_loc_' + mapId);
+        if (locEl) locEl.textContent = rev.display_name
+        ? rev.display_name.split(',').slice(0,3).join(', ')
+        : 'Current location';
+        });
+
+        // Build map
+        var map = L.map(mapId).setView([driverLat, driverLng], 13);
+        activeMaps[mapId] = map;
+
+        L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
+        attribution: '© OpenStreetMap', maxZoom: 19
+        }).addTo(map);
+
+        // Driver marker — green pulsing dot
+        var driverIcon = L.divIcon({
+        html: '<div style="width:16px;height:16px;background:#16a34a;border:3px solid #fff;border-radius:50%;box-shadow:0 0 0 4px rgba(22,163,74,.25)"></div>',
+        className:'', iconAnchor:[8,8]
+        });
+
+        // Store marker — green store pin
+        var storeIcon = L.divIcon({
+        html: '<div style="position:relative">' +
+        '<div style="width:14px;height:14px;background:#16a34a;border:3px solid #fff;border-radius:50%;box-shadow:0 2px 8px rgba(22,163,74,.4)"></div>' +
+        '</div>',
+        className:'', iconAnchor:[7,7]
+        });
+
+        L.marker([driverLat, driverLng], { icon: driverIcon })
+        .addTo(map)
+        .bindPopup('<strong>You are here</strong>').openPopup();
+
+        L.marker([storeLat, storeLng], { icon: storeIcon })
+        .addTo(map)
+        .bindPopup('<strong>Drop off here</strong><br>' + storeAddr);
+
+        // ── Street route via OSRM ──────────────────────────────────────
+        var osrmUrl = 'https://router.project-osrm.org/route/v1/driving/'
+        + driverLng + ',' + driverLat + ';'
+        + storeLng  + ',' + storeLat
+        + '?overview=full&geometries=geojson';
+
+        fetch(osrmUrl)
+        .then(function(r) { return r.json(); })
+        .then(function(route) {
+        if (!route.routes || !route.routes.length) {
+        var fallback = L.polyline(
+        [[driverLat, driverLng], [storeLat, storeLng]],
+        { color:'#16a34a', weight:4, opacity:.75, dashArray:'10 6' }
+        ).addTo(map);
+        map.fitBounds(fallback.getBounds(), { padding:[50,50] });
+        return;
+        }
+
+        var roadLine = L.geoJSON(route.routes[0].geometry, {
+        style: {
+        color:   '#16a34a',
+        weight:  5,
+        opacity: .85,
+        lineJoin:'round',
+        lineCap: 'round'
+        }
+        }).addTo(map);
+
+        map.fitBounds(roadLine.getBounds(), { padding:[50,50] });
+
+        // Distance + duration badge
+        var dist = (route.routes[0].distance / 1000).toFixed(1) + ' km';
+        var mins = Math.round(route.routes[0].duration / 60);
+        var eta  = mins >= 60
+        ? Math.floor(mins/60) + 'h ' + (mins%60) + 'm'
+        : mins + ' min';
+
+        var badge = L.control({ position: 'bottomleft' });
+        badge.onAdd = function() {
+        var d = L.DomUtil.create('div');
+        d.style.cssText = 'background:#fff;border:1.5px solid #dde6f5;border-radius:12px;padding:.55rem 1rem;font-family:Plus Jakarta Sans,sans-serif;font-size:.82rem;font-weight:700;color:#0e1b35;box-shadow:0 4px 14px rgba(15,35,90,.12);display:flex;gap:.75rem;align-items:center';
+        d.innerHTML = '<span style="color:#16a34a"><i class="fas fa-road" style="margin-right:.3rem"></i>' + dist + '</span>'
+        + '<span style="color:#0d7a35"><i class="fas fa-clock" style="margin-right:.3rem"></i>' + eta + '</span>';
+        return d;
+        };
+        badge.addTo(map);
+        })
+        .catch(function() {
+        var fallback = L.polyline(
+        [[driverLat, driverLng], [storeLat, storeLng]],
+        { color:'#16a34a', weight:4, opacity:.75, dashArray:'10 6' }
+        ).addTo(map);
+        map.fitBounds(fallback.getBounds(), { padding:[50,50] });
+        });
+        })
+        .catch(function() {
+        document.getElementById(mapId).innerHTML =
+        '<div style="padding:1rem;text-align:center;color:#8a96b0">Could not load map.</div>';
+        });
+        },
+        function(err) {
+        alert('Location access denied. Please allow location access to navigate.');
+        resetDeliverBtn(btn);
+        },
+        { enableHighAccuracy: true, timeout: 10000 }
+        );
+        }
+    </script>

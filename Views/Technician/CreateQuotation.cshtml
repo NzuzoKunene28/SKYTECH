@@ -1,0 +1,313 @@
+@{
+    ViewBag.Title = "Create Quotation";
+    Layout = "~/Views/Shared/_MinimalLayout.cshtml";
+}
+
+@section Styles {
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+    <link href="https://api.fontshare.com/v2/css?f[]=clash-display@400,500,600,700&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="~/CSS/DashboardStyle.css">
+    <style>
+        .form-group {
+            margin-bottom: 1.5rem;
+        }
+        .form-label {
+            display: block;
+            margin-bottom: 0.5rem;
+            font-weight: 600;
+            color: var(--text);
+        }
+        .form-control {
+            width: 100%;
+            padding: 0.75rem 1rem;
+            border: 1px solid var(--border);
+            border-radius: var(--radius-sm);
+            font-family: var(--font-body);
+            font-size: 0.95rem;
+            transition: all 0.3s;
+        }
+        .form-control:focus {
+            outline: none;
+            border-color: var(--blue);
+            box-shadow: 0 0 0 3px rgba(95,158,160,.1);
+        }
+        .form-control-static {
+            background: var(--blue-soft);
+            color: var(--text);
+        }
+        .quotation-item-section {
+            background: var(--blue-soft);
+            border: 1px solid var(--border);
+            border-radius: var(--radius-sm);
+            padding: 1.5rem;
+            margin-top: 1.5rem;
+        }
+        .item-row {
+            display: grid;
+            grid-template-columns: 2fr 1fr 1fr 0.5fr;
+            gap: 1rem;
+            margin-bottom: 1rem;
+            align-items: end;
+        }
+        .item-remove-btn {
+            background: var(--red);
+            color: white;
+            border: none;
+            padding: 0.5rem 1rem;
+            border-radius: var(--radius-sm);
+            cursor: pointer;
+            transition: all 0.3s;
+        }
+        .item-remove-btn:hover {
+            background: #b91c1c;
+        }
+        .btn-group {
+            display: flex;
+            gap: 1rem;
+            margin-top: 2rem;
+        }
+        .btn {
+            flex: 1;
+            padding: 0.75rem 1.5rem;
+            border-radius: var(--radius-sm);
+            border: none;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.3s;
+        }
+        .btn-primary {
+            background: var(--blue);
+            color: white;
+        }
+        .btn-primary:hover {
+            background: var(--blue-dark);
+            transform: translateY(-2px);
+            box-shadow: var(--shadow-md);
+        }
+        .btn-secondary {
+            background: transparent;
+            color: var(--blue);
+            border: 1px solid var(--blue);
+        }
+        .btn-secondary:hover {
+            background: var(--blue-soft);
+        }
+        .btn-add-item {
+            background: var(--green);
+            color: white;
+            padding: 0.6rem 1.2rem;
+        }
+        .btn-add-item:hover {
+            background: #15803d;
+        }
+        .total-display {
+            text-align: right;
+            font-size: 1.3rem;
+            font-weight: 700;
+            color: var(--green);
+            padding: 1rem;
+            background: white;
+            border-radius: var(--radius-sm);
+            margin-top: 1rem;
+        }
+    </style>
+}
+
+<div class="dash-wrap">
+    <!-- ══ SIDEBAR ══ -->
+    <aside class="dash-sidebar">
+        <div class="dash-brand">
+            <div class="dash-brand-icon"><i class="fas fa-tools"></i></div>
+            <div>
+                <div class="dash-brand-name">SkyTech</div>
+                <div class="dash-brand-sub">Technician Portal</div>
+            </div>
+        </div>
+        <nav class="dash-nav">
+            <div class="dash-nav-label">WORK</div>
+            <a href="@Url.Action("MyAssignments", "Technician")" class="dash-link">
+                <i class="fas fa-tasks"></i><span>My Assignments</span>
+            </a>
+            <a href="@Url.Action("ViewQuotations", "Technician")" class="dash-link active">
+                <i class="fas fa-file-invoice-dollar"></i><span>Quotations</span>
+            </a>
+        </nav>
+
+        <div class="dash-sidebar-foot">
+            <div class="dash-foot-avatar"><i class="fas fa-user-tie"></i></div>
+            <div>
+                <div class="dash-foot-name">Technician</div>
+                <div class="dash-foot-role">Account</div>
+            </div>
+        </div>
+    </aside>
+
+    <!-- ══ MAIN ══ -->
+    <main class="dash-main">
+        <div class="dash-header">
+            <div>
+                <h1 class="dash-title">Create Quotation</h1>
+                <p class="dash-subtitle">Prepare a detailed quotation for this repair request</p>
+            </div>
+            <a href="@Url.Action("RepairDetail", "Technician", new { id = ViewBag.RepairRequestId })" class="dash-btn-secondary">
+                <i class="fas fa-arrow-left"></i> Back to Repair
+            </a>
+        </div>
+
+        <div class="dash-content">
+            @if (!ViewData.ModelState.IsValid)
+            {
+                <div style="background: #fee2e2; border: 1px solid #fca5a5; border-radius: 8px; padding: 1rem; margin-bottom: 1.5rem; color: #991b1b;">
+                    <div style="font-weight: 600; margin-bottom: 0.5rem;"><i class="fas fa-exclamation-circle"></i> Validation Errors</div>
+                    @foreach (var modelState in ViewData.ModelState.Values)
+                    {
+                        @foreach (var error in modelState.Errors)
+                        {
+                            <div>• @error.ErrorMessage</div>
+                        }
+                    }
+                </div>
+            }
+
+            @if (TempData["Error"] != null)
+            {
+                <div style="background: #fee2e2; border: 1px solid #fca5a5; border-radius: 8px; padding: 1rem; margin-bottom: 1.5rem; color: #991b1b;">
+                    <div style="font-weight: 600;"><i class="fas fa-exclamation-circle"></i> @TempData["Error"]</div>
+                </div>
+            }
+
+            <form method="post">
+                @Html.AntiForgeryToken()
+
+                <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 2rem;">
+                    <!-- Request Summary -->
+                    <div class="dash-card">
+                        <h2 style="margin-bottom: 1.5rem; color: var(--text); font-size: 1.1rem;">Repair Summary</h2>
+
+                        <div class="form-group">
+                            <label class="form-label">Item Name</label>
+                            <input type="text" class="form-control form-control-static" value="@ViewBag.ItemName" disabled>
+                            <input type="hidden" name="ItemName" value="@ViewBag.ItemName">
+                        </div>
+
+                        <div class="form-group">
+                            <label class="form-label">Issue Description</label>
+                            <textarea class="form-control form-control-static" rows="3" disabled>@ViewBag.IssueDescription</textarea>
+                            <input type="hidden" name="IssueDescription" value="@ViewBag.IssueDescription">
+                        </div>
+
+                        <div class="form-group">
+                            <label class="form-label">Customer</label>
+                            <input type="text" class="form-control form-control-static" value="@ViewBag.CustomerName" disabled>
+                            <input type="hidden" name="CustomerName" value="@ViewBag.CustomerName">
+                        </div>
+
+                        <input type="hidden" name="RepairRequestId" value="@ViewBag.RepairRequestId">
+                    </div>
+
+                    <!-- Quotation Details -->
+                    <div class="dash-card">
+                        <h2 style="margin-bottom: 1.5rem; color: var(--text); font-size: 1.1rem;">Quotation Details</h2>
+
+                        <div class="form-group">
+                            <label class="form-label">Total Cost (R)</label>
+                            <input type="text" name="TotalCost" class="form-control" placeholder="0.00" value="" required>
+                        </div>
+
+                        <div class="form-group">
+                            <label class="form-label">Technician Notes</label>
+                            <textarea name="TechnicianNotes" class="form-control" rows="4" placeholder="Add any notes about the repair work, parts needed, or timeline..."></textarea>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Quotation Items -->
+                <div class="dash-card quotation-item-section">
+                    <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 1.5rem;">
+                        <h2 style="margin: 0; color: var(--text); font-size: 1.1rem;">Line Items</h2>
+                        <button type="button" class="btn-add-item" onclick="addQuotationItem()">
+                            <i class="fas fa-plus"></i> Add Item
+                        </button>
+                    </div>
+
+                    <div id="quotationItemsContainer"></div>
+
+                    <div class="total-display">
+                        Total: R<span id="totalCostDisplay">0.00</span>
+                    </div>
+                </div>
+
+                <!-- Action Buttons -->
+                <div class="btn-group" style="margin-top: 2rem;">
+                    <button type="submit" class="btn btn-primary">
+                        <i class="fas fa-check"></i> Create Quotation
+                    </button>
+                    <a href="@Url.Action("RepairDetail", "Technician", new { id = ViewBag.RepairRequestId })" class="btn btn-secondary">
+                        <i class="fas fa-times"></i> Cancel
+                    </a>
+                </div>
+            </form>
+        </div>
+    </main>
+</div>
+
+@section Scripts {
+    <script src="~/JS/DashboardScript.js"></script>
+    <script>
+        let itemCount = 0;
+
+        function addQuotationItem() {
+            const container = document.getElementById('quotationItemsContainer');
+            const id = itemCount++;
+
+            const html = `
+                <div class="item-row" id="item-${id}">
+                    <div class="form-group" style="margin: 0;">
+                        <input type="text" name="QuotationItems[${id}].ItemDescription" class="form-control" placeholder="Item description" required>
+                    </div>
+                    <div class="form-group" style="margin: 0;">
+                        <input type="number" name="QuotationItems[${id}].Quantity" class="form-control" placeholder="Qty" step="1" min="1" value="1" required onchange="updateTotal()">
+                    </div>
+                    <div class="form-group" style="margin: 0;">
+                        <input type="number" name="QuotationItems[${id}].UnitCost" class="form-control" placeholder="Unit Cost" step="0.01" min="0" required onchange="updateTotal()">
+                    </div>
+                    <button type="button" class="item-remove-btn" onclick="removeItem(${id})">
+                        <i class="fas fa-trash"></i>
+                    </button>
+                </div>
+            `;
+
+            container.insertAdjacentHTML('beforeend', html);
+        }
+
+        function removeItem(id) {
+            const element = document.getElementById(`item-${id}`);
+            if (element) {
+                element.remove();
+                updateTotal();
+            }
+        }
+
+        function updateTotal() {
+            const items = document.querySelectorAll('.item-row');
+            let total = 0;
+
+            items.forEach(item => {
+                const qty = parseFloat(item.querySelector('input[name*=".Quantity"]')?.value) || 0;
+                const cost = parseFloat(item.querySelector('input[name*=".UnitCost"]')?.value) || 0;
+                total += qty * cost;
+            });
+
+            document.getElementById('totalCostDisplay').textContent = total.toFixed(2);
+
+            // Only update TotalCost field if there are valid line items
+            if (items.length > 0) {
+                document.querySelector('input[name="TotalCost"]').value = total.toFixed(2);
+            }
+        }
+
+        // Don't automatically add an item on page load - let user control when to add items
+    </script>
+}

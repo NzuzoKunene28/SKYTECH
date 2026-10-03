@@ -1,0 +1,157 @@
+﻿@model SkyTech.ViewModels.AddQuestionViewModel
+
+@{
+    ViewData["Title"] = "Add Questions";
+    Layout = "~/Views/Shared/_MinimalLayout.cshtml";
+}
+
+@section Styles {
+    <link rel="stylesheet" href="~/CSS/HRCSS/AddQuestion.css" />
+}
+
+<div class="hr-page">
+    <div class="hr-container">
+
+        <div class="hr-header-sm">
+            <div class="hr-eyebrow">Assessment</div>
+            <h2>@Model.AssessmentTitle</h2>
+        </div>
+
+        <div class="hr-form-card">
+            <form asp-action="AddQuestion" method="post">
+
+                <input asp-for="AssessmentId" type="hidden" />
+
+                <div class="hr-f-group">
+                    <label class="hr-f-label">Question</label>
+                    <textarea asp-for="QuestionText"
+                              class="hr-f-control"></textarea>
+                </div>
+
+                <div class="hr-options-grid">
+                    <div class="hr-f-group">
+                        <label class="hr-f-label">Option A</label>
+                        <input asp-for="OptionA"
+                               class="hr-f-control" />
+                    </div>
+
+                    <div class="hr-f-group">
+                        <label class="hr-f-label">Option B</label>
+                        <input asp-for="OptionB"
+                               class="hr-f-control" />
+                    </div>
+
+                    <div class="hr-f-group">
+                        <label class="hr-f-label">Option C</label>
+                        <input asp-for="OptionC"
+                               class="hr-f-control" />
+                    </div>
+
+                    <div class="hr-f-group">
+                        <label class="hr-f-label">Option D</label>
+                        <input asp-for="OptionD"
+                               class="hr-f-control" />
+                    </div>
+                </div>
+
+                <div class="hr-f-group">
+
+                    <label class="hr-f-label">Correct Answer</label>
+
+                    <select asp-for="CorrectAnswer"
+                            class="hr-f-control">
+
+                        <option value="A">A</option>
+                        <option value="B">B</option>
+                        <option value="C">C</option>
+                        <option value="D">D</option>
+
+                    </select>
+
+                </div>
+
+                <button type="submit" class="btn-hr-submit">
+                    Save Question
+                </button>
+
+            </form>
+        </div>
+
+        <div class="hr-divider"><span>Questions Added</span></div>
+
+        @if (!Model.ExistingQuestions.Any())
+        {
+            <div class="hr-empty-card">
+                No questions added yet.
+            </div>
+        }
+        else
+        {
+            <div class="hr-table-card">
+                <div class="hr-table-scroll">
+                    <table class="hr-table">
+
+                        <thead>
+                            <tr>
+                                <th>#</th>
+                                <th>Question</th>
+                                <th>Correct</th>
+                                <th>Actions</th>
+                            </tr>
+                        </thead>
+
+                        <tbody>
+
+                            @{
+                                int number = 1;
+                            }
+
+                            @foreach (var q in Model.ExistingQuestions)
+                            {
+                                <tr>
+
+                                    <td>@number</td>
+
+                                    <td>@q.QuestionText</td>
+
+                                    <td>@q.CorrectAnswer</td>
+
+                                    <td>
+
+                                        <a asp-action="EditQuestion"
+                                           asp-route-id="@q.QuestionId"
+                                           class="btn-hr-sm btn-hr-edit">
+                                            Edit
+                                        </a>
+
+                                        <a asp-action="DeleteQuestion"
+                                           asp-route-id="@q.QuestionId"
+                                           class="btn-hr-sm btn-hr-delete"
+                                           onclick="return confirm('Are you sure you want to delete this question?');">
+                                            Delete
+                                        </a>
+
+                                    </td>
+
+                                </tr>
+
+                                number++;
+                            }
+
+                        </tbody>
+
+                    </table>
+                </div>
+            </div>
+        }
+
+        <div class="hr-publish-row">
+            <a asp-action="PublishAssessment"
+               asp-route-id="@Model.AssessmentId"
+               class="btn-hr-publish">
+                Publish Quiz
+            </a>
+        </div>
+
+    </div>
+</div>

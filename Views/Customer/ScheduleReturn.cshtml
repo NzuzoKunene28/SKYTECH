@@ -1,0 +1,154 @@
+@model SkyTech.Models.LeaseAgreement
+@{
+    ViewData["Title"] = "Schedule a Return";
+    var banks = ViewBag.Banks as List<object>; // from PayStackTransferService.GetZaBanks()
+    var items = Model.Items.OrderBy(x => x.LeaseAgreementItemId).ToList();
+}
+
+<style>
+    .ret-page { background: linear-gradient(160deg, #4a8f8c 0%, #3d7873 100%); min-height: 100%; padding: 32px 20px 60px; font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif; }
+    .ret-shell { max-width: 680px; margin: 0 auto; }
+    .ret-card { background: #fff; border-radius: 20px; padding: 30px 32px; box-shadow: 0 12px 32px rgba(0,0,0,0.14); opacity: 0; transform: translateY(16px); animation: ret-fade-up .45s ease forwards; }
+    .ret-title { font-weight: 800; font-size: 1.3rem; color: #1b2a2f; margin: 0 0 6px; }
+    .ret-sub { color: #6b8481; font-size: 0.9rem; margin: 0 0 24px; }
+    .ret-error { background: #fdeceb; border: 1px solid #f3bcb9; color: #b3261e; border-radius: 12px; padding: 12px 16px; margin-bottom: 18px; font-size: 0.9rem; }
+
+    .ret-step-label { display: flex; align-items: center; gap: 8px; font-weight: 700; font-size: 0.9rem; color: #1b2a2f; margin: 28px 0 4px; }
+    .ret-step-label:first-of-type { margin-top: 0; }
+    .ret-step-num { width: 22px; height: 22px; border-radius: 50%; background: #4a8f8c; color: #fff; font-size: 0.76rem; display: flex; align-items: center; justify-content: center; flex-shrink: 0; }
+    .ret-step-hint { color: #6b8481; font-size: 0.85rem; margin: 0 0 14px 30px; }
+
+    .ret-field { margin-bottom: 16px; }
+    .ret-field label { display: block; font-size: 0.78rem; font-weight: 700; text-transform: uppercase; letter-spacing: 0.4px; color: #6b8481; margin-bottom: 6px; }
+    .ret-field input[type=text], .ret-field input[type=date], .ret-field select {
+        width: 100%; padding: 10px 12px; border: 1px solid #e1eeec; border-radius: 10px; font-size: 0.92rem;
+        font-family: inherit; box-sizing: border-box; transition: border-color .15s ease;
+    }
+    .ret-field input:focus, .ret-field select:focus { outline: none; border-color: #4a8f8c; }
+
+    /* Photo upload tiles */
+    .ret-photo-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(140px, 1fr)); gap: 14px; margin-bottom: 8px; }
+    .ret-photo-tile {
+        position: relative; border: 2px dashed #cfe4e2; border-radius: 14px; aspect-ratio: 1; cursor: pointer;
+        display: flex; flex-direction: column; align-items: center; justify-content: center; text-align: center;
+        padding: 10px; transition: border-color .2s ease, background .2s ease;
+        background: #f7fbfa; overflow: hidden;
+    }
+    .ret-photo-tile:hover { border-color: #4a8f8c; background: #eef7f6; }
+    .ret-photo-tile.has-image { border-style: solid; border-color: #4a8f8c; padding: 0; }
+    .ret-photo-tile.has-image img { width: 100%; height: 100%; object-fit: cover; }
+    .ret-photo-tile input[type=file] { position: absolute; inset: 0; opacity: 0; cursor: pointer; }
+    .ret-photo-icon { color: #4a8f8c; margin-bottom: 6px; }
+    .ret-photo-name { font-size: 0.72rem; color: #6b8481; font-weight: 600; line-height: 1.3; }
+    .ret-photo-overlay {
+        position: absolute; inset: 0; background: rgba(27,42,47,0.55); color: #fff; font-size: 0.72rem; font-weight: 700;
+        display: flex; align-items: center; justify-content: center; opacity: 0; transition: opacity .2s ease;
+    }
+    .ret-photo-tile.has-image:hover .ret-photo-overlay { opacity: 1; }
+
+    .ret-btn {
+        background: linear-gradient(135deg, #4a8f8c 0%, #3d7873 100%); color: #fff; border: none; border-radius: 999px;
+        padding: 13px 26px; font-weight: 700; font-size: 0.92rem; cursor: pointer; width: 100%; margin-top: 10px;
+        transition: filter .15s ease, transform .1s ease;
+    }
+    .ret-btn:hover { filter: brightness(1.08); }
+    .ret-btn:active { transform: scale(0.98); }
+    .ret-btn[disabled] { opacity: 0.7; cursor: wait; }
+
+    .ret-spinner { display: inline-block; width: 14px; height: 14px; border: 2px solid rgba(255,255,255,0.5); border-top-color: #fff; border-radius: 50%; animation: ret-spin .7s linear infinite; margin-right: 8px; vertical-align: -2px; }
+
+    @@keyframes ret-fade-up { to { opacity: 1; transform: translateY(0); } }
+    @@keyframes ret-spin { to { transform: rotate(360deg); } }
+</style>
+
+<div class="ret-page">
+    <div class="ret-shell">
+        <div class="ret-card">
+            <div class="ret-title">Schedule a Return</div>
+            <div class="ret-sub">Agreement #@Model.LeaseAgreementId &mdash; pick a collection date, attach a photo of each item, and tell us where to send your deposit refund.</div>
+
+            @if (TempData["Error"] != null)
+            {
+                <div class="ret-error">@TempData["Error"]</div>
+            }
+
+            <form method="post" action="@Url.Action("ScheduleReturn", "Customer", new { id = Model.LeaseAgreementId })" enctype="multipart/form-data" class="ret-form">
+                @Html.AntiForgeryToken()
+
+                <div class="ret-step-label"><span class="ret-step-num">1</span> Collection Date</div>
+                <div class="ret-field">
+                    <input type="date" id="scheduledDate" name="scheduledDate" min="@DateTime.Now.AddDays(1).ToString("yyyy-MM-dd")" required>
+                </div>
+
+                <div class="ret-step-label"><span class="ret-step-num">2</span> Condition Photos</div>
+                <div class="ret-step-hint">One clear, current photo per item. You won't see the outcome here &mdash; it's reviewed once the item is received.</div>
+                <div class="ret-photo-grid">
+                    @for (int i = 0; i < items.Count; i++)
+                    {
+                        var item = items[i];
+                        <label class="ret-photo-tile" id="tile-@i">
+                            <input type="file" name="conditionPhotos" accept="image/*" required onchange="retPreview(this, @i)" />
+                            <svg class="ret-photo-icon" width="26" height="26" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M23 19a2 2 0 0 1-2 2H3a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h4l2-3h6l2 3h4a2 2 0 0 1 2 2z" /><circle cx="12" cy="13" r="4" /></svg>
+                            <span class="ret-photo-name">@(item.LeaseUnit?.LeaseProduct?.LeaseProdName ?? "Item")<br />@item.LeaseUnit?.SerialNumber</span>
+                        </label>
+                    }
+                </div>
+
+                <div class="ret-step-label"><span class="ret-step-num">3</span> Deposit Refund Details</div>
+                <div class="ret-field">
+                    <label for="bankCode">Bank</label>
+                    <select id="bankCode" name="bankCode" required>
+                        <option value="">Select your bank</option>
+                        @if (banks != null)
+                        {
+                            @foreach (dynamic bank in banks)
+                            {
+                                <option value="@bank.code">@bank.name</option>
+                            }
+                        }
+                    </select>
+                </div>
+                <div class="ret-field">
+                    <label for="accountHolderName">Account Holder Name</label>
+                    <input type="text" id="accountHolderName" name="accountHolderName" required>
+                </div>
+                <div class="ret-field">
+                    <label for="accountNumber">Account Number</label>
+                    <input type="text" id="accountNumber" name="accountNumber" required>
+                </div>
+
+                <button type="submit" class="ret-btn">Confirm Return</button>
+            </form>
+        </div>
+    </div>
+</div>
+
+<script>
+    // Live thumbnail preview when a photo is chosen — turns the dashed
+    // placeholder tile into the actual selected image with a "change" overlay.
+    function retPreview(input, index) {
+        const tile = document.getElementById('tile-' + index);
+        const file = input.files && input.files[0];
+        if (!file) return;
+
+        const reader = new FileReader();
+        reader.onload = e => {
+            tile.classList.add('has-image');
+            tile.querySelectorAll('svg, span.ret-photo-name').forEach(el => el.remove());
+            const img = document.createElement('img');
+            img.src = e.target.result;
+            const overlay = document.createElement('div');
+            overlay.className = 'ret-photo-overlay';
+            overlay.textContent = 'Change photo';
+            tile.appendChild(img);
+            tile.appendChild(overlay);
+        };
+        reader.readAsDataURL(file);
+    }
+
+    document.querySelector('.ret-form').addEventListener('submit', function () {
+        const btn = this.querySelector('.ret-btn');
+        btn.disabled = true;
+        btn.innerHTML = '<span class="ret-spinner"></span> Scheduling...';
+    });
+</script>

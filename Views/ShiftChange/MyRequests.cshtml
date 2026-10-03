@@ -1,0 +1,61 @@
+﻿@model IEnumerable<SkyTech.Models.SkytechWorkers.ShiftChangeRequest>
+
+@{
+    ViewData["Title"] = "";
+    Layout = "~/Views/Shared/_MinimalLayout.cshtml";
+}
+
+@section Styles {
+    <link rel="stylesheet" href="~/CSS/STAFFCSS/MyRequests.css" />
+}
+
+
+<h2>My Shift Change Requests</h2>
+
+@if (TempData["successful"] != null)
+{
+    <div class="alert alert-success">@TempData["successful"]</div>
+}
+
+@if (!Model.Any())
+{
+    <p>You haven't submitted any shift change requests.</p>
+}
+else
+{
+    <table class="table table-bordered">
+        <thead>
+            <tr>
+                <th>Shift Date</th>
+                <th>Type</th>
+                <th>Reason</th>
+                <th>Status</th>
+                <th>Submitted</th>
+                <th>Review Note</th>
+            </tr>
+        </thead>
+        <tbody>
+            @foreach (var r in Model)
+            {
+                <tr>
+                    <td>@r.RosterShift.WorkDate.ToShortDateString()</td>
+                    <td>@r.Type</td>
+                    <td>@r.Reason</td>
+                    <td>
+                        @{
+                            var badgeClass = r.Status switch
+                            {
+                                SkyTech.Models.SkytechWorkers.ShiftChangeStatus.Approved => "bg-success",
+                                SkyTech.Models.SkytechWorkers.ShiftChangeStatus.Rejected => "bg-danger",
+                                _ => "bg-secondary"
+                            };
+                        }
+                        <span class="badge @badgeClass">@r.Status</span>
+                    </td>
+                    <td>@r.SubmittedAt.ToShortDateString()</td>
+                    <td>@r.ReviewNote</td>
+                </tr>
+            }
+        </tbody>
+    </table>
+}

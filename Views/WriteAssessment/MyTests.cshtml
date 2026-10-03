@@ -1,0 +1,123 @@
+﻿@model SkyTech.ViewModels.ApplicantDashboardViewModel
+
+@{
+    ViewData["Title"] = "Applicant Dashboard";
+    Layout = "~/Views/Shared/_MinimalLayout.cshtml";
+}
+
+@section Styles {
+    <link rel="stylesheet" href="~/CSS/CUSTOMERCSS/MyTests.css" />
+}
+
+<div class="dash-wrapper">
+
+    <div class="dash-header">
+        <div class="dash-header-icon">
+            <i class="fa-solid fa-user"></i>
+        </div>
+        <div>
+            <h2 class="dash-title">Applicant Dashboard</h2>
+            <p class="dash-subtitle">Welcome back, @Model.FirstName</p>
+        </div>
+    </div>
+
+    <div class="dash-stat-grid">
+        <div class="dash-stat-card">
+            <i class="fa-solid fa-briefcase dash-stat-icon"></i>
+            <span class="dash-stat-label">Job Applied</span>
+            <span class="dash-stat-value">@Model.JobTitle</span>
+        </div>
+
+        <div class="dash-stat-card">
+            <i class="fa-solid fa-clipboard-check dash-stat-icon"></i>
+            <span class="dash-stat-label">Application Status</span>
+            <span class="dash-stat-value">@Model.JobStat.ToString().Replace("_", " ")</span>
+        </div>
+
+        <div class="dash-stat-card">
+            <i class="fa-solid fa-chart-simple dash-stat-icon"></i>
+            <span class="dash-stat-label">Test Score</span>
+            <span class="dash-stat-value">@(Model.Score.ToString() ?? "—")</span>
+        </div>
+
+        <div class="dash-stat-card">
+            <i class="fa-solid fa-people-arrows dash-stat-icon"></i>
+            <span class="dash-stat-label">Interview Status</span>
+            @if (Model.InterviewStat.HasValue)
+            {
+                <span class="dash-stat-value dash-status-positive">@Model.InterviewStat.Value</span>
+            }
+            else
+            {
+                <span class="dash-stat-value dash-status-muted">Not invited yet</span>
+            }
+        </div>
+    </div>
+
+    @if (Model.InterviewStat.HasValue)
+    {
+        <a asp-controller="CustomerApplications"
+           asp-action="MyInterview"
+           class="dash-btn dash-btn-primary">
+            <i class="fa-solid fa-calendar-check"></i>
+            View Interview Details
+        </a>
+    }
+
+    <div class="dash-status-panel">
+
+        @if (Model.CanWriteTest)
+        {
+            <a asp-controller="WriteAssessment"
+               asp-action="WriteTest"
+               class="dash-btn dash-btn-primary">
+                <i class="fa-solid fa-pen-to-square"></i>
+                Attempt Assessment
+            </a>
+        }
+        else if (Model.JobStat == SkyTech.Models.JobPostServices.JobApplicationStat.Applied)
+        {
+            <div class="dash-alert dash-alert-pending">
+                <i class="fa-solid fa-hourglass-half"></i>
+                <span>Your application has been received and is awaiting HR review.</span>
+            </div>
+        }
+        else if (Model.JobStat == SkyTech.Models.JobPostServices.JobApplicationStat.Rejected)
+        {
+            <div class="dash-alert dash-alert-negative">
+                <i class="fa-solid fa-circle-xmark"></i>
+                <span>Unfortunately, your application was not shortlisted.</span>
+            </div>
+        }
+        else if (Model.JobStat == SkyTech.Models.JobPostServices.JobApplicationStat.Shortlisted)
+        {
+            <div class="dash-alert dash-alert-info">
+                <i class="fa-solid fa-clipboard-list"></i>
+                <span>Congratulations! You have been shortlisted. The assessment has not been published yet.</span>
+            </div>
+        }
+        else if (Model.JobStat == SkyTech.Models.JobPostServices.JobApplicationStat.Passed_Test)
+        {
+            <div class="dash-alert dash-alert-positive">
+                <i class="fa-solid fa-circle-check"></i>
+                <span>Congratulations! You passed the assessment. HR will contact you regarding the next stage.</span>
+            </div>
+        }
+        else if (Model.JobStat == SkyTech.Models.JobPostServices.JobApplicationStat.Failed_Test)
+        {
+            <div class="dash-alert dash-alert-negative">
+                <i class="fa-solid fa-circle-xmark"></i>
+                <span>You completed the assessment but did not achieve the required pass mark.</span>
+            </div>
+        }
+        else if (Model.JobStat == SkyTech.Models.JobPostServices.JobApplicationStat.Online_interview)
+        {
+            <div class="dash-alert dash-alert-positive">
+                <i class="fa-solid fa-video"></i>
+                <span>Congratulations! You have been invited for an interview. Please check your email for further details.</span>
+            </div>
+        }
+
+    </div>
+
+</div>

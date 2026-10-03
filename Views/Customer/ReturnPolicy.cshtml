@@ -1,0 +1,247 @@
+﻿@{
+    ViewBag.Title = "Return Policy";
+    Layout = "~/Views/Shared/_MinimalLayout.cshtml";
+}
+
+@section Styles {
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+    <link href="https://api.fontshare.com/v2/css?f[]=clash-display@400,500,600,700&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="~/CSS/SharedLayout.css">
+    <link rel="stylesheet" href="~/CSS/ReturnPolicy.css">
+}
+
+<div class="rp-page">
+
+    <a href="@Url.Action("OrderHistory","Customer")" class="rp-back">
+        <i class="fas fa-arrow-left"></i> Back to Orders
+    </a>
+
+    <!-- ── HERO ── -->
+    <div class="rp-hero">
+        <div class="rp-hero-icon"><i class="fas fa-rotate-left"></i></div>
+        <div class="rp-hero-text">
+            <div class="rp-hero-tag"><i class="fas fa-store"></i> SkyTech Return Policy</div>
+            <h1>Returns &amp; Exchanges</h1>
+            <p>Before submitting a return request, please read through our policy carefully.<br>
+               We want to make sure your return qualifies so we can process it quickly.</p>
+        </div>
+    </div>
+
+    <!-- ── WARNING WINDOW ── -->
+    <div class="rp-window">
+        <i class="fas fa-triangle-exclamation"></i>
+        <div>
+            <strong>Important:</strong>We deal in
+            pre-owned, refurbished, and new goods. Returns are assessed on a case-by-case basis.
+            Items that have been used, damaged, or do not meet our conditions below
+            <strong>will not be accepted</strong>.
+        </div>
+    </div>
+
+    <!-- ── REQUIREMENTS ── -->
+    <div class="rp-section-title">
+        <div class="st-icon"><i class="fas fa-list-check"></i></div>
+        You qualify for a return if ALL of the following apply
+    </div>
+
+    <div class="req-grid">
+
+        <div class="req-card">
+            <div class="req-icon blue"><i class="fas fa-calendar-days"></i></div>
+            <div class="req-content">
+                <div class="req-title">Within 7 Days of Delivery</div>
+                <div class="req-desc">Your return request must be submitted within 7 days of receiving your order. Requests after this window will not be accepted.</div>
+            </div>
+        </div>
+
+        <div class="req-card">
+            <div class="req-icon green"><i class="fas fa-box"></i></div>
+            <div class="req-content">
+                <div class="req-title">Original Packaging Intact</div>
+                <div class="req-desc">The item must be returned in its original box, bag, or packaging with all accessories, manuals, and tags still included.</div>
+            </div>
+        </div>
+
+        <div class="req-card">
+            <div class="req-icon yellow"><i class="fas fa-receipt"></i></div>
+            <div class="req-content">
+                <div class="req-title">Proof of Purchase Required</div>
+                <div class="req-desc">You must have a valid order reference number from SkyTech. Orders placed through our platform are automatically tracked.</div>
+            </div>
+        </div>
+
+        <div class="req-card">
+            <div class="req-icon teal"><i class="fas fa-circle-check"></i></div>
+            <div class="req-content">
+                <div class="req-title">Item Unused &amp; Unaltered</div>
+                <div class="req-desc">The product must be in the same condition as when you received it — unused, unmodified, and free of damage caused by the buyer.</div>
+            </div>
+        </div>
+
+        <div class="req-card">
+            <div class="req-icon purple"><i class="fas fa-shield-halved"></i></div>
+            <div class="req-content">
+                <div class="req-title">Fault or Defect Present</div>
+                <div class="req-desc">Returns are accepted for items that are defective, damaged on arrival, or significantly different from what was described in the listing.</div>
+            </div>
+        </div>
+
+        <div class="req-card">
+            <div class="req-icon blue"><i class="fas fa-circle-check"></i></div>
+            <div class="req-content">
+                <div class="req-title">Order Status is Delivered</div>
+                <div class="req-desc">Only orders with a <strong>Delivered</strong> status are eligible. Orders still in transit or pending cannot be returned yet.</div>
+            </div>
+        </div>
+
+    </div>
+
+    <!-- ── NOT ELIGIBLE ── -->
+    <div class="rp-section-title" style="margin-top:2rem">
+        <div class="st-icon" style="background:rgba(220,38,38,.1);border-color:rgba(220,38,38,.2)">
+            <i class="fas fa-ban" style="color:#dc2626"></i>
+        </div>
+        Items that are NOT eligible for return
+    </div>
+
+    <div class="no-list">
+        <div class="no-item"><i class="fas fa-xmark"></i><span><strong>Digital or downloadable items</strong> — software, codes, vouchers once redeemed</span></div>
+        <div class="no-item"><i class="fas fa-xmark"></i><span><strong>Items returned after 7 days</strong> — no exceptions after the return window closes</span></div>
+        <div class="no-item"><i class="fas fa-xmark"></i><span><strong>Damaged by the buyer</strong> — physical damage, water damage, or misuse voids the return</span></div>
+        <div class="no-item"><i class="fas fa-xmark"></i><span><strong>Missing parts or accessories</strong> — incomplete returns will be rejected at inspection</span></div>
+        <div class="no-item"><i class="fas fa-xmark"></i><span><strong>Customised or personalised items</strong> — items made to order cannot be returned</span></div>
+        <div class="no-item"><i class="fas fa-xmark"></i><span><strong>Items without original packaging</strong> — packaging must be present for assessment</span></div>
+    </div>
+
+    <!-- ── CONDITION TABLE ── -->
+    <div class="rp-section-title" style="margin-top:2rem">
+        <div class="st-icon"><i class="fas fa-table"></i></div>
+        Return outcome by item condition
+    </div>
+
+    <div class="cond-table-wrap">
+        <table class="cond-table">
+            <thead>
+                <tr>
+                    <th>Item Condition on Return</th>
+                    <th>Outcome</th>
+                    <th>Resolution</th>
+                </tr>
+            </thead>
+            <tbody>
+                <tr>
+                    <td>Defective / faulty on arrival</td>
+                    <td><span class="pill pill-green">Approved</span></td>
+                    <td>Full refund or replacement</td>
+                </tr>
+                <tr>
+                    <td>Wrong item delivered</td>
+                    <td><span class="pill pill-green">Approved</span></td>
+                    <td>Exchange for correct item</td>
+                </tr>
+                <tr>
+                    <td>Unused, original packaging, within 7 days</td>
+                    <td><span class="pill pill-green">Approved</span></td>
+                    <td>Store credit or refund</td>
+                </tr>
+                <tr>
+                    <td>Opened but unused, packaging intact</td>
+                    <td><span class="pill pill-yellow">Review Required</span></td>
+                    <td>Assessed by shop owner</td>
+                </tr>
+                <tr>
+                    <td>Used but claiming defect</td>
+                    <td><span class="pill pill-yellow">Review Required</span></td>
+                    <td>Inspection required before decision</td>
+                </tr>
+                <tr>
+                    <td>Physically damaged by buyer</td>
+                    <td><span class="pill pill-red">Rejected</span></td>
+                    <td>Item returned to customer</td>
+                </tr>
+                <tr>
+                    <td>After 7-day window</td>
+                    <td><span class="pill pill-red">Rejected</span></td>
+                    <td>No return accepted</td>
+                </tr>
+                <tr>
+                    <td>Missing parts / incomplete</td>
+                    <td><span class="pill pill-red">Rejected</span></td>
+                    <td>Item returned to customer</td>
+                </tr>
+            </tbody>
+        </table>
+    </div>
+
+    <!-- ── HOW TO RETURN ── -->
+    <div class="rp-section-title" style="margin-top:2rem">
+        <div class="st-icon"><i class="fas fa-shoe-prints"></i></div>
+        How to submit a return request
+    </div>
+
+    <div class="steps">
+        <div class="step">
+            <div class="step-num">1</div>
+            <div>
+                <div class="step-title">Check your eligibility</div>
+                <div class="step-desc">Read through all the requirements above and confirm your item qualifies before proceeding. Ineligible requests will be declined at inspection.</div>
+            </div>
+        </div>
+        <div class="step">
+            <div class="step-num">2</div>
+            <div>
+                <div class="step-title">Go to your Order History</div>
+                <div class="step-desc">Navigate to Order History → find the delivered order → click "Request Return". The button is only active on delivered orders within the 7-day window.</div>
+            </div>
+        </div>
+        <div class="step">
+            <div class="step-num">3</div>
+            <div>
+                <div class="step-title">Describe the issue</div>
+                <div class="step-desc">Select a reason (defective, wrong item, changed mind) and provide a brief description. Photo evidence of defects greatly speeds up the process.</div>
+            </div>
+        </div>
+        <div class="step">
+            <div class="step-num">4</div>
+            <div>
+                <div class="step-title">Wait for shop owner review</div>
+                <div class="step-desc">The shop owner will review your request within 2 business days and approve, reject, or request more information.</div>
+            </div>
+        </div>
+        <div class="step">
+            <div class="step-num">5</div>
+            <div>
+                <div class="step-title">Drop off or arrange collection</div>
+                <div class="step-desc">If approved, you'll receive instructions to either drop off the item or arrange a collection. The item must be securely packaged with all original contents.</div>
+            </div>
+        </div>
+        <div class="step">
+            <div class="step-num">6</div>
+            <div>
+                <div class="step-title">Refund or exchange processed</div>
+                <div class="step-desc">Once the item is received and inspected, your refund will be processed within 3–5 business days, or your replacement will be dispatched.</div>
+            </div>
+        </div>
+    </div>
+
+    <!-- ── CTA ── -->
+    <div class="rp-cta">
+        <a href="@Url.Action("PastOrders", "Customer")" class="btn-return">
+            <i class="fas fa-rotate-left"></i> View Past Orders
+        </a>
+        <a href="@Url.Action("ShoppingPage","Customer")" class="btn-orders">
+            <i class="fas fa-bag-shopping"></i> Continue Shopping
+        </a>
+    </div>
+
+    <!-- ── FINE PRINT ── -->
+    <div class="rp-fine">
+        <i class="fas fa-circle-info" style="color:#1a73e8;margin-right:.35rem"></i>
+        SkyTech reserves the right to refuse any return that does not meet the above conditions.
+        All return decisions made by the shop owner are final. For disputes, contact SkyTech support
+        with your order reference number. This policy is subject to change without notice.
+    </div>
+
+</div>

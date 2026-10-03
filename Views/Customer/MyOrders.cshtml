@@ -1,0 +1,244 @@
+﻿@model IEnumerable<SkyTech.Models.Order>
+@using SkyTech.Models
+@{
+    ViewBag.Title = "My Orders";
+    Layout = "~/Views/Shared/_MinimalLayout.cshtml";
+
+}
+
+@section Styles {
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link href="https://fonts.googleapis.com/css2?family=DM+Sans:wght@300;400;500;600&family=Space+Mono:wght@400;700&display=swap" rel="stylesheet" />
+    <link rel="stylesheet" href="~/CSS/MyOrdersStyle.css">
+}
+
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>My Orders</title>
+</head>
+<body>
+
+    @* ── Header ─────────────────────────────────────────────── *@
+    <header class="mo-header">
+        <a href="@Url.Action("ShoppingPage", "Customer")" class="mo-back-btn" title="Back">&#8592;</a>
+        <div>
+            <div class="mo-header-title">My Orders</div>
+            <div class="mo-header-sub">Your delivery history</div>
+        </div>
+    </header>
+
+    <div class="mo-body">
+
+        @if (Model == null || !Model.Any())
+        {
+            @* ── Empty state ─────────────────────────────────── *@
+            <div class="mo-empty">
+                <div class="mo-empty-icon">
+                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor"
+                         stroke-width="1.4" stroke-linecap="round" stroke-linejoin="round">
+                        <path d="M6 2L3 6v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2V6l-3-4z" />
+                        <line x1="3" y1="6" x2="21" y2="6" />
+                        <path d="M16 10a4 4 0 0 1-8 0" />
+                    </svg>
+                </div>
+                <div class="mo-empty-title">No orders yet</div>
+                <div class="mo-empty-sub">Your completed orders will appear here.</div>
+                <a href="@Url.Action("ShoppingPage", "Customer")" class="mo-btn-primary">
+                    Start shopping
+                </a>
+            </div>
+        }
+        else
+        {
+            @* ── Order count pill ────────────────────────────── *@
+            <div class="mo-count">@Model.Count() order@(Model.Count() == 1 ? "" : "s")</div>
+
+            @* ── Order cards ─────────────────────────────────── *@
+            foreach (var order in Model.OrderByDescending(o => o.OrderedOn))
+            {
+                string statusClass = "";
+                string statusLabel = "";
+                switch (order.Status)
+                {
+                    case OrderStatus.Delivered:
+                        statusClass = "delivered"; statusLabel = "Delivered"; break;
+                    case OrderStatus.OutForDelivery:
+                        statusClass = "out"; statusLabel = "Out for Delivery"; break;
+                    case OrderStatus.Assigned:
+                        statusClass = "assigned"; statusLabel = "Driver Assigned"; break;
+                    default:
+                        statusClass = "pending"; statusLabel = "Pending"; break;
+                }
+
+                <div class="mo-card">
+
+                    @* ── Card header ── *@
+                    <div class="mo-card-header">
+                        <div>
+                            <div class="mo-order-id">#ORD-@order.OrderId</div>
+                            <div class="mo-order-date">
+                                @order.OrderedOn.ToString("dd MMM yyyy, hh:mm tt")
+                            </div>
+                        </div>
+                        <div style="display:flex; flex-direction:column; align-items:flex-end; gap:.3rem;">
+                            <span class="mo-status-badge @statusClass">@statusLabel</span>
+                            @if (order.OrderType == DeliveryType.InStorePickup)
+                            {
+                                var pickupOrder = ViewBag.PickupOrders != null ? ((List<PickupOrder>)ViewBag.PickupOrders).FirstOrDefault(p => p.OrderId == order.OrderId) : null;
+                                if (pickupOrder != null)
+                                {
+                                    <span style="background:#f3e8ff; color:#7e22ce; font-size:.7rem; padding:.2rem .6rem; border-radius:20px;">
+                                        <i class="fas fa-qrcode"></i> Ref: @pickupOrder.PickupReference
+                                    </span>
+                                }
+                            }
+                        </div>
+                    </div>
+
+                    <div class="mo-divider"></div>
+
+                    @* ── Delivery address OR Pickup info ── *@
+                    @if (order.OrderType == DeliveryType.InStorePickup)
+                    {
+                        var pickupOrder = ViewBag.PickupOrders != null ? ((List<PickupOrder>)ViewBag.PickupOrders).FirstOrDefault(p => p.OrderId == order.OrderId) : null;
+                        if (pickupOrder != null)
+                        {
+                            <div class="mo-row">
+                                <div class="mo-row-icon">
+                                    <i class="fas fa-store"></i>
+                                </div>
+                                <div>
+                                    <div class="mo-row-label">Collection Branch</div>
+                                    <div class="mo-row-value">@pickupOrder.PickupBranch?.ShopAddress</div>
+                                </div>
+                            </div>
+                            <div class="mo-row">
+                                <div class="mo-row-icon">
+                                    <i class="fas fa-calendar"></i>
+                                </div>
+                                <div>
+                                    <div class="mo-row-label">Ready for Collection</div>
+                                    <div class="mo-row-value">@pickupOrder.ScheduledPickupDate.ToString("dd MMM yyyy")</div>
+                                </div>
+                            </div>
+                        }
+                    }
+                    else
+                    {
+                        <div class="mo-row">
+                            <div class="mo-row-icon">
+                                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor"
+                                     stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                                    <path d="M21 10c0 7-9 13-9 13S3 17 3 10a9 9 0 0 1 18 0z" />
+                                    <circle cx="12" cy="10" r="3" />
+                                </svg>
+                            </div>
+                            <div>
+                                <div class="mo-row-label">Delivered to</div>
+                                <div class="mo-row-value">@order.DeliveryAddress</div>
+                            </div>
+                        </div>
+                    }
+
+                    @* ── Items ordered ───────────────────────── *@
+                    @if (order.OrderItems != null && order.OrderItems.Any())
+                    {
+                        <div class="mo-row">
+                            <div class="mo-row-icon">
+                                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor"
+                                     stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                                    <path d="M6 2L3 6v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2V6l-3-4z" />
+                                    <line x1="3" y1="6" x2="21" y2="6" />
+                                    <path d="M16 10a4 4 0 0 1-8 0" />
+                                </svg>
+                            </div>
+                            <div class="mo-items-list">
+                                <div class="mo-row-label">Items</div>
+                                @foreach (var item in order.OrderItems)
+                                {
+                                    <div class="mo-item-row">
+                                        <span class="mo-item-name">@item.ProdName</span>
+                                        <span class="mo-item-qty">@item.Quantity</span>
+                                        <span class="mo-item-price">R @item.PriceAtTimeOfPurchase.ToString("0.00")</span>
+                                    </div>
+                                }
+                            </div>
+                        </div>
+                    }
+
+                    @* ── Delivered on ────────────────────────── *@
+                    @if (order.Status == OrderStatus.Delivered && order.DeliveredOn != null)
+                    {
+                        <div class="mo-row">
+                            <div class="mo-row-icon">
+                                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor"
+                                     stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                                    <circle cx="12" cy="12" r="10" />
+                                    <polyline points="12 6 12 12 16 14" />
+                                </svg>
+                            </div>
+                            <div>
+                                <div class="mo-row-label">Delivered on</div>
+                                <div class="mo-row-value">@order.DeliveredOn.Value.ToString("dd MMM yyyy, hh:mm tt")</div>
+                            </div>
+                        </div>
+                    }
+
+                    @* ── Driver details ──────────────────────── *@
+                    @if (order.OrderType != DeliveryType.InStorePickup && order.Driver != null)
+                    {
+                        string initials = "";
+                        if (!string.IsNullOrEmpty(order.Driver.DriverName)) { initials += order.Driver.DriverName[0]; }
+                        if (!string.IsNullOrEmpty(order.Driver.DriverSurname)) { initials += order.Driver.DriverSurname[0]; }
+
+                        <div class="mo-row">
+                            <div class="mo-driver-avatar-sm">@initials.ToUpper()</div>
+                            <div>
+                                <div class="mo-row-label">Driver</div>
+                                <div class="mo-row-value">
+                                    @(order.Driver.DriverName ?? "") @(order.Driver.DriverSurname ?? "")
+                                </div>
+                                <div class="mo-row-sub">@(order.Driver.VehicleNumber ?? "N/A")</div>
+                            </div>
+                        </div>
+                    }
+
+                    <div class="mo-divider"></div>
+
+                    @* ── Footer: total + track button ────────── *@
+                    <div class="mo-card-footer">
+                        <div>
+                            <div style="display:flex; justify-content:space-between; font-size:12px; color:var(--text-secondary); margin-bottom:4px;">
+                                <span>Delivery fee</span> <t></t>
+                                <span>R50.00</span>
+                            </div>
+                            <div style="display:flex; justify-content:space-between; align-items:center;">
+                                <div>
+                                    <div class="mo-total-label">Total</div>
+                                    <div class="mo-total-value">R @order.TotalAmount.ToString("0.00")</div>
+                                </div>
+                            </div>
+                        </div>
+                        <a href="@Url.Action("TrackOrder", "Customer", new { id = order.OrderId })"
+                           class="mo-track-btn">
+                            <svg width="13" height="13" viewBox="0 0 24 24" fill="none"
+                                 stroke="currentColor" stroke-width="2.2"
+                                 stroke-linecap="round" stroke-linejoin="round">
+                                <path d="M5 12h14M12 5l7 7-7 7" />
+                            </svg>
+                            Track
+                        </a>
+                    </div>
+
+                </div>
+            }
+        }
+
+    </div>
+
+</body>
+</html>

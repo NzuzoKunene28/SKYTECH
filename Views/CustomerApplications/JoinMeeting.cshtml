@@ -1,0 +1,11 @@
+﻿@model SkyTech.Models.Interviews.Interview
+@{
+    ViewData["Title"] = "My interview";
+    ViewData["RedirectController"] = "Candidate";
+    ViewData["RedirectAction"] = "MyStatus";
+    ViewData["RedirectNeedsId"] = false;
+}
+
+<h2>Your interview</h2>
+
+@await Html.PartialAsync("_JitsiEmbed", Model)

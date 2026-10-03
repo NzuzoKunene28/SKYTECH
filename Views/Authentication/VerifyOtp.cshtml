@@ -1,0 +1,17 @@
+﻿@model SkyTech.Models.Auth.VerifyOtpViewModel
+
+@{
+    ViewBag.Title = "VerifyOtp";
+}
+
+@using (Html.BeginForm("VerifyOtp", "Authentication", FormMethod.Post))
+{
+    @Html.AntiForgeryToken()
+    @Html.HiddenFor(m => m.UserEmail)
+    <div class="form-group">
+        @Html.LabelFor(m => m.OtpCode)
+        @Html.TextBoxFor(m => m.OtpCode, new { @class = "form-control" })
+        @Html.ValidationMessageFor(m => m.OtpCode, "", new { @class = "text-danger" })
+    </div>
+    <button type="submit" class="btn btn-success">Verify OTP</button>
+}

@@ -1,0 +1,92 @@
+﻿@model SkyTech.Models.LeaseAgreement
+@{
+    ViewData["Title"] = "Your Lease Agreement";
+}
+
+<h2>Lease Agreement #@Model.LeaseAgreementId</h2>
+
+@if (TempData["Error"] != null)
+{
+    <div class="alert alert-danger">@TempData["Error"]</div>
+}
+
+@if (Model.Status == SkyTech.Models.LeaseAgreementStatus.PendingApproval)
+{
+    <div class="alert alert-info">
+        Your lease request is still awaiting admin approval. You'll be able to review and sign
+        this agreement once it's approved.
+    </div>
+}
+else
+{
+    <div class="card mb-4">
+        <div class="card-body">
+            <h5 class="card-title">Lease Terms</h5>
+            <p><strong>Start Date:</strong> @Model.StartDate.ToString("dd MMM yyyy")</p>
+            <p><strong>End Date:</strong> @Model.EndDate.ToString("dd MMM yyyy")</p>
+            <p><strong>Term Length:</strong> @Model.TermMonths month(s)</p>
+            <p><strong>Delivery:</strong> @Model.DeliveryType &mdash; @Model.DeliveryAddress</p>
+
+            <table class="table mt-3">
+                <thead>
+                    <tr>
+                        <th>Item</th>
+                        <th>Serial Number</th>
+                        <th>Monthly Rate</th>
+                        <th>Deposit</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    @foreach (var item in Model.Items)
+                    {
+                        <tr>
+                            <td>@item.LeaseUnit?.LeaseProduct?.LeaseProdName</td>
+                            <td>@item.LeaseUnit?.SerialNumber</td>
+                            <td>R@item.MonthlyRateAtLease.ToString("N2")</td>
+                            <td>R@item.DepositAtLease.ToString("N2")</td>
+                        </tr>
+                    }
+                </tbody>
+                <tfoot>
+                    <tr>
+                        <th colspan="2" class="text-end">Due today (deposit + first month):</th>
+                        <th colspan="2">R@Model.Items.Sum(i => i.MonthlyRateAtLease + i.DepositAtLease).ToString("N2")</th>
+                    </tr>
+                </tfoot>
+            </table>
+
+            <p class="text-muted">
+                By clicking "I Agree" below, you confirm you've read and accept the terms of this
+                lease agreement, including the monthly rate, deposit, and term length shown above.
+            </p>
+        </div>
+    </div>
+
+    @if (Model.CustomerAgreed)
+    {
+        <div class="alert alert-success">
+            You agreed to this lease on @Model.AgreedDate?.ToString("dd MMM yyyy, HH:mm").
+        </div>
+
+        @if (Model.Status == SkyTech.Models.LeaseAgreementStatus.PendingPayment)
+        {
+            <a asp-controller="Payment" asp-action="LeasePaymentPage" asp-route-leaseAgreementId="@Model.LeaseAgreementId" class="btn btn-success">
+                Proceed to Payment
+            </a>
+        }
+    }
+    else
+    {
+        <form asp-action="AgreeToLease" asp-route-id="@Model.LeaseAgreementId" method="post">
+            <div class="form-check mb-3">
+                <input class="form-check-input" type="checkbox" id="agreeCheck" required>
+                <label class="form-check-label" for="agreeCheck">
+                    I have read and agree to the terms of this lease agreement.
+                </label>
+            </div>
+            <button type="submit" class="btn btn-success">I Agree</button>
+        </form>
+    }
+}
+
+<a asp-action="MyLeaseRequests" class="btn btn-secondary mt-3">Back to My Requests</a>

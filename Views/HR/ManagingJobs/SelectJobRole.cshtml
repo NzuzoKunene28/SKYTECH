@@ -1,0 +1,48 @@
+﻿@{
+    ViewData["Title"] = "Select Job Role";
+    Layout = "~/Views/Shared/_MinimalLayout.cshtml";
+}
+
+<link rel="stylesheet" href="~/CSS/HRCSS/SelectJobRole.css" />
+
+<div class="hr-page">
+    <div class="hr-container-narrow">
+
+        <div class="hr-header-sm">
+            <span class="hr-eyebrow"><i class="fas fa-robot"></i> AI-Assisted</span>
+            <h2>Select Job Role</h2>
+            <p>Choose a role and branch, then let AI draft the vacancy for you</p>
+        </div>
+
+        <div class="form-container">
+            <form asp-controller="HR" asp-action="SelectJobRole" method="post">
+
+                <div class="form-group">
+                    <label>Select Job Title</label>
+                    <select name="roleId" asp-items="ViewBag.Roles">
+                        <option value="">--Select Role--</option>
+                    </select>
+                </div>
+
+                <div class="form-group">
+                    <label>Select Branch (via Shop Owner)</label>
+                    <select name="ownerId" asp-items="ViewBag.Owners">
+                        <option value="">--Select Shop Owner / Branch--</option>
+                    </select>
+                </div>
+
+                <div class="btn-submit">
+                    <button type="submit" name="mode" value="ai">
+                        <i class="fas fa-wand-magic-sparkles"></i> Generate with AI
+                    </button>
+
+                    <div class="form-divider"><span>or</span></div>
+
+                    <a href="@Url.Action("ComposeJob", "HR")">Create Manually</a>
+                </div>
+
+            </form>
+        </div>
+
+    </div>
+</div>

@@ -1,0 +1,561 @@
+﻿@model List<SkyTech.Models.CartItem>
+
+@{
+    Layout = "~/Views/Shared/_MinimalLayout.cshtml";
+}
+
+@section Styles {
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+    <link href="https://api.fontshare.com/v2/css?f[]=clash-display@400,500,600,700&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="~/CSS/ShoppingPageStyle.css">
+
+    <!-- ========== ADDED: Delivery/Pickup Toggle Styles ========== -->
+    <style>
+        .delivery-toggle {
+            background: #f8f9fa;
+            border-radius: 16px;
+            padding: 8px;
+            margin-bottom: 20px;
+            display: flex;
+            gap: 8px;
+        }
+
+        .toggle-option {
+            flex: 1;
+            text-align: center;
+            padding: 12px;
+            border-radius: 12px;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            font-weight: 600;
+            font-size: 14px;
+        }
+
+            .toggle-option i {
+                margin-right: 8px;
+            }
+
+            .toggle-option.delivery {
+                background: white;
+                color: #1a73e8;
+                border: 1px solid #e0e0e0;
+            }
+
+                .toggle-option.delivery.active {
+                    background: #1a73e8;
+                    color: white;
+                    border-color: #1a73e8;
+                }
+
+            .toggle-option.pickup {
+                background: white;
+                color: #10b981;
+                border: 1px solid #e0e0e0;
+            }
+
+                .toggle-option.pickup.active {
+                    background: #10b981;
+                    color: white;
+                    border-color: #10b981;
+                }
+
+        .branch-select {
+            display: none;
+            margin-top: 15px;
+        }
+
+            .branch-select.show {
+                display: block;
+            }
+
+            .branch-select select {
+                width: 100%;
+                padding: 12px;
+                border: 2px solid #e0e0e0;
+                border-radius: 12px;
+                font-family: inherit;
+                font-size: 14px;
+                background: white;
+            }
+
+        .fee-breakdown {
+            margin-top: 15px;
+            padding-top: 15px;
+            border-top: 1px dashed #e0e0e0;
+        }
+    </style>
+    <!-- ========== END ADDED STYLES ========== -->
+}
+
+<div class="cart-page">
+
+    @* ── Flash messages ── *@
+    @if (TempData["Success"] != null)
+    {
+        <div style="background:rgba(22,163,74,.08);border:1.5px solid rgba(22,163,74,.25);border-radius:10px;padding:.8rem 1rem;font-size:.875rem;font-weight:600;color:#15803d;display:flex;align-items:center;gap:.5rem;margin-bottom:1rem">
+            <i class="fas fa-circle-check"></i> @TempData["Success"]
+        </div>
+    }
+    @if (TempData["Error"] != null)
+    {
+        <div style="background:rgba(220,38,38,.08);border:1.5px solid rgba(220,38,38,.25);border-radius:10px;padding:.8rem 1rem;font-size:.875rem;font-weight:600;color:#b91c1c;display:flex;align-items:center;gap:.5rem;margin-bottom:1rem">
+            <i class="fas fa-circle-exclamation"></i> @TempData["Error"]
+        </div>
+    }
+
+    @if (Model == null || !Model.Any())
+    {
+        <!-- ══ EMPTY STATE ══ -->
+        <div class="cart-topbar">
+            <div class="cart-logo">SkyTech</div>
+            <a href="@Url.Action("ShoppingPage", "Customer")" class="back-link">
+                <i class="fas fa-arrow-left"></i>
+                <span>Continue Shopping</span>
+            </a>
+        </div>
+
+        <div class="cart-empty">
+            <i class="fas fa-bag-shopping"></i>
+            <h2>Your cart is empty</h2>
+            <p>Browse our products and add something you like.</p>
+            <a href="@Url.Action("ShoppingPage", "Customer")" class="btn-shop">
+                <i class="fas fa-arrow-left"></i> Browse Products
+            </a>
+        </div>
+    }
+    else
+    {
+        @* ── Calculate totals ── *@
+        double subtotal = 0;
+        const double delivery = 50;
+        const double pickupFee = 25; // ADDED: pickup fee constant
+        double discount = 0;
+
+        <!-- ══ TOP BAR ══ -->
+        <div class="cart-topbar">
+            <div class="cart-logo">SkyTech</div>
+            <a href="@Url.Action("ShoppingPage", "Customer")" class="back-link">
+                <i class="fas fa-arrow-left"></i>
+                <span>Continue Shopping</span>
+            </a>
+        </div>
+
+        <!-- Section label -->
+        <div class="cart-section-label">
+            <div class="cart-section-icon"><i class="fas fa-bag-shopping"></i></div>
+            <span class="cart-section-title">
+                Your Cart
+                <span class="cart-section-count">
+                    (@Model.Count item@(Model.Count != 1 ? "s" : ""))
+                </span>
+            </span>
+        </div>
+
+        <div class="cart-layout">
+
+            <!-- ══ LEFT: item list ══ -->
+            <div>
+                @foreach (var item in Model)
+                {
+                    subtotal += item.SubTotal;
+
+                    <div class="cart-card">
+                        <div class="cart-inner">
+
+                            <!-- Image — fully null safe -->
+                            <div class="c-img">
+                                @if (ViewBag.IsGuest == true)
+                                {
+                                    var pictures = ViewBag.GuestPictures as Dictionary<int, string>;
+                                    var filePath = pictures != null && pictures.ContainsKey(item.ProdId)
+                                    ? pictures[item.ProdId]
+                                    : null;
+
+                                    if (filePath != null)
+                                    {
+                                        <img src="@filePath" alt="@item.ProdName" />
+                                    }
+                                    else
+                                    {
+                                        <i class="fas fa-image"></i>
+                                    }
+                                }
+                                else
+                                {
+                                    if (item.AddProduct?.ProductPictures != null && item.AddProduct.ProductPictures.Any())
+                                    {
+                                        var pic = item.AddProduct.ProductPictures.First();
+                                        if (pic?.FilePath != null)
+                                        {
+                                            <img src="@pic.FilePath" alt="@(item.AddProduct?.ProdName ?? item.ProdName)" />
+                                        }
+                                        else
+                                        {
+                                            <i class="fas fa-image"></i>
+                                        }
+                                    }
+                                    else
+                                    {
+                                        <i class="fas fa-image"></i>
+                                    }
+                                }
+                            </div>
+
+                            <!-- Info — uses ProdName fallback if Products is null -->
+                            <div class="c-info">
+                                <div class="c-name">@(item.AddProduct?.ProdName ?? item.ProdName)</div>
+                                <div class="c-shop">SkyTech Store</div>
+                                <div class="c-price">R @item.PriceAtTimeAdded.ToString("N2")</div>
+                            </div>
+
+                            <!-- Actions -->
+                            <div class="c-actions">
+                                @if (ViewBag.IsGuest == true)
+                                {
+                                    @using (Html.BeginForm("UpdateGuestCartItem", "Customer", FormMethod.Post))
+                                    {
+                                        @Html.AntiForgeryToken()
+                                        @Html.Hidden("prodId", item.ProdId)
+                                        <div class="qty-form">
+                                            <input type="number" name="quantity"
+                                                   value="@item.ProdQuantity" min="1" />
+                                            <button type="submit" class="qty-update">
+                                                <i class="fas fa-sync-alt"></i>
+                                                <span class="hide-xs">Update</span>
+                                            </button>
+                                        </div>
+                                    }
+                                }
+                                else
+                                {
+                                    @using (Html.BeginForm("UpdateCart", "Customer", FormMethod.Post))
+                                    {
+                                        @Html.AntiForgeryToken()
+                                        @Html.Hidden("id", item.CartItemId)
+                                        <div class="qty-form">
+                                            <input type="number" name="quantity"
+                                                   value="@item.ProdQuantity" min="1" />
+                                            <button type="submit" class="qty-update">
+                                                <i class="fas fa-sync-alt"></i>
+                                                <span class="hide-xs">Update</span>
+                                            </button>
+                                        </div>
+                                    }
+                                }
+
+                                @if (ViewBag.IsGuest == true)
+                                {
+                                    @using (Html.BeginForm("RemoveGuestCartItem", "Customer", FormMethod.Post))
+                                    {
+                                        @Html.AntiForgeryToken()
+                                        @Html.Hidden("prodId", item.ProdId)
+                                        <button type="submit" class="rm-btn">
+                                            <i class="fas fa-trash-alt"></i>
+                                            <span class="hide-xs">Remove</span>
+                                        </button>
+                                    }
+                                }
+                                else
+                                {
+                                    @using (Html.BeginForm("RemoveFromCart", "Customer", FormMethod.Post))
+                                    {
+                                        @Html.AntiForgeryToken()
+                                        @Html.Hidden("id", item.CartItemId)
+                                        <button type="submit" class="rm-btn">
+                                            <i class="fas fa-trash-alt"></i>
+                                            <span class="hide-xs">Remove</span>
+                                        </button>
+                                    }
+                                }
+                            </div>
+
+                        </div>
+                    </div>
+                }
+            </div>
+
+            <!-- ══ RIGHT: summary + pay ══ -->
+            @{
+                double preTax = subtotal + delivery;
+                if (preTax > 500) { discount = Math.Round(preTax * 0.10, 2); }
+                double grandTotal = preTax - discount;
+            }
+
+            <div class="summary-card">
+                <h3>
+                    <i class="fas fa-receipt" style="color:var(--blue);margin-right:.4rem"></i>
+                    Order Summary
+                </h3>
+
+                @* Per-item rows — null safe *@
+                @foreach (var item in Model)
+                {
+                    <div class="sum-row">
+                        <span class="sr-label">
+                            @(item.AddProduct?.ProdName ?? item.ProdName)
+                            <span style="color:var(--text-muted)"> ×@item.ProdQuantity</span>
+                        </span>
+                        <span class="sr-amount">R @item.SubTotal.ToString("N2")</span>
+                    </div>
+                }
+
+                <!-- ========== ADDED: Delivery/Pickup Toggle ========== -->
+                <div class="delivery-toggle">
+                    <div class="toggle-option delivery active" id="deliveryOption" onclick="selectDeliveryType('delivery')">
+                        <i class="fas fa-truck"></i> Home Delivery
+                    </div>
+                    <div class="toggle-option pickup" id="pickupOption" onclick="selectDeliveryType('pickup')">
+                        <i class="fas fa-store"></i> In-Store Pickup
+                    </div>
+                </div>
+
+                <!-- Fee row (will update dynamically) -->
+                <div class="sum-row" id="feeRow">
+                    <span class="sr-label">
+                        <i class="fas fa-truck" style="color:var(--blue);margin-right:.3rem"></i>
+                        Delivery
+                    </span>
+                    <span class="sr-amount" id="feeAmount">R @delivery.ToString("N2")</span>
+                </div>
+                <!-- ========== END ADDED ========== -->
+                @if (discount > 0)
+                {
+                    <div class="sum-row discount">
+                        <span class="sr-label">
+                            Discount
+                            <span class="discount-pill">10% off</span>
+                        </span>
+                        <span class="sr-amount">− R @discount.ToString("N2")</span>
+                    </div>
+                }
+
+                <div class="sum-row total-row">
+                    <span class="sr-label">Total Due</span>
+                    <span class="sr-amount" id="totalAmount">R @grandTotal.ToString("N2")</span>
+                </div>
+
+                <!-- ========== ADDED: Branch Selection (hidden initially) ========== -->
+                <div id="branchSelect" class="branch-select">
+                    <label style="font-size:13px; font-weight:600; margin-bottom:8px; display:block;">
+                        <i class="fas fa-location-dot"></i> Select Pickup Branch
+                    </label>
+                    <select name="selectedPickupBranchId" id="pickupBranch">
+                        <option value="">-- Choose a branch --</option>
+                        @{
+                            var branches = ViewBag.AvailableBranches as List<SkyTech.Models.ShopOwner>;
+                            if (branches != null)
+                            {
+                                foreach (var branch in branches)
+                                {
+                                    <option value="@branch.OwnerId">@branch.ShopAddress</option>
+                                }
+                            }
+                        }
+                    </select>
+                </div>
+
+                <div class="fee-breakdown" id="pickupNote" style="display:none;">
+                    <small style="color:#10b981;">
+                        <i class="fas fa-clock"></i> Ready for pickup within 2 days
+                    </small>
+                </div>
+                <!-- ========== END ADDED ========== -->
+                @* ── Checkout form ── *@
+                @if (Context.Session.GetInt32("UserId") != null)
+                {
+                    @using (Html.BeginForm("Checkout", "Customer", FormMethod.Post))
+                    {
+                        @Html.AntiForgeryToken()
+                        @Html.Hidden("Amount", grandTotal)
+                        @Html.Hidden("ProductName", "SkyTech Order")
+
+                        <!-- ========== MODIFIED: Delivery Address Field with dynamic ID ========== -->
+                        <div class="addr-field" id="addressField">
+                            <label>
+                                <i class="fas fa-location-dot"></i> Delivery Address
+                            </label>
+                            <input type="text"
+                                   name="deliveryAddress"
+                                   id="deliveryAddressInput"
+                                   value="@(ViewBag.Address ?? "")"
+                                   placeholder="e.g. 15 Main Road, Durban"
+                                   required />
+                        </div>
+
+                        <!-- ========== ADDED: Hidden fields for pickup selection ========== -->
+                        <input type="hidden" name="orderType" id="orderTypeHidden" value="delivery">
+                        <input type="hidden" name="selectedPickupBranchId" id="selectedBranchHidden">
+                        <!-- ========== END ADDED ========== -->
+
+                        <button type="submit" class="pay-btn" id="checkoutBtn">
+                            <i class="fas fa-lock"></i>
+                            Pay R <span id="btnTotal">@grandTotal.ToString("N2")</span> Securely
+                        </button>
+                    }
+                }
+                else
+                {
+                    <div style="background:#fef9c3;border:1px solid #fde047;border-radius:8px;
+                                padding:.8rem 1rem;margin-bottom:1rem;font-size:.85rem;color:#854d0e">
+                        <i class="fas fa-circle-info"></i>
+                        You need to log in to complete your purchase.
+                    </div>
+                    <a href="@Url.Action("LogIn", "Authentication")" class="pay-btn"
+                       style="display:block;text-align:center;text-decoration:none">
+                        <i class="fas fa-right-to-bracket"></i>
+                        Log in to Checkout
+                    </a>
+                }
+
+
+
+                @* @using (Html.BeginForm("Checkout", "Customer", FormMethod.Post))
+                {
+                    @Html.AntiForgeryToken()
+                    @Html.Hidden("Amount", grandTotal)
+                    @Html.Hidden("ProductName", "SkyTech Order")
+
+                    <div class="addr-field">
+                        <label>
+                            <i class="fas fa-location-dot"></i> Delivery Address
+                        </label>
+                        <input type="text"
+                               name="deliveryAddress"
+                               value="@(ViewBag.Address ?? "")"
+                               placeholder="e.g. 15 Main Road, Durban"
+                               required />
+                    </div>
+
+                    <button type="submit" class="pay-btn">
+                        <i class="fas fa-lock"></i>
+                        Pay R @grandTotal.ToString("N2") Securely
+                    </button>
+                } *@
+
+                <div class="secure-note">
+                    <i class="fas fa-shield-halved" style="color:var(--blue)"></i>
+                    256-bit SSL · Secured by PayStack
+                </div>
+                <div class="ps-strip">
+                    <i class="fas fa-credit-card" style="color:var(--blue)"></i>
+                    Visa · Mastercard · Bank Transfer · USSD
+                </div>
+
+                @if (discount > 0)
+                {
+                    <div class="savings-banner">
+                        🎉 You saved R @discount.ToString("N2") on this order!
+                    </div>
+                }
+            </div>
+
+        </div>
+    }
+
+
+
+    <script>
+        // ✅ Read values directly from the DOM — no Razor variable scope issues
+        const subtotalJS    = parseFloat(document.getElementById('totalAmount').innerText.replace('R ', '').replace(/,/g, '').trim()) || 0;
+        const deliveryFeeJS = 50.00;
+        const pickupFeeJS   = 25.00;
+        const discountJS    = 0; // discount is already factored into the displayed total
+
+        let currentType = 'delivery';
+
+        function selectDeliveryType(type) {
+            currentType = type;
+
+            const deliveryOpt      = document.getElementById('deliveryOption');
+            const pickupOpt        = document.getElementById('pickupOption');
+            const feeRow           = document.getElementById('feeRow');
+            const totalAmount      = document.getElementById('totalAmount');
+            const btnTotal         = document.getElementById('btnTotal');
+            const branchSelect     = document.getElementById('branchSelect');
+            const addressField     = document.getElementById('addressField');
+            const deliveryAddrInput = document.getElementById('deliveryAddressInput');
+            const pickupNote       = document.getElementById('pickupNote');
+            const orderTypeHidden  = document.getElementById('orderTypeHidden');
+
+            // Read the current subtotal from the DOM each time (items in cart)
+            // We recalculate: sum all item rows
+            let itemSubtotal = 0;
+            document.querySelectorAll('.sum-row:not(.total-row):not(.discount) .sr-amount').forEach(function(el) {
+                var val = parseFloat(el.innerText.replace('R', '').replace(/,/g, '').trim());
+                if (!isNaN(val)) itemSubtotal += val;
+            });
+
+            // Read discount if shown
+            let disc = 0;
+            const discountEl = document.querySelector('.sum-row.discount .sr-amount');
+            if (discountEl) {
+                disc = parseFloat(discountEl.innerText.replace('−', '').replace('R', '').replace(/,/g, '').trim()) || 0;
+            }
+
+            if (type === 'delivery') {
+                deliveryOpt.classList.add('active');
+                pickupOpt.classList.remove('active');
+
+                feeRow.innerHTML = `
+                    <span class="sr-label">
+                        <i class="fas fa-truck" style="color:var(--blue);margin-right:.3rem"></i>
+                        Delivery Fee
+                    </span>
+                    <span class="sr-amount" id="feeAmount">R ${deliveryFeeJS.toFixed(2)}</span>`;
+
+                if (branchSelect) branchSelect.classList.remove('show');
+                if (addressField) addressField.style.display = 'block';
+                if (deliveryAddrInput) deliveryAddrInput.required = true;
+                if (pickupNote) pickupNote.style.display = 'none';
+                if (orderTypeHidden) orderTypeHidden.value = 'delivery';
+
+                const newTotal = itemSubtotal + deliveryFeeJS - disc;
+                if (totalAmount) totalAmount.innerText = 'R ' + newTotal.toFixed(2);
+                if (btnTotal) btnTotal.innerText = newTotal.toFixed(2);
+
+            } else {
+                deliveryOpt.classList.remove('active');
+                pickupOpt.classList.add('active');
+
+                feeRow.innerHTML = `
+                    <span class="sr-label">
+                        <i class="fas fa-store" style="color:#10b981;margin-right:.3rem"></i>
+                        Pickup Fee
+                    </span>
+                    <span class="sr-amount" id="feeAmount">R ${pickupFeeJS.toFixed(2)}</span>`;
+
+                if (branchSelect) branchSelect.classList.add('show');
+                if (addressField) addressField.style.display = 'none';
+                if (deliveryAddrInput) deliveryAddrInput.required = false;
+                if (pickupNote) pickupNote.style.display = 'block';
+                if (orderTypeHidden) orderTypeHidden.value = 'pickup';
+
+                const newTotal = itemSubtotal + pickupFeeJS - disc;
+                if (totalAmount) totalAmount.innerText = 'R ' + newTotal.toFixed(2);
+                if (btnTotal) btnTotal.innerText = newTotal.toFixed(2);
+            }
+        }
+
+        // ✅ Validate and sync branch before form submits
+        const checkoutForm = document.querySelector('form[action*="Checkout"]');
+        if (checkoutForm) {
+            checkoutForm.addEventListener('submit', function (e) {
+                if (currentType === 'pickup') {
+                    const branchDropdown       = document.getElementById('pickupBranch');
+                    const selectedBranchHidden = document.getElementById('selectedBranchHidden');
+
+                    if (!branchDropdown || !branchDropdown.value) {
+                        e.preventDefault();
+                        alert('Please select a pickup branch before continuing.');
+                        return false;
+                    }
+                    selectedBranchHidden.value = branchDropdown.value;
+                }
+            });
+        }
+    </script>
+    <!-- ========== END ADDED JAVASCRIPT ========== -->
+</div>

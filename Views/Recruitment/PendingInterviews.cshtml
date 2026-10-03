@@ -1,0 +1,79 @@
+﻿@model List<SkyTech.ViewModels.ScheduleMeetingViewModel>
+@{
+    ViewData["Title"] = "Pending Interviews";
+    Layout = "~/Views/Shared/_MinimalLayout.cshtml";
+}
+
+<link rel="stylesheet" href="~/CSS/HRCSS/PendingInterviews.css" />
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
+
+<div class="pi-wrap">
+
+    <p class="pi-eyebrow">Recruitment</p>
+    <h1 class="pi-title">Candidates Ready for Interview</h1>
+    <p class="pi-sub">Set an interview date and time for each candidate who passed the online test.</p>
+
+    @if (TempData["Error"] != null)
+    {
+        <div class="pi-alert">
+            <i class="fa-solid fa-triangle-exclamation"></i>
+            @TempData["Error"]
+        </div>
+    }
+
+    @if (Model.Any())
+    {
+        <div class="pi-table-wrap">
+            <table class="pi-table">
+                <thead>
+                    <tr>
+                        <th>Candidate</th>
+                        <th>Test Score</th>
+                        <th>Test Date</th>
+                        <th>Interview Date &amp; Time</th>
+                        <th></th>
+                    </tr>
+                </thead>
+                <tbody>
+                    @foreach (var test in Model)
+                    {
+                        <tr>
+                            <td class="pi-name">@test.FirstName @test.LastName</td>
+                            <td><span class="pi-score">@test.Score</span></td>
+                            <td class="pi-date">@test.DateWritten.ToShortDateString()</td>
+                            <td>
+                                <input type="datetime-local"
+                                       form="scheduleForm_@test.ResultId"
+                                       name="scheduledDate"
+                                       class="pi-datetime-input"
+                                       min="@DateTime.Now.ToString("yyyy-MM-ddTHH:mm")"
+                                       required />
+                            </td>
+                            <td>
+                                <form id="scheduleForm_@test.ResultId" asp-action="ScheduleFromTest" method="post">
+                                    <input type="hidden" name="ResultId" value="@test.ResultId" />
+                                    <button type="submit" class="pi-schedule-btn">
+                                        <i class="fa-solid fa-calendar-plus"></i>
+                                        Schedule
+                                    </button>
+                                </form>
+                            </td>
+                        </tr>
+                    }
+                </tbody>
+            </table>
+        </div>
+    }
+    else
+    {
+        <div class="pi-table-wrap">
+            <div class="pi-empty">
+                <i class="fa-solid fa-user-clock"></i>
+                No candidates are ready for interview right now.
+            </div>
+        </div>
+    }
+
+</div>

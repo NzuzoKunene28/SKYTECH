@@ -1,0 +1,709 @@
+﻿@model SkyTech.ViewModels.CandidateContractViewModel
+
+@{
+    ViewData["Title"] = "Sign Contract";
+    ViewData["Subtitle"] = "Review and sign your employment contract";
+    Layout = "~/Views/Shared/_MinimalLayout.cshtml";
+}
+
+@section Styles {
+     <link rel="stylesheet" href="~/CSS/CUSTOMERCSS/SignContract.css" />
+}
+
+
+@* 
+<style>
+    .sign-container {
+        max-width: 900px;
+        margin: 30px auto;
+        background: #fff;
+        padding: 32px;
+        border-radius: 12px;
+        border: 1px solid #e2e8f0;
+        box-shadow: 0 1px 3px rgba(0,0,0,0.06);
+    }
+
+    .contract-section {
+        margin-bottom: 25px;
+    }
+
+    .contract-section h4 {
+        font-weight: 700;
+        color: #1e293b;
+        margin-bottom: 12px;
+    }
+
+    .contract-box {
+        background: #f8fafc;
+        border: 1px solid #e2e8f0;
+        border-radius: 8px;
+        padding: 18px;
+        line-height: 1.7;
+        white-space: pre-wrap;
+        word-wrap: break-word;
+    }
+
+    .candidate-info {
+        display: grid;
+        grid-template-columns: 1fr 1fr;
+        gap: 15px;
+        margin-bottom: 25px;
+    }
+
+    .info-box {
+        border: 1px solid #e2e8f0;
+        border-radius: 8px;
+        padding: 15px;
+        background: #fff;
+    }
+
+    .info-label {
+        display: block;
+        font-size: 12px;
+        color: #64748b;
+        margin-bottom: 5px;
+        font-weight: 600;
+    }
+
+    .info-value {
+        font-size: 15px;
+        color: #1e293b;
+        font-weight: 500;
+    }
+
+    .signature-pad-wrapper {
+        border: 1.5px solid #e2e8f0;
+        border-radius: 8px;
+        overflow: hidden;
+        background: #fff;
+    }
+
+    .signature-pad-wrapper.error {
+        border-color: #dc2626;
+    }
+
+    #signatureCanvas {
+        display: block;
+        width: 100%;
+        height: 200px;
+        touch-action: none;
+        cursor: crosshair;
+        background: #fafafa;
+    }
+
+    .signature-pad-footer {
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        padding: 8px 12px;
+        background: #f8fafc;
+        border-top: 1px solid #e2e8f0;
+    }
+
+    .signature-hint {
+        font-size: 12px;
+        color: #94a3b8;
+    }
+
+    .checkbox-group {
+        display: flex;
+        align-items: flex-start;
+        gap: 10px;
+        margin-top: 20px;
+    }
+
+    .checkbox-group input {
+        width: 18px;
+        height: 18px;
+        margin-top: 2px;
+    }
+
+    .checkbox-group label {
+        color: #334155;
+        line-height: 1.5;
+        cursor: pointer;
+    }
+
+    .btn {
+        padding: 10px 24px;
+        border-radius: 8px;
+        font-weight: 600;
+        font-size: 14px;
+        text-decoration: none;
+        border: none;
+        cursor: pointer;
+    }
+
+    .btn-success {
+        background: #16a34a;
+        color: white;
+    }
+
+    .btn-success:hover {
+        background: #15803d;
+    }
+
+    .btn-outline {
+        background: transparent;
+        color: #475569;
+        border: 1.5px solid #cbd5e1;
+    }
+
+    .btn-outline:hover {
+        background: #f1f5f9;
+    }
+
+    .required {
+        color: #dc2626;
+    }
+
+    .text-danger {
+        color: #dc2626;
+        font-size: 13px;
+    }
+
+ 
+    
+</style> *@
+
+<div class="sign-container">
+
+    ```
+    <h2 style="margin-bottom:8px;">
+        Employment Contract
+    </h2>
+
+    <p style="color:#64748b;margin-bottom:30px;">
+        Please carefully review your employment contract before signing.
+    </p>
+
+
+
+
+    <div class="contract-section">
+
+        <h4>Candidate Information</h4>
+
+        <div class="candidate-info">
+
+            <div class="info-box">
+
+                <span class="info-label">
+                    Full Name
+                </span>
+
+                <span class="info-value">
+                    @Model.CandidateName
+                </span>
+
+            </div>
+
+            <div class="info-box">
+
+                <span class="info-label">
+                    Email
+                </span>
+
+                <span class="info-value">
+                    @Model.Email
+                </span>
+
+            </div>
+
+        </div>
+
+    </div>
+
+
+
+
+    <div class="contract-section">
+
+        <h4>Employment Information</h4>
+
+        <div class="candidate-info">
+
+            <div class="info-box">
+
+                <span class="info-label">
+                    Position
+                </span>
+
+                <span class="info-value">
+                    @Model.JobTitle
+                </span>
+
+            </div>
+
+            <div class="info-box">
+
+                <span class="info-label">
+                    Employment Type
+                </span>
+
+                <span class="info-value">
+                    @Model.EmploymentType
+                </span>
+
+            </div>
+
+        </div>
+
+    </div>
+
+
+
+
+    <div class="contract-section">
+
+        <h4>Job Description</h4>
+
+        <div class="contract-box">
+            @Model.JobDescription
+        </div>
+
+    </div>
+
+
+
+    <div class="contract-section">
+
+        <h4>Terms and Conditions</h4>
+
+        <div class="contract-box">
+            @Model.ContractTerms
+        </div>
+
+    </div>
+
+
+
+
+    <div class="contract-section">
+
+        <h4>Contract Information</h4>
+
+        <div class="info-box">
+
+            <span class="info-label">
+                Contract Sent
+            </span>
+
+            <span class="info-value">
+                @Model.DateSent.ToString("dd MMMM yyyy")
+            </span>
+
+        </div>
+
+    </div>
+
+
+    <form asp-action="SignContract"
+          method="post"
+          id="signForm">
+
+        @Html.AntiForgeryToken()
+
+        <input type="hidden"
+               asp-for="ContractId" />
+
+        <input type="hidden"
+               asp-for="ApplicationId" />
+
+        <input type="hidden"
+               asp-for="CandidateSignature"
+               id="signatureInput" />
+
+
+        <div class="contract-section">
+
+            <h4>
+                Candidate Signature
+            </h4>
+
+            <p style="color:#64748b;">
+                Please sign below using your mouse, touchscreen, or stylus.
+            </p>
+
+
+            <div class="signature-pad-wrapper"
+                 id="padWrapper">
+
+                <canvas id="signatureCanvas"></canvas>
+
+                <div class="signature-pad-footer">
+
+                    <span class="signature-hint">
+                        Draw your signature above
+                    </span>
+
+                    <button type="button"
+                            class="btn btn-outline"
+                            id="clearSignatureBtn">
+
+                        Clear
+
+                    </button>
+
+                </div>
+
+            </div>
+
+
+            <span id="signatureRequiredMsg"
+                  class="text-danger"
+                  style="display:none;">
+
+                Please draw your signature before submitting.
+
+            </span>
+
+        </div>
+
+
+
+
+        <div class="checkbox-group">
+
+            <input asp-for="AgreeToTerms"
+                   type="checkbox"
+                   id="agreeToTerms" />
+
+            <label asp-for="AgreeToTerms">
+
+                I have read and understood this employment contract,
+                including the job description and terms and conditions.
+                I agree to the terms of this contract and confirm that
+                the signature above represents my electronic signature.
+
+            </label>
+
+        </div>
+
+        <span asp-validation-for="AgreeToTerms"
+              class="text-danger">
+        </span>
+
+
+     
+
+        <div style="
+            display:flex;
+            gap:12px;
+            margin-top:30px;
+            padding-top:20px;
+            border-top:1px solid #e2e8f0;">
+
+            <a asp-action="MyContracts"
+               class="btn btn-outline">
+
+                Cancel
+
+            </a>
+
+            <button type="submit"
+                    class="btn btn-success"
+                    id="submitBtn">
+
+                Sign Contract
+
+            </button>
+
+        </div>
+
+    </form>
+    ```
+
+</div>
+
+@section Scripts {
+
+    ```
+    <partial name="_ValidationScriptsPartial" />
+
+    <script>
+
+        (function () {
+
+            const canvas =
+                document.getElementById("signatureCanvas");
+
+            const ctx =
+                canvas.getContext("2d");
+
+            const wrapper =
+                document.getElementById("padWrapper");
+
+            const hiddenInput =
+                document.getElementById("signatureInput");
+
+            const clearBtn =
+                document.getElementById("clearSignatureBtn");
+
+            const requiredMsg =
+                document.getElementById("signatureRequiredMsg");
+
+            const form =
+                document.getElementById("signForm");
+
+            const agreeCheckbox =
+                document.getElementById("agreeToTerms");
+
+
+            let drawing = false;
+
+            let hasStroke = false;
+
+            let lastX = 0;
+
+            let lastY = 0;
+
+
+            function resizeCanvas() {
+
+                const ratio =
+                    window.devicePixelRatio || 1;
+
+                const rect =
+                    canvas.getBoundingClientRect();
+
+                canvas.width =
+                    rect.width * ratio;
+
+                canvas.height =
+                    rect.height * ratio;
+
+                ctx.setTransform(
+                    ratio,
+                    0,
+                    0,
+                    ratio,
+                    0,
+                    0
+                );
+
+                ctx.lineWidth = 2;
+
+                ctx.lineCap = "round";
+
+                ctx.lineJoin = "round";
+
+                ctx.strokeStyle = "#1e293b";
+            }
+
+
+            function getPosition(e) {
+
+                const rect =
+                    canvas.getBoundingClientRect();
+
+                return {
+
+                    x: e.clientX - rect.left,
+
+                    y: e.clientY - rect.top
+
+                };
+
+            }
+
+
+            function startDrawing(e) {
+
+                e.preventDefault();
+
+                drawing = true;
+
+                hasStroke = true;
+
+                const position =
+                    getPosition(e);
+
+                lastX = position.x;
+
+                lastY = position.y;
+
+                wrapper.classList.remove("error");
+
+                requiredMsg.style.display = "none";
+            }
+
+
+            function draw(e) {
+
+                if (!drawing)
+                    return;
+
+                e.preventDefault();
+
+                const position =
+                    getPosition(e);
+
+                ctx.beginPath();
+
+                ctx.moveTo(
+                    lastX,
+                    lastY
+                );
+
+                ctx.lineTo(
+                    position.x,
+                    position.y
+                );
+
+                ctx.stroke();
+
+                lastX = position.x;
+
+                lastY = position.y;
+            }
+
+
+            function stopDrawing() {
+
+                drawing = false;
+            }
+
+
+            function clearSignature() {
+
+                const rect =
+                    canvas.getBoundingClientRect();
+
+                ctx.clearRect(
+                    0,
+                    0,
+                    rect.width,
+                    rect.height
+                );
+
+                hasStroke = false;
+
+                hiddenInput.value = "";
+            }
+
+
+            // Mouse
+
+            canvas.addEventListener(
+                "mousedown",
+                startDrawing
+            );
+
+            canvas.addEventListener(
+                "mousemove",
+                draw
+            );
+
+            window.addEventListener(
+                "mouseup",
+                stopDrawing
+            );
+
+
+            // Touch
+
+            canvas.addEventListener(
+                "touchstart",
+                function (e) {
+
+                    e.preventDefault();
+
+                    const touch = e.touches[0];
+
+                    startDrawing({
+                        preventDefault: () => {},
+                        clientX: touch.clientX,
+                        clientY: touch.clientY
+                    });
+
+                },
+                { passive: false }
+            );
+
+
+            canvas.addEventListener(
+                "touchmove",
+                function (e) {
+
+                    e.preventDefault();
+
+                    const touch = e.touches[0];
+
+                    draw({
+                        preventDefault: () => {},
+                        clientX: touch.clientX,
+                        clientY: touch.clientY
+                    });
+
+                },
+                { passive: false }
+            );
+
+
+            canvas.addEventListener(
+                "touchend",
+                stopDrawing
+            );
+
+
+            clearBtn.addEventListener(
+                "click",
+                clearSignature
+            );
+
+
+            window.addEventListener(
+                "resize",
+                resizeCanvas
+            );
+
+
+            resizeCanvas();
+
+
+            form.addEventListener(
+                "submit",
+                function (e) {
+
+                    if (!hasStroke) {
+
+                        e.preventDefault();
+
+                        wrapper.classList.add("error");
+
+                        requiredMsg.style.display =
+                            "block";
+
+                        canvas.scrollIntoView({
+                            behavior: "smooth",
+                            block: "center"
+                        });
+
+                        return;
+                    }
+
+
+                    if (!agreeCheckbox.checked) {
+
+                        e.preventDefault();
+
+                        alert(
+                            "You must agree to the terms and conditions before signing the contract."
+                        );
+
+                        return;
+                    }
+
+
+                    hiddenInput.value =
+                        canvas.toDataURL("image/png");
+
+                }
+            );
+
+        })();
+
+    </script>
+
+}

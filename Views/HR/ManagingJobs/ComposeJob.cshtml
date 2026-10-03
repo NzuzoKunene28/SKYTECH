@@ -1,0 +1,135 @@
+﻿@model SkyTech.Models.JobPost
+
+@{
+    ViewData["Title"] = "Compose a Job Post";
+    Layout = "~/Views/Shared/_MinimalLayout.cshtml";
+}
+
+@section Styles {
+    <link rel="stylesheet" href="~/CSS/HRCSS/ComposeJob.css" />
+}
+
+<div class="hr-page">
+    <div class="hr-container-narrow">
+
+        <div class="hr-header-sm">
+            <h2>Compose a Job Post</h2>
+            <p>Fill in the details below to publish a new vacancy</p>
+        </div>
+
+        <div class="form-container">
+
+            <form asp-controller="HR" asp-action="ComposeJob" method="Post">
+
+                <div class="form-section-label">Role Details</div>
+
+                <div class="form-row">
+                    <div class="form-group">
+                        <label>Job Title</label>
+                        <select asp-for="PositionId" asp-items="ViewBag.JobTitles">
+                            <option value="">--Select Job Title--</option>
+                        </select>
+                        <span asp-validation-for="PositionId"></span>
+                    </div>
+
+                    <div class="form-group">
+                        <label>Select Branch (via Shop Owner)</label>
+                        <select asp-for="OwnerId" asp-items="ViewBag.Owners">
+                            <option value="">--Select Shop Owner / Branch--</option>
+                        </select>
+                        <span asp-validation-for="OwnerId"></span>
+                    </div>
+                </div>
+
+                <div class="form-row">
+                    <div class="form-group">
+                        <label asp-for="Department">Select Department</label>
+                        <select asp-for="Department"
+                                asp-items="Html.GetEnumSelectList<SkyTech.Models.SelectDepartment>()">
+                            <option value="">--Select Department--</option>
+                        </select>
+                        <span asp-validation-for="Department"></span>
+                    </div>
+
+                    <div class="form-group">
+                        <label asp-for="Location">Work Location</label>
+                        <select asp-for="Location"
+                                asp-items="Html.GetEnumSelectList<SkyTech.Models.SelectLocation>()">
+                            <option value="">--Select Work Location--</option>
+                        </select>
+                        <span asp-validation-for="Location"></span>
+                    </div>
+                </div>
+
+                <div class="form-row">
+                    <div class="form-group">
+                        <label asp-for="EmploymentType">Employment Type</label>
+                        <select asp-for="EmploymentType"
+                                asp-items="Html.GetEnumSelectList<SkyTech.Models.SelectEmploymentType>()">
+                            <option value="">--Select Employment Type</option>
+                        </select>
+                        <span asp-validation-for="EmploymentType"></span>
+                    </div>
+
+                    <div class="form-group">
+                        <label asp-for="ClosingDate">Closing Date</label>
+                        <input asp-for="ClosingDate" type="date" />
+                        <span asp-validation-for="ClosingDate"></span>
+                    </div>
+                </div>
+
+                <div class="form-section-label">Compensation</div>
+
+                <div class="form-row">
+                    <div class="form-group">
+                        <label asp-for="SalaryMin">Minimum Salary</label>
+                        <input asp-for="SalaryMin" type="number" placeholder="Value in Rands" />
+                        <span asp-validation-for="SalaryMin"></span>
+                    </div>
+
+                    <div class="form-group">
+                        <label asp-for="SalaryMax">Maximum Salary</label>
+                        <input asp-for="SalaryMax" type="number" placeholder="Value in Rands" />
+                        <span asp-validation-for="SalaryMax"></span>
+                    </div>
+                </div>
+
+                <div class="form-section-label">Role Description</div>
+
+                <div class="form-group">
+                    <label asp-for="Responsibilities">List Responsibilities For The Role</label>
+                    <textarea asp-for="Responsibilities" rows="5" placeholder="List them here"></textarea>
+                    <span asp-validation-for="Responsibilities"></span>
+                </div>
+
+                <div class="form-group">
+                    <label asp-for="RequiredCerts">Required Certifications</label>
+                    <textarea asp-for="RequiredCerts" rows="7" placeholder="List the certifications and Qualifications here"></textarea>
+                    <span asp-validation-for="RequiredCerts"></span>
+                </div>
+
+              
+                <div class="form-group">
+                    <label asp-for="RequiredSkillsAndXP">Required Skills and Experience</label>
+                    <textarea asp-for="RequiredSkillsAndXP" rows="7" placeholder="List the Skills and Experience here"></textarea>
+                    <span asp-validation-for="RequiredSkillsAndXP"></span>
+                </div>
+
+                <div class="form-group">
+                    <label asp-for="ContractTerms">Terms and Conditions</label>
+                    <textarea asp-for="ContractTerms" rows="7" placeholder="List the T&Cs here"></textarea>
+                    <span asp-validation-for="ContractTerms"></span>
+                </div>
+
+                <div class="btn-submit">
+                    <button type="submit">
+                        Post job
+                    </button>
+                </div>
+
+            </form>
+
+        </div>
+
+    </div>
+</div>

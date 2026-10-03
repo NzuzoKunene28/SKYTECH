@@ -1,0 +1,185 @@
+﻿@* @model List<SkyTech.Models.SkytechWorkers.RosterShift>
+@{
+    ViewData["Title"] = "My Roster";
+    Layout = "~/Views/Shared/_MinimalLayout.cshtml";
+
+}
+
+@section Styles {
+    <link rel="stylesheet" href="~/CSS/STAFFCSS/MyRoster.css" />
+}
+
+<style>
+    .my-row {
+        background-color: #fff3b0;
+        font-weight: bold;
+    }
+</style>
+
+<h1>My Roster</h1>
+
+@if (ViewBag.NoRoster == true)
+{
+    <p>No published roster is available yet for your branch.</p>
+}
+else
+{
+    <h3>@ViewBag.PositionName — @ViewBag.BranchName — Week of @(((DateTime)ViewBag.WeekStartDate).ToShortDateString())</h3>
+
+    var weekStartDate = (DateTime)ViewBag.WeekStartDate;
+    var weekDates = Enumerable.Range(0, 7).Select(i => weekStartDate.AddDays(i)).ToList();
+    int currentStaffId = (int)ViewBag.CurrentStaffId;
+
+    var byStaff = Model
+        .GroupBy(s => s.Staff)
+        .OrderBy(g => g.Key.FirstName);
+
+    <table border="1" cellpadding="6">
+        <thead>
+            <tr>
+                <th>Employee Name</th>
+                @foreach (var date in weekDates)
+                {
+                    <th>@date.ToString("dddd")<br />@date.ToString("dd MMM")</th>
+                }
+            </tr>
+        </thead>
+        <tbody>
+            @foreach (var staffGroup in byStaff)
+            {
+                bool isMe = staffGroup.Key.StaffId == currentStaffId;
+                <tr class="@(isMe ? "my-row" : "")">
+                    <td>@staffGroup.Key.FirstName @staffGroup.Key.LastName @(isMe ? "(You)" : "")</td>
+                    @foreach (var date in weekDates)
+                    {
+                        var shiftThatDay = staffGroup.FirstOrDefault(s => s.WorkDate.Date == date.Date);
+                        <td>
+                            @if (shiftThatDay != null)
+                            {
+                                @($"{shiftThatDay.StartTime} - {shiftThatDay.EndTime}")
+
+                                if (isMe)
+                                {
+                                    <br />
+                                    <a asp-controller="ShiftChange" asp-action="RequestChange"
+                                       asp-route-rosterShiftId="@shiftThatDay.RosterShiftId"
+                                       class="btn btn-sm btn-outline-primary">
+                                        Request Change
+                                    </a>
+                                }
+                            }
+                            else
+                            {
+                                @: —
+                            }
+                        </td>
+                    }
+                </tr>
+            }
+        </tbody>
+    </table>
+} *@
+
+@model List<SkyTech.Models.SkytechWorkers.RosterShift>
+@{
+    ViewData["Title"] = "My Roster";
+    Layout = "~/Views/Shared/_MinimalLayout.cshtml";
+}
+
+<link rel="stylesheet" href="~/CSS/StaffCSS/MyRoster.css" />
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
+
+<div class="mr-wrap">
+
+    <div class="mr-header">
+        <div>
+            <p class="mr-eyebrow">Roster</p>
+            <h1 class="mr-title">My Roster</h1>
+        </div>
+    </div>
+
+    @if (ViewBag.NoRoster == true)
+    {
+        <div class="mr-empty">
+            <i class="fa-solid fa-calendar-xmark"></i>
+            No published roster is available yet for your branch.
+        </div>
+    }
+    else
+    {
+        var weekStartDate = (DateTime)ViewBag.WeekStartDate;
+        var weekDates = Enumerable.Range(0, 7).Select(i => weekStartDate.AddDays(i)).ToList();
+        int currentStaffId = (int)ViewBag.CurrentStaffId;
+
+        var byStaff = Model
+            .GroupBy(s => s.Staff)
+            .OrderBy(g => g.Key.FirstName);
+
+        <div class="mr-position">
+
+            <h2 class="mr-position-title">
+                <i class="fa-solid fa-id-badge"></i>
+                @ViewBag.PositionName — @ViewBag.BranchName — Week of @weekStartDate.ToShortDateString()
+            </h2>
+
+            <div class="mr-table-wrap">
+                <table class="mr-table">
+                    <thead>
+                        <tr>
+                            <th>Employee Name</th>
+                            @foreach (var date in weekDates)
+                            {
+                                <th>
+                                    <span class="mr-day-name">@date.ToString("dddd")</span>
+                                    <span class="mr-day-date">@date.ToString("dd MMM")</span>
+                                </th>
+                            }
+                        </tr>
+                    </thead>
+                    <tbody>
+                        @foreach (var staffGroup in byStaff)
+                        {
+                            bool isMe = staffGroup.Key.StaffId == currentStaffId;
+                            <tr class="@(isMe ? "mr-me-row" : "")">
+                                <td>
+                                    @staffGroup.Key.FirstName @staffGroup.Key.LastName
+                                    @if (isMe)
+                                    {
+                                        <span class="mr-you-badge">You</span>
+                                    }
+                                </td>
+                                @foreach (var date in weekDates)
+                                {
+                                    var shiftThatDay = staffGroup.FirstOrDefault(s => s.WorkDate.Date == date.Date);
+                                    <td>
+                                        @if (shiftThatDay != null)
+                                        {
+                                            <span class="mr-shift">@shiftThatDay.StartTime - @shiftThatDay.EndTime</span>
+
+                                            if (isMe)
+                                            {
+                                                <a asp-controller="ShiftChange" asp-action="RequestChange"
+                                                   asp-route-rosterShiftId="@shiftThatDay.RosterShiftId"
+                                                   class="mr-request-btn">
+                                                    Request change
+                                                </a>
+                                            }
+                                        }
+                                        else
+                                        {
+                                            <span class="mr-off">—</span>
+                                        }
+                                    </td>
+                                }
+                            </tr>
+                        }
+                    </tbody>
+                </table>
+            </div>
+
+        </div>
+    }
+
+</div>

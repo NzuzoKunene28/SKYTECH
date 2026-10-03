@@ -1,0 +1,255 @@
+/* ShiftChangeRequests.css — belongs to Views/ShiftChange/Index.cshtml (or wherever the
+   pending-requests view lives)
+   Path: ~/CSS/HRCSS/ShiftChangeRequests.css
+   Uses _MinimalLayout.cshtml — no sidebar, so this only styles the page content.
+   Color tokens match ~/CSS/HRCSS/HRDash.css so the two pages feel like one product. */
+
+:root {
+    --blue: #5f9ea0;
+    --blue-dark: #2d6b6d;
+    --blue-deep: #1f4f50;
+    --bg: #f0f4fc;
+    --border: #dde6f5;
+    --text: #0e1b35;
+    --text-2: #4a5878;
+    --text-m: #8a96b0;
+
+    /* page-specific accents, kept in the same family as the base palette */
+    --amber: #c8862d;
+    --amber-bg: #fbf1e2;
+    --coral: #b5473f;
+    --coral-bg: #fbeceb;
+    --success-bg: #e9f5f0;
+    --success-text: #226657;
+    --success-border: #bfe3d5;
+}
+
+* , *::before, *::after {
+    box-sizing: border-box;
+}
+
+body {
+    margin: 0;
+    font-family: 'Plus Jakarta Sans', sans-serif;
+    background-color: var(--bg);
+    color: var(--text);
+}
+
+.scr-page {
+    max-width: 1180px;
+    margin: 0 auto;
+    padding: 2.5rem 3rem 4rem;
+}
+
+.scr-eyebrow {
+    font-size: .72rem;
+    font-weight: 700;
+    color: var(--text-m);
+    text-transform: uppercase;
+    letter-spacing: 1.2px;
+    margin: 0 0 .4rem;
+}
+
+.scr-title {
+    font-family: 'Clash Display', 'Plus Jakarta Sans', sans-serif;
+    font-weight: 700;
+    font-size: 1.9rem;
+    letter-spacing: -.5px;
+    color: var(--text);
+    margin: 0 0 .4rem;
+}
+
+.scr-sub {
+    font-size: .9rem;
+    color: var(--text-m);
+    margin: 0 0 1.8rem;
+}
+
+/* ══ ALERT ══ */
+.scr-alert {
+    display: flex;
+    align-items: center;
+    gap: .6rem;
+    background: var(--success-bg);
+    color: var(--success-text);
+    border: 1.5px solid var(--success-border);
+    border-radius: 10px;
+    padding: .75rem 1rem;
+    font-size: .85rem;
+    font-weight: 600;
+    margin-bottom: 1.5rem;
+}
+
+/* ══ CARD + TABLE ══ */
+.scr-card {
+    background: #fff;
+    border: 1.5px solid var(--border);
+    border-radius: 14px;
+    overflow: hidden;
+}
+
+.scr-empty {
+    padding: 3rem 1.5rem;
+    text-align: center;
+    color: var(--text-m);
+    font-size: .9rem;
+}
+
+.scr-table {
+    width: 100%;
+    border-collapse: collapse;
+    font-size: .85rem;
+}
+
+    .scr-table thead th {
+        text-align: left;
+        font-size: .68rem;
+        font-weight: 700;
+        color: var(--text-m);
+        text-transform: uppercase;
+        letter-spacing: .8px;
+        background: var(--bg);
+        padding: .85rem 1.1rem;
+        border-bottom: 1.5px solid var(--border);
+    }
+
+    .scr-table tbody td {
+        padding: .95rem 1.1rem;
+        border-bottom: 1px solid var(--border);
+        color: var(--text-2);
+        vertical-align: top;
+    }
+
+    .scr-table tbody tr:last-child td {
+        border-bottom: none;
+    }
+
+    .scr-table tbody tr:hover {
+        background: rgba(95, 158, 160, .05);
+    }
+
+.scr-staff {
+    font-weight: 700;
+    color: var(--text);
+}
+
+.scr-shift-meta {
+    display: block;
+    font-size: .78rem;
+    color: var(--text-m);
+    margin-top: .15rem;
+}
+
+/* ══ TYPE BADGE ══ */
+.scr-badge {
+    display: inline-block;
+    padding: .28rem .65rem;
+    border-radius: 999px;
+    font-size: .72rem;
+    font-weight: 700;
+    letter-spacing: .2px;
+    white-space: nowrap;
+}
+
+.scr-badge-swap {
+    background: rgba(95, 158, 160, .14);
+    color: var(--blue-deep);
+}
+
+.scr-badge-time {
+    background: var(--amber-bg);
+    color: var(--amber);
+}
+
+.scr-detail {
+    color: var(--text-2);
+    font-size: .82rem;
+}
+
+.scr-detail-label {
+    display: block;
+    font-size: .68rem;
+    font-weight: 700;
+    color: var(--text-m);
+    text-transform: uppercase;
+    letter-spacing: .6px;
+    margin-bottom: .2rem;
+}
+
+/* ══ ACTIONS ══ */
+.scr-actions {
+    display: flex;
+    flex-direction: column;
+    gap: .5rem;
+    min-width: 180px;
+}
+
+.scr-action-form {
+    display: flex;
+    gap: .4rem;
+}
+
+.scr-note-input {
+    flex: 1;
+    border: 1.5px solid var(--border);
+    border-radius: 8px;
+    padding: .4rem .6rem;
+    font-size: .8rem;
+    font-family: inherit;
+    color: var(--text);
+    background: #fff;
+}
+
+    .scr-note-input:focus {
+        outline: none;
+        border-color: var(--blue);
+        box-shadow: 0 0 0 3px rgba(95, 158, 160, .15);
+    }
+
+.scr-btn {
+    border: none;
+    border-radius: 8px;
+    padding: .4rem .85rem;
+    font-size: .78rem;
+    font-weight: 700;
+    cursor: pointer;
+    white-space: nowrap;
+    transition: filter .15s, transform .05s;
+}
+
+    .scr-btn:hover {
+        filter: brightness(.94);
+    }
+
+    .scr-btn:active {
+        transform: translateY(1px);
+    }
+
+    .scr-btn:focus-visible {
+        outline: 2px solid var(--blue-deep);
+        outline-offset: 2px;
+    }
+
+.scr-btn-approve {
+    background: linear-gradient(135deg, var(--blue), var(--blue-dark));
+    color: #fff;
+}
+
+.scr-btn-reject {
+    background: var(--coral-bg);
+    color: var(--coral);
+}
+
+@media (max-width: 860px) {
+    .scr-page {
+        padding: 1.75rem 1.25rem 3rem;
+    }
+
+    .scr-card {
+        overflow-x: auto;
+    }
+
+    .scr-table {
+        min-width: 720px;
+    }
+}

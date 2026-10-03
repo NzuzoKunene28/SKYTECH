@@ -1,0 +1,380 @@
+﻿@using SkyTech.Models
+@model List<SkyTech.Models.ProposeItem>
+@{
+    Layout = "~/Views/Shared/_MinimalLayout.cshtml";
+    ViewData["Title"] = "My Proposals";
+}
+
+@section Styles {
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+    <link href="https://api.fontshare.com/v2/css?f[]=clash-display@400,500,600,700&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="~/CSS/SharedLayout.css">
+    <link rel="stylesheet" href="~/CSS/CusMyProposal.css">
+   
+}
+
+@{
+    // ── helpers ──────────────────────────────────────────────────────────────
+    string HeadClass(Status s) => s switch {
+        Status.Pending           => "h-pending",
+        Status.Approved          => "h-approved",
+        Status.CustomerAccepted  => "h-approved",
+        Status.CollectionScheduled => "h-approved",
+        Status.Item_Collected    => "h-collected",
+        Status.PaymentMade       => "h-paid",
+        Status.Rejected          => "h-danger",
+        Status.CustomerDeclined  => "h-danger",
+        Status.Cancelled         => "h-danger",
+        _                        => "h-pending"
+    };
+
+    (string icon, string label) StatusInfo(Status s) => s switch {
+        Status.Pending           => ("fa-clock",              "Pending Review"),
+        Status.Approved          => ("fa-circle-check",       "Offer Made"),
+        Status.Rejected          => ("fa-circle-xmark",       "Rejected"),
+        Status.Cancelled         => ("fa-ban",                "Cancelled"),
+        Status.CustomerAccepted  => ("fa-handshake",          "Offer Accepted"),
+        Status.CustomerDeclined  => ("fa-thumbs-down",        "Offer Declined"),
+        Status.CollectionScheduled => ("fa-calendar-check",   "Collection Scheduled"),
+        Status.Item_Collected    => ("fa-box-open",           "Item Collected"),
+        Status.PaymentMade       => ("fa-money-bill-wave",    "Payment Made"),
+        _                        => ("fa-circle-dot",         s.ToString())
+    };
+
+    // ── timeline definition (happy path order) ───────────────────────────────
+    var timelineSteps = new[] {
+        (Status.Pending,             "fa-clock",           "Submitted"),
+        (Status.Approved,            "fa-circle-check",    "Offer Made"),
+        (Status.CustomerAccepted,    "fa-handshake",       "Accepted"),
+        (Status.CollectionScheduled, "fa-calendar-check",  "Scheduled"),
+        (Status.Item_Collected,      "fa-box-open",        "Collected"),
+        (Status.PaymentMade,         "fa-money-bill-wave", "Paid"),
+    };
+
+    bool IsTerminal(Status s) =>
+        s == Status.Rejected || s == Status.Cancelled || s == Status.CustomerDeclined;
+
+    int HappyIndex(Status s) => s switch {
+        Status.Pending             => 0,
+        Status.Approved            => 1,
+        Status.CustomerAccepted    => 2,
+        Status.CollectionScheduled => 3,
+        Status.Item_Collected      => 4,
+        Status.PaymentMade         => 5,
+        _                          => -1
+    };
+}
+
+<!-- Lightbox overlay -->
+<div class="lb-overlay" id="lb">
+    <button class="lb-close" onclick="closeLb()"><i class="fas fa-xmark"></i></button>
+    <img class="lb-img" id="lb-img" src="" alt="preview"/>
+</div>
+
+<div class="page">
+
+    <div class="pg-title">My Proposals</div>
+    <div class="pg-sub">@Model.Count proposal@(Model.Count != 1 ? "s" : "") submitted by you</div>
+
+    @if (Model.Any())
+    {
+        <!-- summary pills -->
+        <div class="summary-row">
+            @{
+                var grouped = Model.GroupBy(p => p.ProdStatus);
+                foreach (var g in grouped.OrderBy(g => g.Key.ToString()))
+                {
+                    var (ico, lbl) = StatusInfo(g.Key);
+                    var (bg, fg, bc) = g.Key switch {
+                        Status.Pending           => ("#f1f5f9","#475569","#cbd5e1"),
+                        Status.Approved          => ("#eff6ff","#1a73e8","#bfdbfe"),
+                        Status.CustomerAccepted  => ("#f0fdf4","#16a34a","#bbf7d0"),
+                        Status.CollectionScheduled => ("#eff6ff","#0e7490","#a5f3fc"),
+                        Status.Item_Collected    => ("#ecfeff","#0e7490","#a5f3fc"),
+                        Status.PaymentMade       => ("#faf5ff","#7c3aed","#ddd6fe"),
+                        Status.Rejected          => ("#fef2f2","#dc2626","#fecaca"),
+                        Status.CustomerDeclined  => ("#fef2f2","#dc2626","#fecaca"),
+                        Status.Cancelled         => ("#f8fafc","#64748b","#e2e8f0"),
+                        _                        => ("#f1f5f9","#475569","#cbd5e1")
+                    };
+                    <span class="sum-pill" style="background:@bg;color:@fg;border-color:@bc">
+                        <i class="fas @ico"></i> @lbl &nbsp;<strong>@g.Count()</strong>
+                    </span>
+                }
+            }
+        </div>
+    }
+
+    @if (!Model.Any())
+    {
+        <div class="empty">
+            <i class="fas fa-file-invoice"></i>
+            <h3>No proposals yet</h3>
+            <p>You haven't submitted any proposals. Start by browsing items to propose.</p>
+        </div>
+    }
+    else
+    {
+        int idx = 1;
+        foreach (var item in Model)
+        {
+            var (statusIcon, statusLabel) = StatusInfo(item.ProdStatus);
+            string headCls  = HeadClass(item.ProdStatus);
+            int    curStep  = HappyIndex(item.ProdStatus);
+            bool   terminal = IsTerminal(item.ProdStatus);
+
+            <div class="task-card">
+
+                <!-- ── Header ── -->
+                <div class="tc-head @headCls">
+                    <div class="tc-num">@idx</div>
+                    <div style="position:relative;z-index:1;min-width:0">
+                        <div class="tc-name">@item.ProdName</div>
+                        <div class="tc-cat">@item.ProdCategory &nbsp;·&nbsp; @item.ProdCondition</div>
+                    </div>
+                    <div class="tc-head-right">
+                        <div class="status-badge">
+                            <i class="fas @statusIcon"></i>
+                            @statusLabel
+                        </div>
+                    </div>
+                </div>
+
+                <!-- ── Status Timeline ── -->
+                <div class="status-timeline">
+                    <div class="stl-title"><i class="fas fa-timeline"></i> PROPOSAL PROGRESS</div>
+                    <div class="stl-steps">
+                        @if (!terminal)
+                        {
+                            @for (int si = 0; si < timelineSteps.Length; si++)
+                            {
+                                var (stepStatus, stepIcon, stepLbl) = timelineSteps[si];
+                                string stepCls = si < curStep  ? "done"
+                                               : si == curStep ? "active"
+                                               : "";
+                                <div class="stl-step @stepCls">
+                                    <div class="stl-dot"><i class="fas @stepIcon"></i></div>
+                                    <div class="stl-lbl">@stepLbl</div>
+                                </div>
+                            }
+                        }
+                        else
+                        {
+                            <!-- Show done steps up to the terminal point, then the terminal step -->
+                            @for (int si = 0; si < timelineSteps.Length; si++)
+                            {
+                                var (stepStatus, stepIcon, stepLbl) = timelineSteps[si];
+                                <div class="stl-step done">
+                                    <div class="stl-dot"><i class="fas @stepIcon"></i></div>
+                                    <div class="stl-lbl">@stepLbl</div>
+                                </div>
+                                if (si == 0) break; // only show Submitted as done, then terminal
+                            }
+                            @* @{ *@
+                                string termIcon = item.ProdStatus switch {
+                                    Status.Rejected        => "fa-circle-xmark",
+                                    Status.Cancelled       => "fa-ban",
+                                    Status.CustomerDeclined => "fa-thumbs-down",
+                                    _ => "fa-circle-xmark"
+                                };
+                                string termLbl = item.ProdStatus switch {
+                                    Status.Rejected        => "Rejected",
+                                    Status.Cancelled       => "Cancelled",
+                                    Status.CustomerDeclined => "Declined",
+                                    _ => "Ended"
+                                };
+                            @* } *@
+                            <div class="stl-step rejected-step">
+                                <div class="stl-dot"><i class="fas @termIcon"></i></div>
+                                <div class="stl-lbl">@termLbl</div>
+                            </div>
+                        }
+                    </div>
+                </div>
+
+                <!-- ── Offer Box (shown when Approved / awaiting customer response) ── -->
+                @if (item.ProdStatus == Status.Approved && item.AmountProposed > 0)
+                {
+                    <div class="offer-box">
+                        <div>
+                            <div class="offer-lbl">STORE OFFER</div>
+                            <div class="offer-amount">R @item.AmountProposed.ToString("N2")</div>
+                            <div class="offer-note">Review this offer and accept or decline below.</div>
+                        </div>
+                                <div class="offer-actions">
+
+                                    <!-- Accept: plain GET link to ProposalCheckout -->
+                                    <a href="@Url.Action("ProposalCheckout", "Customer", new { id = item.PropItemId })" class="btn-accept">
+                                        <i class="fas fa-check"></i> Accept
+                                    </a>
+
+                                    <!-- Decline: POST form styled as a button -->
+                                    <form method="post" asp-action="CustomerDeclineOffer" asp-controller="Customer" style="display:inline">
+                                        @Html.AntiForgeryToken()
+                                        <input type="hidden" name="id" value="@item.PropItemId" />
+                                        <button type="submit" class="btn-decline">
+                                            <i class="fas fa-xmark"></i> Decline
+                                        </button>
+                                    </form>
+
+                                </div>
+                    </div>
+                }
+
+                <!-- ── Info Grid ── -->
+                <div class="tc-grid">
+                    <div class="tc-cell">
+                        <div class="cell-lbl"><i class="fas fa-calendar-plus"></i> DATE SUBMITTED</div>
+                        <div class="cell-val blue">
+                            @(item.SavedOn != null && item.SavedOn != default(DateTime)
+                                ? ((DateTime)item.SavedOn)
+                                : item.SavedOn != null && item.SavedOn != default(DateTime)
+                                    ? ((DateTime)item.SavedOn)
+                                    : "—")
+                        </div>
+                    </div>
+                    <div class="tc-cell">
+                        <div class="cell-lbl"><i class="fas fa-tag"></i> CATEGORY</div>
+                        <div class="cell-val">@(item.ProdCategory)</div>
+                    </div>
+                    <div class="tc-cell">
+                        <div class="cell-lbl"><i class="fas fa-star-half-stroke"></i> CONDITION</div>
+                        <div class="cell-val">@(item.ProdCondition)</div>
+                    </div>
+                   
+                    @if (item.AmountProposed > 0)
+                    {
+                        <div class="tc-cell">
+                            <div class="cell-lbl"><i class="fas fa-hand-holding-dollar"></i> STORE OFFER</div>
+                            <div class="cell-val purple">R @item.AmountProposed.ToString("N2")</div>
+                        </div>
+                    }
+                    @if (item.CollectionDate != null && item.CollectionDate != default(DateTime))
+                    {
+                        <div class="tc-cell">
+                            <div class="cell-lbl"><i class="fas fa-truck-fast"></i> COLLECTION DATE</div>
+                            <div class="cell-val blue">@((DateTime)item.CollectionDate).ToString("dd MMM yyyy")</div>
+                        </div>
+                    }
+                    <div class="tc-cell">
+                        <div class="cell-lbl"><i class="fas fa-align-left"></i> DESCRIPTION</div>
+                        <div class="cell-val" style="font-size:.82rem;line-height:1.5">
+                            @(item.ProdDescription ?? "No description provided.")
+                        </div>
+                    </div>
+                    <div class="tc-cell">
+                        <div class="cell-lbl"><i class="fas fa-location-dot"></i> COLLECTION ADDRESS</div>
+                        <div class="cell-val" style="font-size:.82rem">
+                            @{
+                                string custAddr = item.CustomerAddress ?? item.Checkout?.Address ?? "";
+                            }
+                            @(custAddr != "" ? custAddr : "—")
+                        </div>
+                    </div>
+                </div>
+
+                <!-- ── Product Images ── -->
+                @if (item.ProposedProdPics != null && item.ProposedProdPics.Any())
+                {
+                    <div class="tc-imgs">
+                        <div class="imgs-lbl"><i class="fas fa-images" style="color:#1a73e8"></i> &nbsp;PRODUCT IMAGES</div>
+                        @foreach (var pic in item.ProposedProdPics)
+                        {
+                            <div class="tc-img" onclick="openLb('@pic.FilePath')">
+                                <img src="@pic.FilePath" alt="product image"/>
+                            </div>
+                        }
+                    </div>
+                }
+
+                <!-- ── Receipt Images ── -->
+                @if (item.ReceiptPics != null && item.ReceiptPics.Any())
+                {
+                    <div class="tc-imgs receipts">
+                        <div class="imgs-lbl"><i class="fas fa-receipt" style="color:#d97706"></i> &nbsp;RECEIPT / PROOF OF PURCHASE</div>
+                        @foreach (var rec in item.ReceiptPics)
+                        {
+                            <div class="tc-img" onclick="openLb('@rec.FilePath')">
+                                <img src="@rec.FilePath" alt="receipt"/>
+                            </div>
+                        }
+                    </div>
+                }
+
+                <!-- ── Footer note ── -->
+                <div class="tc-footer">
+                    <div class="tc-footer-note">
+                        @if (item.ProdStatus == Status.Pending)
+                        {
+                            <i class="fas fa-hourglass-half" style="color:#d97706"></i>
+                            <span>&nbsp;Your proposal is under review. We'll notify you once an offer is ready.</span>
+                        }
+                        else if (item.ProdStatus == Status.Approved)
+                        {
+                            <i class="fas fa-bell" style="color:#1a73e8"></i>
+                            <span>&nbsp;You have a new offer! Accept or decline it above.</span>
+                        }
+                        else if (item.ProdStatus == Status.CustomerAccepted)
+                        {
+                            <i class="fas fa-calendar-check" style="color:#16a34a"></i>
+                            <span>&nbsp;Offer accepted — a collection date will be scheduled soon.</span>
+                        }
+                        else if (item.ProdStatus == Status.CollectionScheduled)
+                        {
+                            <i class="fas fa-truck" style="color:#1a73e8"></i>
+                            <span>&nbsp;A driver will collect your item on the scheduled date.</span>
+                        }
+                        else if (item.ProdStatus == Status.Item_Collected)
+                        {
+                            <i class="fas fa-box-open" style="color:#0e7490"></i>
+                            <span>&nbsp;Your item has been collected and is being processed.</span>
+                        }
+                        else if (item.ProdStatus == Status.PaymentMade)
+                        {
+                            <i class="fas fa-circle-check" style="color:#7c3aed"></i>
+                            <span>&nbsp;Payment has been made. Thank you for your proposal!</span>
+                        }
+                        else if (item.ProdStatus == Status.Rejected)
+                        {
+                            <i class="fas fa-circle-xmark" style="color:#dc2626"></i>
+                            <span>&nbsp;Unfortunately this proposal was not accepted.</span>
+                        }
+                        else if (item.ProdStatus == Status.CustomerDeclined)
+                        {
+                            <i class="fas fa-thumbs-down" style="color:#dc2626"></i>
+                            <span>&nbsp;You declined this offer. You may submit a new proposal if you'd like.</span>
+                        }
+                        else if (item.ProdStatus == Status.Cancelled)
+                        {
+                            <i class="fas fa-ban" style="color:#64748b"></i>
+                            <span>&nbsp;This proposal was cancelled.</span>
+                        }
+                    </div>
+                    <span style="font-size:.72rem;color:#bcc8e0;font-weight:600">#@item.PropItemId</span>
+                </div>
+
+            </div>
+
+            idx++;
+        }
+    }
+</div>
+
+<script>
+function openLb(src) {
+    document.getElementById('lb-img').src = src;
+    document.getElementById('lb').classList.add('open');
+}
+function closeLb() {
+    document.getElementById('lb').classList.remove('open');
+    document.getElementById('lb-img').src = '';
+}
+document.getElementById('lb').addEventListener('click', function(e) {
+    if (e.target === this) closeLb();
+});
+document.addEventListener('keydown', function(e) {
+    if (e.key === 'Escape') closeLb();
+});
+</script>

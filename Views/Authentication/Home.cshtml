@@ -1,0 +1,96 @@
+﻿@{
+    ViewBag.Title = "Home";
+    Layout = "~/Views/Shared/_MinimalLayout.cshtml";
+}
+
+@section Styles {
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+    <link href="https://api.fontshare.com/v2/css?f[]=clash-display@400,500,600,700&display=swap" rel="stylesheet">
+    <link href="~/CSS/Home.css" rel="stylesheet">
+
+}
+
+<div class="orb orb-1"></div>
+<div class="orb orb-2"></div>
+<div class="orb orb-3"></div>
+
+<div class="home-wrap">
+
+    <!-- Logo & headline -->
+    <div class="logo-block">
+        <div class="logo-pill">
+            <div class="logo-icon"><i class="fas fa-store"></i></div>
+            <span class="logo-wordmark">SkyTech</span>
+        </div>
+        <div class="home-headline">Your Number1<br>Trading Shop.</div>
+        <div class="home-sub">
+            <i class="fas fa-map-marker-alt"></i>
+            Serving communities across South Africa
+        </div>
+    </div>
+
+    <!-- Options card -->
+    <div class="options-card">
+        <div class="card-head">
+            <h2>Welcome! 👋 Get started</h2>
+            <p>Choose how you'd like to use SkyTech</p>
+        </div>
+
+        <div class="btn-grid">
+            <!-- Login -->
+            <a href="@Url.Action("Login","Authentication")" class="nav-btn">
+                <div class="btn-icon"><i class="fas fa-right-to-bracket"></i></div>
+                <div class="btn-label">
+                    <span>Login</span>
+                    <small>Already have an account</small>
+                </div>
+            </a>
+            <!-- Customer -->
+            <a href="@Url.Action("CustomerReg","Authentication")" class="nav-btn">
+                <div class="btn-icon"><i class="fas fa-bag-shopping"></i></div>
+                <div class="btn-label">
+                    <span>Customer Account</span>
+                    <small>Shop and save</small>
+                </div>
+            </a>
+            <!-- Shop Owner -->
+            <a href="@Url.Action("ShopOwnerReg","Authentication")" class="nav-btn">
+                <div class="btn-icon"><i class="fas fa-store"></i></div>
+                <div class="btn-label">
+                    <span>Register Branch</span>
+                    <small>Start selling today</small>
+                </div>
+            </a>
+            <!-- Driver -->
+            <a href="@Url.Action("DeliveryDriverReg","Authentication")" class="nav-btn">
+                <div class="btn-icon"><i class="fas fa-truck"></i></div>
+                <div class="btn-label">
+                    <span>Delivery Driver</span>
+                    <small>Deliver &amp; earn</small>
+                </div>
+            </a>
+
+            <!-- Technician -->
+            <a href="@Url.Action("TechnicianReg", "Authentication")" class="nav-btn">
+                <div class="btn-icon"><i class="fas fa-tools"></i></div>
+                <div class="btn-label">
+                    <span>Technician</span>
+                    <small>Repair &amp; earn</small>
+                </div>
+            </a>
+        </div>
+
+        <div class="card-foot">
+            <i class="fas fa-shield-halved"></i>
+            Your information is secure ·
+            <a href="#">Learn more</a>
+        </div>
+    </div>
+
+    <div class="bottom-note">
+        <i class="fas fa-map-marker-alt"></i> Nationwide delivery
+    </div>
+
+</div>

@@ -1,0 +1,136 @@
+﻿@model SkyTech.Models.AddProduct
+@{
+    ViewBag.Title = Model.ProdName;
+    Layout = "~/Views/Shared/_MinimalLayout.cshtml";
+}
+
+@section Styles {
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+    <link href="https://api.fontshare.com/v2/css?f[]=clash-display@400,500,600,700&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="~/CSS/ShoppingPageStyle.css">
+}
+
+@section Scripts{
+    <script>
+        function switchImg(src, thumb) {
+            document.getElementById('mainImg').src = src;
+            document.querySelectorAll('.det-thumb').forEach(t => t.classList.remove('active'));
+            thumb.classList.add('active');
+        }
+        function stepQty(btn, dir) {
+            const row   = btn.closest('.qty-stepper');
+            const input = row.querySelector('.qty-input');
+            const max   = parseInt(row.querySelector('[data-max]')?.dataset.max) || 99;
+            input.value = Math.max(1, Math.min(max, (parseInt(input.value) || 1) + dir));
+        }
+    </script>
+}
+
+<div class="det-page">
+
+    <a href="@Url.Action("ShoppingPage","Customer")" class="det-back">
+        <i class="fas fa-arrow-left"></i> Back to Shop
+    </a>
+
+    <div class="det-layout">
+
+        <!-- LEFT: Images -->
+        <div>
+            <div class="det-img-wrap" id="mainImgWrap">
+                @if (Model.ProductPictures != null && Model.ProductPictures.Any())
+                {
+                    var first = Model.ProductPictures.First();
+                    <img id="mainImg" src="@first.FilePath" alt="@first.FileName"/>
+                }
+                else
+                {
+                    <div class="det-img-placeholder"><i class="fas fa-image"></i></div>
+                }
+            </div>
+
+            <!-- Thumbnails (if multiple pictures) -->
+            @if (Model.ProductPictures != null && Model.ProductPictures.Count() > 1)
+            {
+                <div class="det-thumbs">
+                    @foreach (var pic in Model.ProductPictures)
+                    {
+                        <div class="det-thumb" onclick="switchImg('@pic.FilePath', this)">
+                            <img src="@pic.FilePath" alt="@pic.FileName"/>
+                        </div>
+                    }
+                </div>
+            }
+        </div>
+
+        <!-- RIGHT: Info -->
+        <div>
+            @if (Model.Owner != null)
+            {
+                <div class="det-shop">
+                    <i class="fas fa-store" style="font-size:.65rem"></i>
+                    SkyTech
+                </div>
+            }
+
+            <div class="det-name">@Model.ProdName</div>
+            <div class="det-price">R @Model.ProdPrice.ToString("N2")</div>
+
+            <!-- Meta pills -->
+            <div class="det-meta">
+                @if (!string.IsNullOrEmpty(Model.ProdSize))
+                {
+                    <div class="det-pill"><i class="fas fa-ruler"></i> @Model.ProdSize</div>
+                }
+                <div class="det-pill"><i class="fas fa-tag"></i> @Model.ProdCategory</div>
+
+                @{
+                    string stockClass = Model.ProdQuantity == 0  ? "out-stock"
+                                      : Model.ProdQuantity <= 5  ? "low-stock"
+                                                                  : "in-stock";
+                    string stockText  = Model.ProdQuantity == 0  ? "Out of Stock"
+                                      : Model.ProdQuantity <= 5  ? $"Only {Model.ProdQuantity} left"
+                                                                  : $"{Model.ProdQuantity} in Stock";
+                }
+                <div class="det-stock-chip @stockClass">
+                    <i class="fas fa-circle" style="font-size:.5rem"></i> @stockText
+                </div>
+            </div>
+
+            <!-- Description -->
+            @if (!string.IsNullOrEmpty(Model.ProdDescription))
+            {
+                <div class="det-desc-label">DESCRIPTION</div>
+                <div class="det-desc">@Model.ProdDescription</div>
+            }
+
+            <!-- Add to cart -->
+            @if (Model.ProdQuantity > 0)
+            {
+                @using (Html.BeginForm("AddToCart", "Customer", FormMethod.Post, new { @class = "add-form" }))
+                {
+                    @Html.AntiForgeryToken()
+                    @Html.Hidden("id", Model.ProdId)
+                    <div class="det-add-row">
+                        <div class="qty-stepper">
+                            <button type="button" class="qty-btn" onclick="stepQty(this,-1)">−</button>
+                            <input type="number" name="quantity" value="1" min="1" max="@Model.ProdQuantity" class="qty-input"/>
+                            <button type="button" class="qty-btn" onclick="stepQty(this,1)" data-max="@Model.ProdQuantity">+</button>
+                        </div>
+                        <button type="submit" class="add-btn-lg">
+                            <i class="fas fa-bag-shopping"></i> Add to Cart
+                        </button>
+                    </div>
+                }
+            }
+            else
+            {
+                <button class="add-btn-lg oos" disabled>
+                    <i class="fas fa-ban"></i> Out of Stock
+                </button>
+            }
+        </div>
+    </div>
+</div>
+

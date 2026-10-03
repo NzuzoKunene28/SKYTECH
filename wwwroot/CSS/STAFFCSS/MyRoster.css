@@ -1,0 +1,237 @@
+﻿/* MyRoster.css — belongs to Views/StaffRoster/MyRoster.cshtml
+   Path: ~/CSS/StaffCSS/MyRoster.css
+   Standalone — this page loads ONLY this file (plus fonts/icons), nothing else.
+   Shares the design tokens and table pattern used by RosterDetails.css / HRDash.css. */
+
+:root {
+    --blue: #5f9ea0;
+    --blue-dark: #2d6b6d;
+    --blue-deep: #1f4f50;
+    --bg: #f0f4fc;
+    --border: #dde6f5;
+    --text: #0e1b35;
+    --text-2: #4a5878;
+    --text-m: #8a96b0;
+    --amber-bg: #fff4e0;
+    --amber-text: #9a6a00;
+}
+
+*, *::before, *::after {
+    box-sizing: border-box;
+}
+
+body {
+    margin: 0;
+    font-family: 'Plus Jakarta Sans', sans-serif;
+    background-color: var(--bg);
+    color: var(--text);
+}
+
+.mr-wrap {
+    max-width: 1080px;
+    margin: 0 auto;
+    padding: 2.5rem 1.5rem 4rem;
+}
+
+/* ══ HEADER ══ */
+.mr-header {
+    display: flex;
+    align-items: flex-start;
+    justify-content: space-between;
+    gap: 1.5rem;
+    flex-wrap: wrap;
+    margin-bottom: 1.8rem;
+}
+
+.mr-eyebrow {
+    font-size: .72rem;
+    font-weight: 700;
+    color: var(--text-m);
+    text-transform: uppercase;
+    letter-spacing: 1.2px;
+    margin: 0 0 .4rem;
+}
+
+.mr-title {
+    font-family: 'Clash Display', 'Plus Jakarta Sans', sans-serif;
+    font-weight: 700;
+    font-size: 1.8rem;
+    letter-spacing: -.5px;
+    color: var(--text);
+    margin: 0;
+}
+
+/* ══ EMPTY STATE ══ */
+.mr-empty {
+    display: flex;
+    align-items: center;
+    gap: .6rem;
+    background: #fff;
+    border: 1.5px solid var(--border);
+    border-radius: 14px;
+    padding: 1.1rem 1.3rem;
+    color: var(--text-2);
+    font-size: .9rem;
+}
+
+    .mr-empty i {
+        color: var(--text-m);
+    }
+
+/* ══ POSITION / WEEK SECTION ══ */
+.mr-position {
+    margin-bottom: 2.2rem;
+}
+
+.mr-position-title {
+    display: flex;
+    align-items: center;
+    gap: .55rem;
+    font-family: 'Clash Display', 'Plus Jakarta Sans', sans-serif;
+    font-weight: 700;
+    font-size: 1.05rem;
+    color: var(--blue-dark);
+    margin: 0 0 .8rem;
+}
+
+    .mr-position-title i {
+        font-size: .85rem;
+        color: var(--blue);
+    }
+
+/* ══ TABLE — compressed so all 7 days fit without horizontal scroll ══ */
+.mr-table-wrap {
+    background: #fff;
+    border: 1.5px solid var(--border);
+    border-radius: 14px;
+    overflow: hidden;
+    box-shadow: 0 8px 24px -18px rgba(15, 40, 60, .35);
+}
+
+.mr-table {
+    width: 100%;
+    table-layout: fixed;
+    border-collapse: collapse;
+    font-size: .72rem;
+}
+
+    .mr-table th:first-child,
+    .mr-table td:first-child {
+        width: 16%;
+    }
+
+    .mr-table thead th {
+        text-align: center;
+        background: var(--bg);
+        color: var(--text-2);
+        font-size: .6rem;
+        font-weight: 700;
+        text-transform: uppercase;
+        letter-spacing: .3px;
+        padding: .5rem .3rem;
+        border-bottom: 1.5px solid var(--border);
+        overflow: hidden;
+        text-overflow: ellipsis;
+    }
+
+        .mr-table thead th:first-child {
+            text-align: left;
+            padding-left: .8rem;
+        }
+
+    .mr-table thead .mr-day-name {
+        display: block;
+        font-size: .6rem;
+    }
+
+    .mr-table thead .mr-day-date {
+        display: block;
+        font-size: .58rem;
+        font-weight: 500;
+        color: var(--text-m);
+        text-transform: none;
+        letter-spacing: 0;
+        margin-top: .05rem;
+    }
+
+    .mr-table tbody td {
+        text-align: center;
+        padding: .45rem .3rem;
+        border-bottom: 1px solid var(--border);
+        color: var(--text);
+        font-weight: 500;
+        overflow: hidden;
+        text-overflow: ellipsis;
+    }
+
+        .mr-table tbody td:first-child {
+            text-align: left;
+            padding-left: .8rem;
+            font-weight: 600;
+            color: var(--text);
+            white-space: nowrap;
+        }
+
+    .mr-table tbody tr:last-child td {
+        border-bottom: none;
+    }
+
+    .mr-table tbody tr:hover {
+        background: rgba(95, 158, 160, .05);
+    }
+
+/* Highlighted row + badge for the logged-in staff member */
+tr.mr-me-row {
+    background: rgba(180, 83, 9, .06);
+}
+
+    tr.mr-me-row td:first-child {
+        color: var(--text) !important;
+    }
+
+.mr-you-badge {
+    display: inline-block;
+    margin-left: .35rem;
+    background: var(--amber-bg);
+    color: var(--amber-text);
+    font-size: .58rem;
+    font-weight: 700;
+    text-transform: uppercase;
+    letter-spacing: .4px;
+    padding: .12rem .4rem;
+    border-radius: 999px;
+    vertical-align: middle;
+}
+
+.mr-shift {
+    display: inline-block;
+    background: rgba(95, 158, 160, .12);
+    color: var(--blue-dark);
+    font-size: .66rem;
+    font-weight: 700;
+    padding: .2rem .4rem;
+    border-radius: 6px;
+    white-space: nowrap;
+}
+
+.mr-off {
+    color: var(--text-m);
+    font-weight: 400;
+}
+
+.mr-request-btn {
+    display: block;
+    margin: .3rem auto 0;
+    background: transparent;
+    border: none;
+    color: var(--blue-dark);
+    font-size: .58rem;
+    font-weight: 700;
+    text-decoration: underline;
+    text-underline-offset: 2px;
+    cursor: pointer;
+}
+
+    .mr-request-btn:hover {
+        color: var(--blue-deep);
+    }

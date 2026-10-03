@@ -1,0 +1,78 @@
+﻿@model IEnumerable<SkyTech.Models.JobPostServices.ApplicationForm>
+
+
+@foreach(var application in Model)
+{
+    <div class="wrapper">
+
+        <div class="">
+            <label class="">First Name</label>
+            <p>@application.FirstName</p>
+
+        </div>
+        <div class="">
+            <label class="">Last Name</label>
+            <p>@application.LastName</p>
+
+        </div>
+
+        <div class="">
+            <label class="">Phone Number</label>
+            <p>@application.PhoneNumber</p>
+
+        </div>
+        <div class="">
+            <label class="">ID Number</label>
+            <p>@application.IDNumber</p>
+
+        </div>
+        <div class="">
+            <label class="">Email Address</label>
+            <p>@application.Email</p>
+
+        </div>
+        <div class="">
+            <label class="">Location</label>
+            <p>@application.Location</p>
+
+        </div>
+        <div class="">
+            <label class="">experience</label>
+            <p>@application.Experience</p>
+
+        </div>
+        <div class="">
+            <label class="">Skills</label>
+            <p>@application.Skills</p>
+
+        </div>
+
+        <div class="">
+            <label class="">Cetrificates</label>
+            <p>@application.Certificates</p>
+
+        </div>
+
+        <div class="">
+            <label class="">Applicant Links</label>
+            <p>@application.Links</p>
+
+        </div>
+
+        <div class="buttons">
+
+            <form asp-controller="HR" asp-action="ChangeStatus" method="post">
+                <input type="hidden" name="id" value="@application.ApplicationId" />
+                <button type="submit" name="status" value="Physical_Interview" class="btn btn-success">PhysicalInterview</button>
+                <button type="submit" name="status" value="Rejected" class="btn btn-danger">ApplicationRejected</button>
+                <button type="submit" name="status" value="Online_interview" class="btn btn-warning">OnlineInterview</button>
+            </form>
+        
+
+        </div>
+
+
+
+
+    </div>
+}

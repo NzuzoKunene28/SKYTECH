@@ -1,0 +1,257 @@
+@model Repair_Request
+@{
+    ViewBag.Title = "Repair Request Detail";
+    Layout = "~/Views/Shared/_MinimalLayout.cshtml";
+}
+
+@section Styles {
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+    <link href="https://api.fontshare.com/v2/css?f[]=clash-display@400,500,600,700&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="~/CSS/DashboardStyle.css">
+    <style>
+        .status-badge {
+            display: inline-block;
+            padding: 0.4rem 0.8rem;
+            border-radius: var(--radius-pill);
+            font-size: 0.75rem;
+            font-weight: 600;
+            text-transform: uppercase;
+        }
+        .status-pending { background: #fef3c7; color: #92400e; }
+        .status-assigned { background: #dbeafe; color: #0c4a6e; }
+        .status-quoted { background: #c7d2fe; color: #312e81; }
+        .status-in-progress { background: #fed7aa; color: #92400e; }
+        .status-completed { background: #bbf7d0; color: #065f46; }
+        .detail-row {
+            display: grid;
+            grid-template-columns: 200px 1fr;
+            gap: 1rem;
+            padding: 1rem;
+            border-bottom: 1px solid var(--border);
+        }
+        .detail-label {
+            font-weight: 600;
+            color: var(--text);
+        }
+        .detail-value {
+            color: var(--text-2);
+        }
+        .timeline {
+            padding: 1rem 0;
+        }
+        .timeline-item {
+            display: flex;
+            gap: 1rem;
+            padding: 1rem;
+            margin-bottom: 0.5rem;
+            background: var(--blue-soft);
+            border-left: 4px solid var(--blue);
+            border-radius: var(--radius-sm);
+        }
+        .timeline-icon {
+            width: 32px;
+            height: 32px;
+            background: var(--blue);
+            color: white;
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            flex-shrink: 0;
+            font-size: 0.8rem;
+        }
+        .timeline-content {
+            flex: 1;
+        }
+        .timeline-date {
+            font-size: 0.8rem;
+            color: var(--text-muted);
+        }
+        .quotation-card {
+            border: 1px solid var(--border);
+            border-radius: var(--radius-sm);
+            padding: 1.5rem;
+            margin-bottom: 1rem;
+        }
+    </style>
+}
+
+<div class="dash-wrap">
+    <!-- ══ SIDEBAR ══ -->
+    <aside class="dash-sidebar">
+        <div class="dash-brand">
+            <div class="dash-brand-icon"><i class="fas fa-lock-open"></i></div>
+            <div>
+                <div class="dash-brand-name">SkyTech</div>
+                <div class="dash-brand-sub">Admin Portal</div>
+            </div>
+        </div>
+        <nav class="dash-nav">
+            <div class="dash-nav-label">REPAIR MANAGEMENT</div>
+            <a href="@Url.Action("PendingRepairRequests", "SystemAdmin")" class="dash-link">
+                <i class="fas fa-clock"></i><span>Pending Requests</span>
+            </a>
+            <a href="@Url.Action("AllRepairRequests", "SystemAdmin")" class="dash-link">
+                <i class="fas fa-list"></i><span>All Requests</span>
+            </a>
+        </nav>
+
+        <div class="dash-sidebar-foot">
+            <div class="dash-foot-avatar"><i class="fas fa-shield"></i></div>
+            <div>
+                <div class="dash-foot-name">System Admin</div>
+                <div class="dash-foot-role">Administrator</div>
+            </div>
+        </div>
+    </aside>
+
+    <!-- ══ MAIN ══ -->
+    <main class="dash-main">
+        <div class="dash-header">
+            <div>
+                <h1 class="dash-title">Repair Request #@Model.RequestId</h1>
+                <p class="dash-subtitle">Request Status: <span class="status-badge status-@Model.Status.ToString().ToLower()">@Model.Status</span></p>
+            </div>
+            <a href="@Url.Action("AllRepairRequests", "SystemAdmin")" class="dash-btn-secondary">
+                <i class="fas fa-arrow-left"></i> Back
+            </a>
+        </div>
+
+        <div class="dash-content">
+            <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 2rem;">
+                <!-- Request Information -->
+                <div>
+                    <div class="dash-card">
+                        <h2 style="margin-bottom: 1rem; color: var(--text); font-size: 1.1rem;">Request Information</h2>
+
+                        <div class="detail-row" style="border: none;">
+                            <div class="detail-label">Item:</div>
+                            <div class="detail-value">@Model.ItemName</div>
+                        </div>
+                        <div class="detail-row">
+                            <div class="detail-label">Description:</div>
+                            <div class="detail-value">@Model.ItemDescription</div>
+                        </div>
+                        <div class="detail-row">
+                            <div class="detail-label">Issue:</div>
+                            <div class="detail-value">@Model.IssueDescription</div>
+                        </div>
+                        <div class="detail-row">
+                            <div class="detail-label">Category:</div>
+                            <div class="detail-value">@Model.Category?.CategoryName</div>
+                        </div>
+                        <div class="detail-row">
+                            <div class="detail-label">Date Created:</div>
+                            <div class="detail-value">@Model.DateCreated.ToString("MMM dd, yyyy HH:mm")</div>
+                        </div>
+
+                        <h2 style="margin-top: 2rem; margin-bottom: 1rem; color: var(--text); font-size: 1.1rem;">Customer Information</h2>
+
+                        <div class="detail-row" style="border: none;">
+                            <div class="detail-label">Name:</div>
+                            <div class="detail-value">@Model.Customers?.FirstName @Model.Customers?.LastName</div>
+                        </div>
+                        <div class="detail-row">
+                            <div class="detail-label">Email:</div>
+                            <div class="detail-value">@Model.Customers?.Email</div>
+                        </div>
+                        <div class="detail-row">
+                            <div class="detail-label">Phone:</div>
+                            <div class="detail-value">@Model.Customers?.PhoneNumber</div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Assignment & Quotation Info -->
+                <div>
+                    @if (ViewBag.Assignment != null)
+                    {
+                        <div class="dash-card" style="margin-bottom: 1.5rem;">
+                            <h2 style="margin-bottom: 1rem; color: var(--text); font-size: 1.1rem;">Assignment Details</h2>
+
+                            <div class="detail-row" style="border: none;">
+                                <div class="detail-label">Technician:</div>
+                                <div class="detail-value">@ViewBag.Assignment.Technician?.TechnicianFirstName @ViewBag.Assignment.Technician?.TechnicianLastName</div>
+                            </div>
+                            <div class="detail-row">
+                                <div class="detail-label">Assigned Date:</div>
+                                <div class="detail-value">@ViewBag.Assignment.AssignedDate.ToString("MMM dd, yyyy")</div>
+                            </div>
+                            <div class="detail-row">
+                                <div class="detail-label">Notes:</div>
+                                <div class="detail-value">@(string.IsNullOrEmpty(ViewBag.Assignment.AssignmentNotes) ? "No notes" : ViewBag.Assignment.AssignmentNotes)</div>
+                            </div>
+                        </div>
+                    }
+
+                    @if (ViewBag.Quotation != null)
+                    {
+                        <div class="dash-card">
+                            <h2 style="margin-bottom: 1rem; color: var(--text); font-size: 1.1rem;">Quotation</h2>
+
+                            <div class="quotation-card">
+                                <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 1rem;">
+                                    <strong>Quotation #@ViewBag.Quotation.QuotationId</strong>
+                                    <span class="status-badge status-@ViewBag.Quotation.Status.ToString().ToLower()">@ViewBag.Quotation.Status</span>
+                                </div>
+
+                                <div style="margin-bottom: 1rem;">
+                                    <div class="detail-label">Total Cost:</div>
+                                    <div class="detail-value" style="font-size: 1.5rem; color: var(--green);">R@ViewBag.Quotation.TotalCost:N2</div>
+                                </div>
+
+                                @if (ViewBag.Quotation.QuotationItems?.Count > 0)
+                                {
+                                    <div>
+                                        <strong style="margin-bottom: 0.5rem; display: block;">Items:</strong>
+                                        @foreach (var item in ViewBag.Quotation.QuotationItems)
+                                        {
+                                            <div style="padding: 0.5rem 0; border-bottom: 1px solid var(--border);">
+                                                <div>@item.ItemDescription (x@item.Quantity)</div>
+                                                <div style="font-size: 0.9rem; color: var(--text-muted);">R@item.UnitCost:N2</div>
+                                            </div>
+                                        }
+                                    </div>
+                                }
+                            </div>
+                        </div>
+                    }
+                </div>
+            </div>
+
+            <!-- Timeline / Tracking History -->
+            <div class="dash-card" style="margin-top: 2rem;">
+                <h2 style="margin-bottom: 1.5rem; color: var(--text); font-size: 1.1rem;">Status Timeline</h2>
+
+                @if (ViewBag.TrackingHistory?.Count > 0)
+                {
+                    <div class="timeline">
+                        @foreach (var tracking in ViewBag.TrackingHistory)
+                        {
+                            <div class="timeline-item">
+                                <div class="timeline-icon">
+                                    <i class="fas fa-check"></i>
+                                </div>
+                                <div class="timeline-content">
+                                    <strong>@tracking.Status</strong>
+                                    <p style="margin: 0.25rem 0 0;">@tracking.StatusMessage</p>
+                                    <div class="timeline-date">@tracking.UpdatedDate.ToString("MMM dd, yyyy HH:mm")</div>
+                                </div>
+                            </div>
+                        }
+                    </div>
+                }
+                else
+                {
+                    <p style="color: var(--text-muted);">No status updates yet.</p>
+                }
+            </div>
+        </div>
+    </main>
+</div>
+
+@section Scripts {
+    <script src="~/JS/DashboardScript.js"></script>
+}

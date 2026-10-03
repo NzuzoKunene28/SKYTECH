@@ -1,0 +1,246 @@
+﻿@model SkyTech.ViewModels.AddProductViewModel
+@{
+    ViewBag.Title = "Add Product";
+    Layout = "~/Views/Shared/_MinimalLayout.cshtml";
+    ViewBag.ActivePage = "AddProduct";
+    bool restricted = ViewBag.ApplicationStatus == ApplicationStat.Pending
+                  || ViewBag.ApplicationStatus == ApplicationStat.Rejected;
+}
+
+@section Styles {
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+    <link href="https://api.fontshare.com/v2/css?f[]=clash-display@400,500,600,700&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="~/CSS/ShopOwnerStyle.css">
+}
+
+@section Scripts{
+   
+    <script>
+        // Toggle dropdown for Received Orders
+        const dropdownToggle = document.getElementById('ordersDropdown');
+        const dropdownMenu = document.getElementById('ordersSubmenu');
+
+        if (dropdownToggle && dropdownMenu) {
+            dropdownToggle.addEventListener('click', function(e) {
+                e.preventDefault();
+                this.classList.toggle('open');
+                dropdownMenu.classList.toggle('show');
+            });
+
+            // Keep submenu open if a sub-link is active
+            if (window.location.href.includes('DeliveryOrders') || window.location.href.includes('PickupOrders')) {
+                dropdownToggle.classList.add('open');
+                dropdownMenu.classList.add('show');
+            }
+        }
+    </script>
+
+}
+
+<div class="so-wrap">
+
+    <!-- SIDEBAR -->
+    <aside class="so-sidebar">
+        <div class="so-brand">
+            <div class="so-brand-icon"><i class="fas fa-store"></i></div>
+            <div>
+                <div class="so-brand-name">SkyTech</div>
+                <div class="so-brand-sub">Shop Owner Portal</div>
+            </div>
+        </div>
+        <nav class="so-nav">
+            <div class="so-nav-label">OVERVIEW</div>
+
+            <a href="@Url.Action("ShopOwnerDash", "ShopOwner")" class="so-link active"><i class="fas fa-grid-2"></i><span>Dashboard</span></a>
+
+            <div class="so-nav-label" style="margin-top:1rem">INVENTORY</div>
+            <a href="@Url.Action("AddProductPage", "ShopOwner")" class="so-link @(restricted ? "disabled-link" : "")"><i class="fas fa-circle-plus"></i><span>Add Product</span></a>
+            <a href="@Url.Action("TrackStockLevelPage", "ShopOwner")" class="so-link @(restricted ? "disabled-link" : "")"><i class="fas fa-boxes-stacked"></i><span>Track Stock</span></a>
+
+            <div class="so-nav-label" style="margin-top:1rem">ORDERS & STAFF</div>
+
+            <!-- Received Orders with submenu -->
+            <div class="nav-item-dropdown">
+                <a href="#" class="so-link so-dropdown-toggle @(restricted ? "disabled-link" : "")" id="ordersDropdown">
+                    <i class="fas fa-bag-shopping"></i>
+                    <span>Received Orders</span>
+                    <i class="fas fa-chevron-down dropdown-icon"></i>
+                </a>
+                <div class="so-dropdown-menu" id="ordersSubmenu">
+                    <a href="@Url.Action("DeliveryOrders", "ShopOwner")" class="so-link so-sub-link @(restricted ? "disabled-link" : "")">
+                        <i class="fas fa-truck"></i> Delivery Orders
+                    </a>
+                    <a href="@Url.Action("PickupOrders", "ShopOwner")" class="so-link so-sub-link @(restricted ? "disabled-link" : "")">
+                        <i class="fas fa-store"></i> In-Store Collection
+                    </a>
+                </div>
+            </div>
+
+            <a href="@Url.Action("StaffReg", "ShopOwner")" class="so-link @(restricted ? "disabled-link" : "")"><i class="fas fa-user-plus"></i><span>Register Staff</span></a>
+            <a href="@Url.Action("StaffMembers", "ShopOwner")" class="so-link @(restricted ? "disabled-link" : "")"><i class="fas fa-users"></i><span>Staff Members</span></a>
+
+            <a href="@Url.Action("ReturnedItems","ShopOwner")" class="so-link @(restricted?"disabled-link":"")"><i class="fas fa-bag-shopping"></i><span>Returned Items</span></a>
+            <a href="@Url.Action("StaffReg","ShopOwner")" class="so-link @(restricted?"disabled-link":"")"><i class="fas fa-user-plus"></i><span>Register Staff</span></a>
+            <a href="@Url.Action("StaffMembers","ShopOwner")" class="so-link @(restricted?"disabled-link":"")"><i class="fas fa-users"></i><span>Staff Members</span></a>
+            <div class="so-nav-label" style="margin-top:1rem">ACCOUNT</div>
+            <a href="@Url.Action("OwnerProfile", "ShopOwner")" class="so-link"><i class="fas fa-circle-user"></i><span>Profile</span></a>
+        </nav>
+        <div class="so-sidebar-foot">
+            <div class="so-foot-avatar"><i class="fas fa-store"></i></div>
+            <div>
+                <div class="so-foot-role">SkyTech</div>
+            </div>
+        </div>
+
+        <!--Logout button-->
+        <div style="padding:.8rem 1.2rem">
+            @using (Html.BeginForm("Logout", "Authentication", FormMethod.Post))
+            {
+                @Html.AntiForgeryToken()
+                <button type="submit" style="width:100%;background:rgba(239,68,68,.08);
+                    border:1.5px solid rgba(239,68,68,.25);border-radius:8px;
+                    padding:.6rem 1rem;cursor:pointer;color:#ef4444;
+                    font-weight:600;font-size:.85rem;display:flex;
+                    align-items:center;gap:.5rem;justify-content:center">
+                    <i class="fas fa-right-from-bracket"></i> Log Out
+                </button>
+            }
+        </div>
+    </aside>
+
+    <!-- MAIN -->
+    <main class="so-main">
+
+        @if (TempData["Message"] != null)
+        {
+            <div class="so-alert so-alert-success"><i class="fas fa-circle-check"></i> @TempData["Message"]</div>
+        }
+
+        <div class="so-topbar">
+            <div>
+                <div class="so-page-title">Add Product</div>
+                <div class="so-page-sub">List a new item in your store.</div>
+            </div>
+            <a href="@Url.Action("TrackStockLevelPage","ShopOwner")" class="btn btn-outline">
+                <i class="fas fa-arrow-left"></i> Back to Stock
+            </a>
+        </div>
+
+        <!-- Tips banner -->
+        <div class="so-alert so-alert-info" style="margin-bottom:1.6rem">
+            <i class="fas fa-lightbulb"></i>
+            Use clear product names and accurate quantities — customers see this directly in the shop.
+        </div>
+
+        @using (Html.BeginForm("AddProductPage", "ShopOwner", FormMethod.Post, new { enctype = "multipart/form-data" }))
+        {
+            @Html.AntiForgeryToken()
+            @Html.ValidationSummary(true, "", new { @class = "so-alert so-alert-error" })
+
+            <div class="so-card">
+                <div class="so-card-head">
+                    <div class="so-card-title"><i class="fas fa-tag" style="color:var(--blue);margin-right:.4rem"></i>Product Details</div>
+                </div>
+                <div class="so-card-body">
+                    <div class="so-form-grid">
+
+                        <div class="so-form-group">
+                            <label class="so-label"><i class="fas fa-pen"></i> Product Name</label>
+                            @Html.TextBoxFor(m => m.ProdName, new { @class = "so-input", placeholder = "e.g. Sunlight Dishwashing Liquid" })
+                            @Html.ValidationMessageFor(m => m.ProdName, "", new { @class = "text-danger" })
+                        </div>
+
+                        <div class="so-form-group">
+                            <label class="so-label"><i class="fas fa-tag"></i> Category</label>
+                            <select asp-for="ProdCategory" asp-items="Html.GetEnumSelectList<SkyTech.Models.SelectCategory>()" class="so-select">
+                                <option value="">-- Select Category --</option>
+                            </select>
+                            @Html.ValidationMessageFor(m => m.ProdCategory, "", new { @class = "text-danger" })
+                        </div>
+
+                        <div class="so-form-group">
+                            <label class="so-label"><i class="fas fa-tag"></i> Product Type</label>
+                            <select asp-for="ProdType" asp-items="Html.GetEnumSelectList<SkyTech.Models.SelectType>()" class="so-select">
+                                <option value="">-- Select Product Type --</option>
+                            </select>
+                            @Html.ValidationMessageFor(m => m.ProdType, "", new { @class = "text-danger" })
+                        </div>
+
+                        <div class="so-form-group">
+                            <label class="so-label"><i class="fas fa-rand-sign"></i> Price (R)</label>
+                            <div class="so-input-prefix-group">
+                                <span class="so-input-prefix">R</span>
+                                @Html.TextBoxFor(m => m.ProdPrice, new { @class = "so-input prefix-wrap", placeholder = "0.00" })
+                            </div>
+                            @Html.ValidationMessageFor(m => m.ProdPrice, "", new { @class = "text-danger" })
+                        </div>
+
+                        <div class="so-form-group">
+                            <label class="so-label"><i class="fas fa-hashtag"></i> Quantity in Stock</label>
+                            @Html.TextBoxFor(m => m.ProdQuantity, new { @class = "so-input", placeholder = "0", type = "number", min = "0" })
+                            @Html.ValidationMessageFor(m => m.ProdQuantity, "", new { @class = "text-danger" })
+                        </div>
+
+                        <div class="so-form-group">
+                            <label class="so-label"><i class="fas fa-ruler"></i> Size / Weight</label>
+                            @Html.TextBoxFor(m => m.ProdSize, new { @class = "so-input", placeholder = "e.g. 500ml, 1kg, Large" })
+                            @Html.ValidationMessageFor(m => m.ProdSize, "", new { @class = "text-danger" })
+                        </div>
+
+                        <div class="so-form-group span-2">
+                            <label class="so-label"><i class="fas fa-align-left"></i> Description</label>
+                            @Html.TextAreaFor(m => m.ProdDescription, new { @class = "so-textarea", placeholder = "Describe the product — ingredients, usage, features..." })
+                            @Html.ValidationMessageFor(m => m.ProdDescription, "", new { @class = "text-danger" })
+                        </div>
+
+                    </div>
+                </div>
+            </div>
+
+            <!-- Image upload card -->
+            <div class="so-card" style="margin-top:1.2rem">
+                <div class="so-card-head">
+                    <div class="so-card-title"><i class="fas fa-image" style="color:var(--blue);margin-right:.4rem"></i>Product Image</div>
+                </div>
+                <div class="so-card-body">
+                    <div class="so-file-card" style="position:relative" onclick="document.getElementById('picInput').click()">
+                        <img id="imgPreview" class="preview-img" src="" alt="Preview">
+                        <i class="fas fa-cloud-arrow-up" id="uploadIcon"></i>
+                        <p id="uploadText">Click to upload · JPG, PNG, JPEG</p>
+                        <input type="file" id="picInput" name="ProductPicture" accept=".jpg,.png,.jpeg"
+                               style="display:none"
+                               onchange="previewImg(this)">
+                    </div>
+                </div>
+            </div>
+
+            <!-- Actions -->
+            <div style="display:flex;align-items:center;gap:1rem;margin-top:1.4rem;flex-wrap:wrap">
+                <button type="submit" class="btn btn-primary btn-lg">
+                    <i class="fas fa-circle-check"></i> Save Product
+                </button>
+                <a href="@Url.Action("TrackStockLevelPage","ShopOwner")" class="btn btn-outline btn-lg">
+                    Cancel
+                </a>
+            </div>
+        }
+    </main>
+</div>
+
+<script>function previewImg(input) {
+    var file = input.files[0];
+    if (!file) return;
+    var reader = new FileReader();
+    reader.onload = function(e) {
+        var img  = document.getElementById('imgPreview');
+        var icon = document.getElementById('uploadIcon');
+        var txt  = document.getElementById('uploadText');
+        img.src = e.target.result;
+        img.style.display = 'block';
+        icon.style.display = 'none';
+        txt.textContent = file.name;
+    };
+    reader.readAsDataURL(file);
+}</script>

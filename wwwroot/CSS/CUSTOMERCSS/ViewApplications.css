@@ -1,0 +1,192 @@
+﻿/* ==========================================================
+   My Applications — SkyTech candidate design system
+   ========================================================== */
+
+.cust-page-wrap {
+    max-width: 820px;
+    margin: 2.5rem auto 4rem;
+    padding: 0 1.5rem;
+    font-family: 'Plus Jakarta Sans', sans-serif;
+}
+
+.cust-eyebrow {
+    font-size: 0.78rem;
+    font-weight: 700;
+    text-transform: uppercase;
+    letter-spacing: 0.06em;
+    color: #2c7a7b;
+    margin: 0 0 0.4rem;
+}
+
+.cust-title {
+    font-family: 'Clash Display', sans-serif;
+    font-size: 1.7rem;
+    color: #1f3d3d;
+    margin: 0 0 0.4rem;
+}
+
+.cust-sub {
+    color: #6b8484;
+    font-size: 0.95rem;
+    margin: 0;
+}
+
+.va-header {
+    margin-bottom: 1.8rem;
+}
+
+/* Empty state */
+
+.va-empty {
+    text-align: center;
+    padding: 3.5rem 1rem;
+    background: #ffffff;
+    border: 1px dashed #dceeed;
+    border-radius: 18px;
+    color: #9ab8b8;
+}
+
+    .va-empty i {
+        font-size: 2rem;
+        margin-bottom: 1rem;
+        display: block;
+    }
+
+    .va-empty p {
+        margin: 0 0 1.2rem;
+        font-size: 0.95rem;
+    }
+
+.va-browse-btn {
+    display: inline-flex;
+    align-items: center;
+    gap: 0.5rem;
+    padding: 0.7rem 1.4rem;
+    border-radius: 10px;
+    background: linear-gradient(135deg, #2c7a7b, #5f9ea0);
+    color: #ffffff;
+    font-weight: 700;
+    font-size: 0.9rem;
+    text-decoration: none;
+}
+
+/* List */
+
+.va-list {
+    display: flex;
+    flex-direction: column;
+    gap: 1rem;
+}
+
+.va-card {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 1.2rem;
+    background: #ffffff;
+    border: 1px solid #dceeed;
+    border-left: 4px solid #2c7a7b;
+    border-radius: 16px;
+    padding: 1.3rem 1.6rem;
+    box-shadow: 0 2px 10px rgba(44, 122, 123, 0.06);
+    transition: transform 0.15s ease, box-shadow 0.15s ease;
+}
+
+    .va-card:hover {
+        transform: translateY(-2px);
+        box-shadow: 0 6px 18px rgba(44, 122, 123, 0.12);
+    }
+
+.va-card-main {
+    flex: 1;
+    min-width: 0;
+}
+
+.va-job-title {
+    font-family: 'Clash Display', sans-serif;
+    font-size: 1.12rem;
+    color: #1f3d3d;
+    margin: 0 0 0.55rem;
+}
+
+.va-meta {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 0.9rem;
+    font-size: 0.83rem;
+    color: #4a6363;
+    margin-bottom: 0.5rem;
+}
+
+    .va-meta span,
+    .va-sub-meta span {
+        display: flex;
+        align-items: center;
+        gap: 0.35rem;
+    }
+
+    .va-meta i {
+        color: #9ab8b8;
+    }
+
+.va-sub-meta {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 0.9rem;
+    font-size: 0.78rem;
+    color: #9ab8b8;
+}
+
+    .va-sub-meta i {
+        color: #c3d8d8;
+    }
+
+/* Status badge */
+
+.va-status-col {
+    flex-shrink: 0;
+}
+
+.va-status-badge {
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+    padding: 0.5rem 0.95rem;
+    border-radius: 999px;
+    font-size: 0.8rem;
+    font-weight: 700;
+    white-space: nowrap;
+}
+
+.va-status-pending {
+    background: #fff8e6;
+    color: #8a6d1f;
+}
+
+.va-status-negative {
+    background: #fdeeee;
+    color: #a13b3b;
+}
+
+.va-status-info {
+    background: #eaf6f6;
+    color: #2c7a7b;
+}
+
+.va-status-positive {
+    background: #eafaf1;
+    color: #1f8a5f;
+}
+
+/* Responsive: stack status below on narrow screens */
+
+@@media (max-width: 560px) {
+    .va-card {
+        flex-direction: column;
+        align-items: flex-start;
+    }
+
+    .va-status-col {
+        align-self: flex-start;
+    }
+}

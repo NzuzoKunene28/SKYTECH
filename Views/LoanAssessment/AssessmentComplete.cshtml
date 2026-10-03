@@ -1,0 +1,109 @@
+﻿@model SkyTech.Models.ViewModels.AssessmentViewModel
+
+@{
+    ViewData["Title"] = "Assessment Complete";
+    Layout = "~/Views/Shared/_MinimalLayout.cshtml";
+    var app = Model.LoanApplication;
+}
+
+<style>
+    :root {
+        --blue: #5f9ea0;
+        --blue-dark: #2d6b6d;
+        --blue-deep: #1f4f50;
+        --bg: #f0f4fc;
+        --border: #dde6f5;
+        --text: #0e1b35;
+        --text-2: #4a5878;
+    }
+
+    .confirmation-page {
+        min-height: 80vh;
+        background: var(--bg);
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        padding: 40px 20px;
+    }
+
+    .confirmation-card {
+        width: 100%;
+        max-width: 700px;
+        background: white;
+        border: 1px solid var(--border);
+        border-radius: 24px;
+        padding: 45px;
+        text-align: center;
+        box-shadow: 0 20px 50px rgba(31, 79, 80, 0.08);
+    }
+
+    .success-icon {
+        width: 80px;
+        height: 80px;
+        margin: 0 auto 25px;
+        border-radius: 50%;
+        background: #e2f4ec;
+        color: #198754;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        font-size: 38px;
+        font-weight: 800;
+    }
+
+    .confirmation-title {
+        color: var(--text);
+        font-size: 30px;
+        font-weight: 750;
+        margin-bottom: 12px;
+    }
+
+    .confirmation-text {
+        color: var(--text-2);
+        line-height: 1.7;
+        margin-bottom: 30px;
+    }
+
+    .home-button {
+        display: inline-block;
+        background: var(--blue-dark);
+        color: white;
+        padding: 13px 24px;
+        border-radius: 10px;
+        text-decoration: none;
+        font-weight: 650;
+    }
+
+        .home-button:hover {
+            background: var(--blue-deep);
+            color: white;
+        }
+</style>
+
+<div class="confirmation-page">
+    <div class="confirmation-card">
+
+        <div class="success-icon">✓</div>
+
+        <h1 class="confirmation-title">Assessment Complete</h1>
+
+        <p class="confirmation-text">
+            Application <strong>#@app.LoanApplicationId</strong> has been marked
+            <strong>@app.Status</strong>.
+        </p>
+
+        @if (app.Status == SkyTech.Models.SkytechWorkers.LoanApplicationStatus.Approved)
+        {
+            <a asp-controller="LoanDisbursement" asp-action="DisburseForm" asp-route-id="@app.LoanApplicationId" class="home-button">
+                Disburse Payment →
+            </a>
+        }
+        else
+        {
+            <a asp-action="Queue" asp-controller="LoanAssessment" class="home-button">
+                Back to Queue
+            </a>
+        }
+
+    </div>
+</div>

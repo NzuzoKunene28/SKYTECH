@@ -1,0 +1,212 @@
+/* ManageAssessments.css — belongs to Views/Assessment/ManageAssessments.cshtml
+   Path: ~/CSS/HRCSS/ManageAssessments.css
+   Shares the design tokens of HRDash.css. */
+
+:root {
+    --blue: #5f9ea0;
+    --blue-dark: #2d6b6d;
+    --blue-deep: #1f4f50;
+    --bg: #f0f4fc;
+    --border: #dde6f5;
+    --text: #0e1b35;
+    --text-2: #4a5878;
+    --text-m: #8a96b0;
+}
+
+* , *::before, *::after {
+    box-sizing: border-box;
+}
+
+body {
+    margin: 0;
+    font-family: 'Plus Jakarta Sans', sans-serif;
+    background-color: var(--bg);
+    color: var(--text);
+}
+
+.ma-main {
+    padding: 2.5rem 3rem;
+}
+
+@media (max-width: 700px) {
+    .ma-main {
+        padding: 1.5rem 1.25rem;
+    }
+}
+
+.ma-eyebrow {
+    font-size: .72rem;
+    font-weight: 700;
+    color: var(--text-m);
+    text-transform: uppercase;
+    letter-spacing: 1.2px;
+    margin: 0 0 .4rem;
+}
+
+.ma-title {
+    font-family: 'Clash Display', 'Plus Jakarta Sans', sans-serif;
+    font-weight: 700;
+    font-size: 1.9rem;
+    letter-spacing: -.5px;
+    color: var(--text);
+    margin: 0 0 .4rem;
+}
+
+.ma-sub {
+    font-size: .9rem;
+    color: var(--text-m);
+    margin: 0 0 1.8rem;
+}
+
+/* ══ EMPTY STATE ══ */
+.ma-empty {
+    background: #fff;
+    border: 1.5px dashed var(--border);
+    border-radius: 14px;
+    padding: 2.6rem 2rem;
+    text-align: center;
+    color: var(--text-2);
+    font-size: .9rem;
+    font-weight: 600;
+    margin-bottom: 1.8rem;
+}
+
+/* ══ TABLE CARD ══ */
+.ma-table-wrap {
+    background: #fff;
+    border: 1.5px solid var(--border);
+    border-radius: 16px;
+    overflow: hidden;
+    box-shadow: 0 6px 20px rgba(31, 79, 80, .05);
+    margin-bottom: 1.8rem;
+}
+
+.ma-table {
+    width: 100%;
+    border-collapse: collapse;
+}
+
+    .ma-table thead th {
+        background: var(--bg);
+        text-align: left;
+        font-size: .68rem;
+        font-weight: 700;
+        color: var(--text-m);
+        text-transform: uppercase;
+        letter-spacing: .8px;
+        padding: .85rem 1.2rem;
+        border-bottom: 1.5px solid var(--border);
+        white-space: nowrap;
+    }
+
+    .ma-table tbody td {
+        padding: .8rem 1.2rem;
+        font-size: .87rem;
+        color: var(--text);
+        border-bottom: 1px solid var(--border);
+        vertical-align: middle;
+    }
+
+    .ma-table tbody tr:last-child td {
+        border-bottom: none;
+    }
+
+    .ma-table tbody tr:hover {
+        background: rgba(95, 158, 160, .05);
+    }
+
+.ma-job-title {
+    color: var(--text-m);
+    font-weight: 600;
+    font-size: .82rem;
+}
+
+.ma-assessment-title {
+    font-weight: 700;
+}
+
+/* ══ STATUS BADGES ══ */
+.ma-badge {
+    display: inline-flex;
+    align-items: center;
+    gap: .35rem;
+    font-size: .72rem;
+    font-weight: 700;
+    padding: .3rem .7rem;
+    border-radius: 999px;
+    letter-spacing: .2px;
+}
+
+    .ma-badge::before {
+        content: "";
+        width: 6px;
+        height: 6px;
+        border-radius: 50%;
+        background: currentColor;
+    }
+
+.ma-badge-published {
+    background: rgba(45, 107, 109, .1);
+    color: var(--blue-dark);
+}
+
+.ma-badge-draft {
+    background: rgba(217, 158, 61, .14);
+    color: #a1701f;
+}
+
+/* ══ ACTIONS ══ */
+.ma-manage-btn {
+    display: inline-flex;
+    align-items: center;
+    font-family: inherit;
+    font-weight: 700;
+    font-size: .78rem;
+    color: #fff;
+    background: linear-gradient(135deg, var(--blue), var(--blue-dark));
+    border: none;
+    border-radius: 8px;
+    padding: .48rem 1rem;
+    text-decoration: none;
+    transition: filter .2s, transform .15s;
+}
+
+    .ma-manage-btn:hover {
+        filter: brightness(1.06);
+        color: #fff;
+    }
+
+    .ma-manage-btn:active {
+        transform: translateY(1px);
+    }
+
+    .ma-manage-btn:focus-visible {
+        outline: 2px solid var(--blue-deep);
+        outline-offset: 2px;
+    }
+
+.ma-create-btn {
+    display: inline-flex;
+    align-items: center;
+    gap: .4rem;
+    font-family: inherit;
+    font-weight: 700;
+    font-size: .85rem;
+    color: var(--blue-deep);
+    background: #fff;
+    border: 1.5px solid var(--blue);
+    border-radius: 10px;
+    padding: .7rem 1.4rem;
+    text-decoration: none;
+    transition: background .2s, color .2s;
+}
+
+    .ma-create-btn:hover {
+        background: var(--blue);
+        color: #fff;
+    }
+
+    .ma-create-btn:focus-visible {
+        outline: 2px solid var(--blue-deep);
+        outline-offset: 2px;
+    }

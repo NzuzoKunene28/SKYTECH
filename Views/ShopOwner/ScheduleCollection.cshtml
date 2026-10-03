@@ -1,0 +1,60 @@
+﻿@model SkyTech.Models.ProposeItem
+@{
+    Layout = "~/Views/Shared/_MinimalLayout.cshtml";
+    ViewData["Title"] = "Schedule Collection";
+}
+
+<div class="container mt-4" style="max-width:500px;">
+
+    <h3>Schedule Collection</h3>
+
+    @if (TempData["Error"] != null)
+    {
+        <div class="alert alert-danger">@TempData["Error"]</div>
+    }
+
+    <!-- Item summary -->
+    <div class="alert alert-info">
+        <strong>Item:</strong> @Model.ProdName &nbsp;|&nbsp;
+        <strong>Offered Amount:</strong> R @Model.AmountProposed.ToString("F2")
+    </div>
+
+    <!-- Customer contact & address -->
+    @if (Model.Checkout != null)
+    {
+        <div class="card mb-3">
+            <div class="card-header"><strong>Collection Details</strong></div>
+            <div class="card-body">
+                <p class="mb-1">📍 <strong>Address:</strong> @Model.Checkout.Address</p>
+                <p class="mb-0">📞 <strong>Phone:</strong> @Model.Checkout.PhoneNumber</p>
+            </div>
+        </div>
+    }
+
+    <!-- Auto info -->
+    <div class="alert alert-secondary">
+        <p class="mb-1">
+            🚗 A driver will be <strong>automatically assigned</strong>
+            based on availability.
+        </p>
+        <p class="mb-0">
+            📅 Collection date will be set to
+            <strong>@DateTime.Now.AddDays(4).ToString("dddd, dd MMM yyyy")</strong>
+            (4 days from today).
+        </p>
+    </div>
+
+    <!-- Confirm form — no inputs needed, everything is automatic -->
+    <form asp-action="ScheduleCollection" asp-controller="ShopOwner" method="post">
+        <input type="hidden" name="id" value="@Model.PropItemId" />
+
+        <button type="submit" class="btn btn-info w-100">
+            ✅ Confirm & Assign Driver
+        </button>
+        <a asp-action="AcceptedProposals" asp-controller="ShopOwner"
+               class="btn btn-secondary w-100 mt-2">
+            ← Cancel
+        </a>
+    </form>
+
+</div>

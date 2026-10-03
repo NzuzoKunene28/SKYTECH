@@ -1,0 +1,303 @@
+﻿@model SkyTech.ViewModels.ShopOwnerViewModel
+@inject Microsoft.Extensions.Configuration.IConfiguration Configuration
+@{
+    ViewBag.Title = "Shop Owner Registration";
+    Layout = "~/Views/Shared/_MinimalLayout.cshtml";
+    var geoapifyApiKey = Configuration["Geoapify:ApiKey"];
+}
+
+
+@section Styles {
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+    <link href="https://api.fontshare.com/v2/css?f[]=clash-display@400,500,600,700&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="~/CSS/ShopOwnerStyle.css">
+    <link rel="stylesheet" href="~/CSS/RegistrationForms.css">
+    <style>
+        .geo-suggestions {
+            position: relative;
+        }
+
+        .geo-suggestions-list {
+            display: none;
+            position: absolute;
+            top: 100%;
+            left: 0;
+            right: 0;
+            z-index: 50;
+            background: #fff;
+            border: 1px solid #d1d5db;
+            border-radius: 8px;
+            max-height: 220px;
+            overflow-y: auto;
+            box-shadow: 0 4px 12px rgba(0,0,0,.1);
+        }
+
+            .geo-suggestions-list.open {
+                display: block;
+            }
+
+        .geo-suggestion-item {
+            padding: .6rem .9rem;
+            cursor: pointer;
+            font-size: .9rem;
+        }
+
+            .geo-suggestion-item:hover {
+                background: #f3f4f6;
+            }
+    </style>
+}
+
+@section Scripts {
+    <script src="~/MyScripts/PasswordProgressBar.js"></script>
+
+    <script>
+        (function() {
+            const GEOAPIFY_KEY = '@geoapifyApiKey';
+            const input = document.getElementById('shopAddressInput');
+            const list = document.getElementById('addressSuggestions');
+            const latInput = document.getElementById('LatitudeInput');
+            const lngInput = document.getElementById('LongitudeInput');
+            const addressError = document.getElementById('addressError');
+
+            let debounceTimer = null;
+
+            function clearSelection() {
+                latInput.value = '';
+                lngInput.value = '';
+            }
+
+            function showError(visible) {
+                addressError.style.display = visible ? 'block' : 'none';
+            }
+
+            function closeList() {
+                list.classList.remove('open');
+                list.innerHTML = '';
+            }
+
+            function renderSuggestions(results) {
+                list.innerHTML = '';
+                if (!results || results.length === 0) {
+                    closeList();
+                    return;
+                }
+
+                results.forEach(function(place) {
+                    const item = document.createElement('div');
+                    item.className = 'geo-suggestion-item';
+                    item.textContent = place.formatted;
+                    item.addEventListener('click', function() {
+                        input.value = place.formatted;
+                        latInput.value = place.lat;
+                        lngInput.value = place.lon;
+                        showError(false);
+                        closeList();
+                    });
+                    list.appendChild(item);
+                });
+
+                list.classList.add('open');
+            }
+
+            input.addEventListener('input', function() {
+                clearSelection(); // typing invalidates any previous selection
+                const query = input.value.trim();
+
+                clearTimeout(debounceTimer);
+                if (query.length < 3) {
+                    closeList();
+                    return;
+                }
+
+                // Wait for the user to stop typing before calling the API —
+                // keeps this well within the free tier's daily limit.
+                debounceTimer = setTimeout(function() {
+                    const url = 'https://api.geoapify.com/v1/geocode/autocomplete'
+                        + '?text=' + encodeURIComponent(query)
+                        + '&filter=countrycode:za' // bias to South Africa — remove this line for worldwide results
+                        + '&format=json'
+                        + '&apiKey=' + GEOAPIFY_KEY;
+
+                    fetch(url)
+                        .then(function(res) { return res.json(); })
+                        .then(function(data) { renderSuggestions(data.results); })
+                        .catch(function() { closeList(); });
+                }, 350);
+            });
+
+            // Close the dropdown if the user clicks elsewhere on the page
+            document.addEventListener('click', function(e) {
+                if (!list.contains(e.target) && e.target !== input) {
+                    closeList();
+                }
+            });
+
+            document.addEventListener('DOMContentLoaded', function() {
+                document.querySelector('form').addEventListener('submit', function(e) {
+                    if (!latInput.value || !lngInput.value) {
+                        e.preventDefault();
+                        showError(true);
+                        input.scrollIntoView({ behavior: 'smooth', block: 'center' });
+                    }
+                });
+            });
+        })();
+    </script>
+}
+
+
+<main class="so-main">
+
+    @if (TempData["Message"] != null)
+    {
+        <div class="so-alert so-alert-success">
+            <i class="fas fa-circle-check"></i> @TempData["Message"]
+        </div>
+    }
+
+    @using (Html.BeginForm("ShopOwnerReg", "Authentication", FormMethod.Post, new { enctype = "multipart/form-data" }))
+    {
+        @Html.AntiForgeryToken()
+        @Html.ValidationSummary(true, "", new { @class = "so-alert so-alert-error" })
+
+        <!-- Personal Details -->
+        <div class="so-card" style="margin-bottom:1.2rem">
+            <div class="so-card-head">
+                <div class="so-card-title">
+                    <i class="fas fa-user" style="color:var(--blue);margin-right:.4rem"></i>Personal Details
+                </div>
+            </div>
+            <div class="so-card-body">
+                <div class="so-form-grid">
+
+                    <div class="so-form-group">
+                        <label class="so-label"><i class="fas fa-pen"></i> First Name</label>
+                        @Html.TextBoxFor(m => m.Names, new { @class = "so-input", placeholder = "e.g. Thabo", maxlength = "100" })
+                        @Html.ValidationMessageFor(m => m.Names, "", new { @class = "text-danger" })
+                    </div>
+
+                    <div class="so-form-group">
+                        <label class="so-label"><i class="fas fa-pen"></i> Last Name</label>
+                        @Html.TextBoxFor(m => m.Surname, new { @class = "so-input", placeholder = "e.g. Mokoena", maxlength = "100" })
+                        @Html.ValidationMessageFor(m => m.Surname, "", new { @class = "text-danger" })
+                    </div>
+
+                    <div class="so-form-group">
+                        <label class="so-label"><i class="fas fa-envelope"></i> Email Address</label>
+                        @Html.TextBoxFor(m => m.Email, new { @class = "so-input", placeholder = "owner@example.com", type = "email" })
+                        @Html.ValidationMessageFor(m => m.Email, "", new { @class = "text-danger" })
+                    </div>
+
+                    <div class="so-form-group">
+                        <label class="so-label"><i class="fas fa-home"></i> Residential Address</label>
+                        @Html.TextBoxFor(m => m.ResidentialAddress, new { @class = "so-input", placeholder = "Street Name, City" })
+                        @Html.ValidationMessageFor(m => m.ResidentialAddress, "", new { @class = "text-danger" })
+                    </div>
+
+                    <div class="so-form-group">
+                        <label class="so-label"><i class="fas fa-id-card"></i> ID Number</label>
+                        @Html.TextBoxFor(m => m.IdBookNumber, new { @class = "so-input", placeholder = "Must be 13 digits", maxlength = "13", type = "tel" })
+                        @Html.ValidationMessageFor(m => m.IdBookNumber, "", new { @class = "text-danger" })
+                    </div>
+
+                    <div class="so-form-group">
+                        <label class="so-label"><i class="fas fa-university"></i> Account Number</label>
+                        @Html.TextBoxFor(m => m.AccountNumber, new { @class = "so-input", placeholder = "Your bank account number" })
+                        @Html.ValidationMessageFor(m => m.AccountNumber, "", new { @class = "text-danger" })
+                    </div>
+
+                    <div class="so-form-group">
+                        <label class="so-label"><i class="fas fa-building-columns"></i> Bank Name</label>
+                        @Html.TextBoxFor(m => m.BankType, new { @class = "so-input", placeholder = "e.g. FNB, Capitec, ABSA" })
+                        @Html.ValidationMessageFor(m => m.BankType, "", new { @class = "text-danger" })
+                    </div>
+
+                    <!-- Shop Address — now with Geoapify Autocomplete.
+      Start typing and pick a real suggestion; free-typed
+      text that was never selected from the dropdown will
+      be rejected on submit. -->
+                    <div class="so-form-group geo-suggestions">
+                        <label class="so-label"><i class="fas fa-store-alt"></i> Shop Address</label>
+                        @Html.TextBoxFor(m => m.ShopAddress, new { @class = "so-input", placeholder = "Start typing the shop's address...", id = "shopAddressInput", autocomplete = "off" })
+                        <div id="addressSuggestions" class="geo-suggestions-list"></div>
+                        @Html.ValidationMessageFor(m => m.ShopAddress, "", new { @class = "text-danger" })
+                        <small id="addressError" style="display:none;color:#dc2626">
+                            Please select a valid address from the suggestions — free-typed addresses that don't match a real place aren't accepted.
+                        </small>
+                        @Html.HiddenFor(m => m.Latitude, new { id = "LatitudeInput" })
+                        @Html.HiddenFor(m => m.Longitude, new { id = "LongitudeInput" })
+                    </div>
+
+                    <div class="so-form-group">
+                        <label class="so-label"><i class="fas fa-shop"></i> Shop / Branch Name</label>
+                        @Html.TextBoxFor(m => m.ShopName, new { @class = "so-input", placeholder = "e.g. SkyTech Sandton" })
+                        @Html.ValidationMessageFor(m => m.ShopName, "", new { @class = "text-danger" })
+                    </div>
+
+                   
+                    <!-- File: Identity Book -->
+                    <div class="so-form-group file-input-group">
+                        <label class="so-label"><i class="fas fa-id-card"></i> Certified Identity Book</label>
+                        <input type="file" name="OwnerIdentityBook" class="so-input" accept=".pdf,.jpg,.png,.jpeg" />
+                        <small style="color:var(--text-muted)">PDF, JPG, PNG (max 5MB)</small>
+                    </div>
+
+                    <!-- File: Business Registration -->
+                    <div class="so-form-group file-input-group">
+                        <label class="so-label"><i class="fas fa-certificate"></i> Business Registration Certificate</label>
+                        <input type="file" name="BusRegCertificate" class="so-input" accept=".pdf,.jpg,.png,.jpeg" />
+                        <small style="color:var(--text-muted)">PDF, JPG, PNG (max 5MB)</small>
+                    </div>
+
+                </div>
+            </div>
+        </div>
+
+        <!-- Account Credentials -->
+        <div class="so-card">
+            <div class="so-card-head">
+                <div class="so-card-title">
+                    <i class="fas fa-lock" style="color:var(--blue);margin-right:.4rem"></i>Account Credentials
+                </div>
+            </div>
+            <div class="so-card-body">
+                <div class="so-form-grid">
+
+                    <div class="so-form-group">
+                        <label class="so-label"><i class="fas fa-key"></i> Password</label>
+                        <div class="pw-wrap">
+                            @Html.PasswordFor(m => m.Password, new { @class = "so-input", id = "pwField", placeholder = "Min. 8 characters", autocomplete = "new-password" })
+                            <i class="fas fa-eye pw-eye" onclick="togglePw('pwField', this)"></i>
+                        </div>
+                        <div class="pw-strength"><div class="pw-strength-fill" id="pwBar"></div></div>
+                        <div class="pw-hint" id="pwHint">Enter a password</div>
+                        @Html.ValidationMessageFor(m => m.Password, "", new { @class = "text-danger" })
+                    </div>
+
+                    <div class="so-form-group">
+                        <label class="so-label"><i class="fas fa-key"></i> Confirm Password</label>
+                        <div class="pw-wrap">
+                            @Html.PasswordFor(m => m.ConfirmPassword, new { @class = "so-input", id = "pwConfirm", placeholder = "Repeat password", autocomplete = "new-password" })
+                            <i class="fas fa-eye pw-eye" onclick="togglePw('pwConfirm', this)"></i>
+                        </div>
+                        @Html.ValidationMessageFor(m => m.ConfirmPassword, "", new { @class = "text-danger" })
+                    </div>
+
+                </div>
+            </div>
+
+            <!-- Actions -->
+            <div style="display:flex;align-items:center;gap:1rem;margin-top:1.4rem;flex-wrap:wrap;padding:1rem">
+                <button type="submit" class="btn btn-primary btn-lg">
+                    <i class="fas fa-user-plus"></i> Submit Application
+                </button>
+                <a href="@Url.Action("Home", "Authentication")" class="btn btn-outline btn-lg">
+                    Cancel
+                </a>
+            </div>
+        </div>
+    }
+
+</main>

@@ -1,0 +1,209 @@
+﻿/* ==========================================================
+   Recruitment Test — SkyTech design system
+   ========================================================== */
+
+.quiz-wrapper {
+    max-width: 760px;
+    margin: 2rem auto 4rem;
+    padding: 0 1.5rem;
+    font-family: 'Plus Jakarta Sans', sans-serif;
+}
+
+/* Sticky timer bar */
+
+.quiz-timer-bar {
+    position: sticky;
+    top: 0;
+    z-index: 20;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    background: #ffffff;
+    border: 1px solid #dceeed;
+    border-radius: 12px;
+    padding: 0.9rem 1.3rem;
+    margin-bottom: 1.5rem;
+    box-shadow: 0 2px 10px rgba(44, 122, 123, 0.08);
+    transition: border-color 0.3s ease;
+}
+
+.quiz-timer-label {
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+    font-size: 0.85rem;
+    font-weight: 600;
+    color: #5f7a7a;
+    text-transform: uppercase;
+    letter-spacing: 0.03em;
+}
+
+.quiz-timer-value {
+    font-family: 'Clash Display', sans-serif;
+    font-size: 1.6rem;
+    font-weight: 600;
+    letter-spacing: 0.02em;
+}
+
+.quiz-timer-safe {
+    border-color: #c3ecd6;
+}
+
+    .quiz-timer-safe .quiz-timer-value {
+        color: #1f8a5f;
+    }
+
+.quiz-timer-warning {
+    border-color: #f3e2ad;
+}
+
+    .quiz-timer-warning .quiz-timer-value {
+        color: #b8860b;
+    }
+
+.quiz-timer-critical {
+    border-color: #f3c8c8;
+}
+
+    .quiz-timer-critical .quiz-timer-value {
+        color: #c0392b;
+    }
+
+/* Header */
+
+.quiz-header {
+    margin-bottom: 1.8rem;
+}
+
+.quiz-title {
+    font-family: 'Clash Display', sans-serif;
+    font-size: 1.7rem;
+    color: #1f3d3d;
+    margin: 0 0 0.35rem;
+}
+
+.quiz-subtitle {
+    color: #6b8484;
+    font-size: 0.95rem;
+    margin: 0;
+}
+
+/* Question cards */
+
+.quiz-question-card {
+    background: #ffffff;
+    border: 1px solid #dceeed;
+    border-radius: 16px;
+    padding: 1.5rem 1.6rem;
+    margin-bottom: 1.3rem;
+    box-shadow: 0 2px 8px rgba(44, 122, 123, 0.06);
+}
+
+.quiz-question-number {
+    font-size: 0.78rem;
+    font-weight: 700;
+    text-transform: uppercase;
+    letter-spacing: 0.05em;
+    color: #2c7a7b;
+    margin-bottom: 0.5rem;
+}
+
+.quiz-question-text {
+    font-size: 1.08rem;
+    font-weight: 600;
+    color: #1f3d3d;
+    margin: 0 0 1.1rem;
+    line-height: 1.5;
+}
+
+/* Options as selectable cards */
+
+.quiz-options {
+    display: flex;
+    flex-direction: column;
+    gap: 0.65rem;
+}
+
+.quiz-option {
+    display: flex;
+    align-items: center;
+    gap: 0.85rem;
+    padding: 0.75rem 1rem;
+    border: 1.5px solid #e2eeee;
+    border-radius: 12px;
+    cursor: pointer;
+    transition: border-color 0.15s ease, background 0.15s ease;
+}
+
+    .quiz-option:hover {
+        border-color: #9ecece;
+        background: #f4fbfb;
+    }
+
+    .quiz-option input[type="radio"] {
+        position: absolute;
+        opacity: 0;
+        pointer-events: none;
+    }
+
+.quiz-option-marker {
+    flex-shrink: 0;
+    width: 30px;
+    height: 30px;
+    border-radius: 50%;
+    background: #eaf6f6;
+    color: #2c7a7b;
+    font-weight: 700;
+    font-size: 0.85rem;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    transition: background 0.15s ease, color 0.15s ease;
+}
+
+.quiz-option-text {
+    color: #1f3d3d;
+    font-size: 0.98rem;
+}
+
+.quiz-option:has(input[type="radio"]:checked) {
+    border-color: #2c7a7b;
+    background: #eaf6f6;
+}
+
+    .quiz-option:has(input[type="radio"]:checked) .quiz-option-marker {
+        background: #2c7a7b;
+        color: #ffffff;
+    }
+
+/* Submit button */
+
+.quiz-submit-btn {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 0.6rem;
+    width: 100%;
+    padding: 0.9rem;
+    margin-top: 1rem;
+    border: none;
+    border-radius: 12px;
+    background: linear-gradient(135deg, #2c7a7b, #5f9ea0);
+    color: #ffffff;
+    font-weight: 700;
+    font-size: 1rem;
+    cursor: pointer;
+    box-shadow: 0 3px 10px rgba(44, 122, 123, 0.25);
+    transition: transform 0.12s ease, box-shadow 0.12s ease, opacity 0.2s ease;
+}
+
+    .quiz-submit-btn:hover {
+        transform: translateY(-1px);
+        box-shadow: 0 5px 14px rgba(44, 122, 123, 0.32);
+    }
+
+    .quiz-submit-btn:disabled {
+        opacity: 0.7;
+        cursor: not-allowed;
+        transform: none;
+    }

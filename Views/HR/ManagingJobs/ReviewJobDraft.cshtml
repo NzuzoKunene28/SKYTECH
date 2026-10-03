@@ -1,0 +1,67 @@
+﻿@model SkyTech.Models.JobPost
+
+@{
+    ViewData["Title"] = "Review Job Draft";
+    Layout = "~/Views/Shared/_MinimalLayout.cshtml";
+}
+
+<link rel="stylesheet" href="~/CSS/HRCSS/JobDraftReview.css" />
+
+<div class="jd-page">
+
+    @if (TempData["aiError"] != null)
+    {
+        <div class="jd-error">@TempData["aiError"]</div>
+    }
+
+    <p class="jd-eyebrow">HR / Job Postings</p>
+    <h2 class="jd-title">@Model.JobTitle</h2>
+    <div class="jd-meta">
+        <span class="jd-meta-pill">@Model.Department.ToString()</span>
+        <span class="jd-meta-pill">@Model.Location.ToString()</span>
+        <span class="jd-meta-pill">@Model.EmploymentType.ToString()</span>
+    </div>
+
+    <div class="jd-card">
+        <form asp-controller="HR" asp-action="PublishJobDraft" method="Post">
+
+            <input type="hidden" asp-for="PostId" />
+            <input type="hidden" asp-for="JobTitle" />
+            <input type="hidden" asp-for="Department" />
+            <input type="hidden" asp-for="Location" />
+            <input type="hidden" asp-for="EmploymentType" />
+            <input type="hidden" asp-for="SalaryMin" />
+            <input type="hidden" asp-for="SalaryMax" />
+            <input type="hidden" asp-for="ClosingDate" />
+
+            <div class="jd-group">
+                <label class="jd-label" asp-for="Responsibilities">Responsibilities</label>
+                <textarea class="jd-textarea" asp-for="Responsibilities" rows="5"></textarea>
+                <span class="jd-validation" asp-validation-for="Responsibilities"></span>
+            </div>
+
+            <div class="jd-group">
+                <label class="jd-label" asp-for="RequiredCerts">Required Certifications</label>
+                <textarea class="jd-textarea" asp-for="RequiredCerts" rows="7"></textarea>
+                <span class="jd-validation" asp-validation-for="RequiredCerts"></span>
+            </div>
+
+            <div class="jd-group">
+                <label class="jd-label" asp-for="RequiredSkillsAndXP">Required Skills and Experience</label>
+                <textarea class="jd-textarea" asp-for="RequiredSkillsAndXP" rows="7"></textarea>
+                <span class="jd-validation" asp-validation-for="RequiredSkillsAndXP"></span>
+            </div>
+
+            <div class="jd-actions">
+                <button type="submit" class="jd-btn jd-btn-publish">Publish</button>
+            </div>
+
+        </form>
+
+        <form asp-controller="ShopOwner" asp-action="RegenerateJobDraft" method="Post" class="jd-regenerate-form">
+            <input type="hidden" name="id" value="@Model.PostId" />
+            <button type="submit" class="jd-btn jd-btn-regenerate">Regenerate with AI</button>
+        </form>
+    </div>
+
+</div>

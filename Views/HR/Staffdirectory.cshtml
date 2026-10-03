@@ -1,0 +1,80 @@
+﻿@model List<SkyTech.Models.Staff>
+@{
+    ViewData["Title"] = "Staff Directory";
+    Layout = "~/Views/Shared/_MinimalLayout.cshtml";
+}
+
+<link rel="stylesheet" href="~/CSS/HRCSS/StaffDirectory.css" />
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
+
+<div class="sd-wrap">
+
+    <p class="sd-eyebrow">Staffing</p>
+    <h1 class="sd-title">Staff Directory</h1>
+
+    <div class="sd-note">
+        <i class="fa-solid fa-circle-info"></i>
+        Showing all staff. Branch scoping not yet implemented — HR isn't linked to a specific branch yet.
+    </div>
+
+    @if (Model.Any())
+    {
+        <div class="sd-table-wrap">
+            <table class="sd-table">
+                <thead>
+                    <tr>
+                        <th>Photo</th>
+                        <th>Name</th>
+                        <th>Branch</th>
+                        <th>Position</th>
+                        <th>Email</th>
+                        <th>Enrollment</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    @foreach (var staff in Model)
+                    {
+                        <tr>
+                            <td>
+                                @if (!string.IsNullOrEmpty(staff.ReferencePhotoPath))
+                                {
+                                    <img src="@staff.ReferencePhotoPath" alt="Reference photo" class="sd-photo" />
+                                }
+                                else
+                                {
+                                    <span class="sd-no-photo"><i class="fa-solid fa-user"></i></span>
+                                }
+                            </td>
+                            <td class="sd-name">@staff.FirstName @staff.LastName</td>
+                            <td>@staff.Branches?.BranchName</td>
+                            <td>@staff.Positions?.PositionName</td>
+                            <td class="sd-email">@staff.Email</td>
+                            <td>
+                                @if (!string.IsNullOrEmpty(staff.ReferenceEmbedding))
+                                {
+                                    <span class="sd-badge enrolled"><i class="fa-solid fa-check"></i> Enrolled</span>
+                                }
+                                else
+                                {
+                                    <span class="sd-badge not-enrolled"><i class="fa-solid fa-xmark"></i> Not enrolled</span>
+                                }
+                            </td>
+                        </tr>
+                    }
+                </tbody>
+            </table>
+        </div>
+    }
+    else
+    {
+        <div class="sd-table-wrap">
+            <div class="sd-empty">
+                <i class="fa-solid fa-user-slash"></i>
+                No staff records found.
+            </div>
+        </div>
+    }
+
+</div>

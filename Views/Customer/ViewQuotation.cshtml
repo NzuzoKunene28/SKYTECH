@@ -1,0 +1,367 @@
+@{
+    ViewBag.Title = "View Quotation";
+    Layout = "~/Views/Shared/_MinimalLayout.cshtml";
+}
+
+@section Styles {
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+    <link href="https://api.fontshare.com/v2/css?f[]=clash-display@400,500,600,700&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="~/CSS/DashboardStyle.css">
+    <style>
+        .detail-grid {
+            display: grid;
+            grid-template-columns: repeat(2, 1fr);
+            gap: 1rem;
+            margin-bottom: 1.5rem;
+        }
+        .detail-item {
+            display: flex;
+            flex-direction: column;
+            gap: 0.25rem;
+        }
+        .detail-label {
+            font-size: 0.8rem;
+            font-weight: 600;
+            color: var(--text-muted);
+            text-transform: uppercase;
+            letter-spacing: 0.04em;
+        }
+        .detail-value {
+            font-size: 0.97rem;
+            color: var(--text);
+            font-weight: 500;
+        }
+        .items-table {
+            width: 100%;
+            border-collapse: collapse;
+            font-size: 0.92rem;
+            margin-bottom: 0.5rem;
+        }
+        .items-table th {
+            text-align: left;
+            padding: 0.6rem 0.75rem;
+            background: var(--blue-soft);
+            color: var(--text-muted);
+            font-size: 0.8rem;
+            font-weight: 700;
+            text-transform: uppercase;
+            letter-spacing: 0.04em;
+        }
+        .items-table td {
+            padding: 0.75rem;
+            border-bottom: 1px solid var(--border);
+            color: var(--text);
+        }
+        .items-table tr:last-child td {
+            border-bottom: none;
+        }
+        .total-row {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 1rem 0.75rem;
+            border-top: 2px solid var(--border);
+            margin-top: 0.5rem;
+        }
+        .total-label {
+            font-weight: 700;
+            font-size: 1rem;
+            color: var(--text);
+        }
+        .total-amount {
+            font-size: 1.4rem;
+            font-weight: 800;
+            color: var(--green);
+        }
+        .notes-box {
+            background: var(--blue-soft);
+            border-left: 4px solid var(--blue);
+            border-radius: var(--radius-sm);
+            padding: 1rem 1.25rem;
+            font-size: 0.93rem;
+            color: var(--text);
+            margin-top: 1rem;
+        }
+        .reject-input {
+            width: 100%;
+            padding: 0.7rem 1rem;
+            border: 1px solid var(--border);
+            border-radius: var(--radius-sm);
+            font-family: var(--font-body);
+            font-size: 0.93rem;
+            margin-bottom: 0.75rem;
+            transition: border-color 0.2s;
+        }
+        .reject-input:focus {
+            outline: none;
+            border-color: #ef4444;
+            box-shadow: 0 0 0 3px rgba(239,68,68,0.1);
+        }
+        .btn-danger {
+            background: #ef4444;
+            color: white;
+            border: none;
+            padding: 0.75rem 1.5rem;
+            border-radius: var(--radius-sm);
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.2s;
+            width: 100%;
+        }
+        .btn-danger:hover {
+            background: #dc2626;
+            transform: translateY(-1px);
+        }
+        .action-panel {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 1.5rem;
+            margin-top: 1.5rem;
+        }
+        .action-card {
+            border: 1.5px solid var(--border);
+            border-radius: var(--radius);
+            padding: 1.25rem;
+        }
+        .action-card.accept { border-color: #86efac; background: #f0fdf4; }
+        .action-card.reject { border-color: #fca5a5; background: #fff5f5; }
+        .action-title {
+            font-weight: 700;
+            font-size: 0.95rem;
+            margin-bottom: 0.5rem;
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+        }
+        .action-title.accept { color: #15803d; }
+        .action-title.reject { color: #dc2626; }
+        .action-desc {
+            font-size: 0.85rem;
+            color: var(--text-muted);
+            margin-bottom: 1rem;
+        }
+        .btn-accept {
+            background: #16a34a;
+            color: white;
+            border: none;
+            padding: 0.75rem 1.5rem;
+            border-radius: var(--radius-sm);
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.2s;
+            width: 100%;
+        }
+        .btn-accept:hover {
+            background: #15803d;
+            transform: translateY(-1px);
+        }
+    </style>
+}
+
+<div class="dash-wrap">
+    <!-- ══ SIDEBAR ══ -->
+    <aside class="dash-sidebar">
+        <div class="dash-brand">
+            <div class="dash-brand-icon"><i class="fas fa-user"></i></div>
+            <div>
+                <div class="dash-brand-name">SkyTech</div>
+                <div class="dash-brand-sub">Customer Portal</div>
+            </div>
+        </div>
+        <nav class="dash-nav">
+            <div class="dash-nav-label">OVERVIEW</div>
+            <a href="@Url.Action("Dashboard", "Customer")" class="dash-link">
+                <i class="fas fa-grid-2"></i><span>Dashboard</span>
+            </a>
+            <div class="dash-nav-label">MY REPAIRS</div>
+            <a href="@Url.Action("MyRepairs", "Customer")" class="dash-link">
+                <i class="fas fa-wrench"></i><span>My Repairs</span>
+            </a>
+            <a href="@Url.Action("MyQuotations", "Customer")" class="dash-link active">
+                <i class="fas fa-file-invoice-dollar"></i><span>Quotations</span>
+            </a>
+        </nav>
+        <div class="dash-sidebar-foot">
+            <div class="dash-foot-avatar"><i class="fas fa-user"></i></div>
+            <div>
+                <div class="dash-foot-name">Customer</div>
+                <div class="dash-foot-role">Account</div>
+            </div>
+        </div>
+        <div style="padding:.8rem 1.2rem;margin-top:1rem">
+            @using (Html.BeginForm("Logout", "Authentication", FormMethod.Post))
+            {
+                @Html.AntiForgeryToken()
+                <button type="submit" style="width:100%;background:rgba(220,38,38,.08);border:1.5px solid rgba(220,38,38,.25);border-radius:8px;padding:.6rem 1rem;cursor:pointer;color:#dc2626;font-weight:600;font-size:.85rem;display:flex;align-items:center;gap:.5rem;justify-content:center">
+                    <i class="fas fa-right-from-bracket"></i> Log Out
+                </button>
+            }
+        </div>
+    </aside>
+
+    <!-- ══ MAIN ══ -->
+    <main class="dash-main">
+        <div class="dash-header">
+            <div>
+                <h1 class="dash-title">Quotation #@Model.QuotationId</h1>
+                <p class="dash-subtitle">Review the quotation for your repair request</p>
+            </div>
+            <a href="@Url.Action("MyRepairs", "Customer")" class="dash-btn-secondary">
+                <i class="fas fa-arrow-left"></i> Back
+            </a>
+        </div>
+
+        @if (TempData["Success"] != null)
+        {
+            <div class="so-alert so-alert-success" style="margin-bottom:1.5rem">
+                <i class="fas fa-circle-check"></i> @TempData["Success"]
+            </div>
+        }
+        @if (TempData["Message"] != null)
+        {
+            <div class="so-alert so-alert-error" style="margin-bottom:1.5rem">
+                <i class="fas fa-circle-xmark"></i> @TempData["Message"]
+            </div>
+        }
+
+        <div class="dash-content">
+            <div style="display:grid;grid-template-columns:1fr 1fr;gap:2rem;align-items:start">
+
+                <!-- ── LEFT: Repair + Cost breakdown ── -->
+                <div style="display:flex;flex-direction:column;gap:1.5rem">
+
+                    <!-- Repair Details -->
+                    <div class="dash-card">
+                        <h2 style="font-size:1rem;font-weight:700;margin-bottom:1.25rem;color:var(--text)">
+                            <i class="fas fa-screwdriver-wrench" style="color:var(--blue);margin-right:.4rem"></i>Repair Details
+                        </h2>
+                        <div class="detail-grid">
+                            <div class="detail-item">
+                                <span class="detail-label">Item</span>
+                                <span class="detail-value">@Model.ItemName</span>
+                            </div>
+                            <div class="detail-item">
+                                <span class="detail-label">Technician</span>
+                                <span class="detail-value">@(Model.TechnicianName ?? "—")</span>
+                            </div>
+                            <div class="detail-item" style="grid-column:span 2">
+                                <span class="detail-label">Issue</span>
+                                <span class="detail-value">@Model.IssueDescription</span>
+                            </div>
+                            <div class="detail-item">
+                                <span class="detail-label">Date Issued</span>
+                                <span class="detail-value">@Model.CreatedDate.ToString("dd MMM yyyy")</span>
+                            </div>
+                        </div>
+
+                        @if (!string.IsNullOrWhiteSpace(Model.TechnicianNotes))
+                        {
+                            <div class="notes-box">
+                                <strong><i class="fas fa-note-sticky"></i> Technician Notes</strong><br>
+                                @Model.TechnicianNotes
+                            </div>
+                        }
+                    </div>
+
+                    <!-- Cost Breakdown -->
+                    <div class="dash-card">
+                        <h2 style="font-size:1rem;font-weight:700;margin-bottom:1.25rem;color:var(--text)">
+                            <i class="fas fa-receipt" style="color:var(--blue);margin-right:.4rem"></i>Cost Breakdown
+                        </h2>
+
+                        @if (Model.QuotationItems != null && Model.QuotationItems.Any())
+                        {
+                            <table class="items-table">
+                                <thead>
+                                    <tr>
+                                        <th>Description</th>
+                                        <th>Qty</th>
+                                        <th>Unit Cost</th>
+                                        <th>Line Total</th>
+                                    </tr>
+                                </thead>
+                                <tbody>
+                                    @foreach (var item in Model.QuotationItems)
+                                    {
+                                        <tr>
+                                            <td>@item.ItemDescription</td>
+                                            <td>x@(item.Quantity)</td>
+                                            <td>@($"R{item.UnitCost:N2}")</td>
+                                            <td><strong>@($"R{item.LineTotal:N2}")</strong></td>
+                                        </tr>
+                                    }
+                                </tbody>
+                            </table>
+                        }
+                        else
+                        {
+                            <p style="color:var(--text-muted);font-size:0.9rem">No line items added.</p>
+                        }
+
+                        <div class="total-row">
+                            <span class="total-label">Total Amount</span>
+                            <span class="total-amount">@($"R{Model.TotalCost:N2}")</span>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- ── RIGHT: Accept / Reject ── -->
+                <div>
+                    <div class="dash-card">
+                        <h2 style="font-size:1rem;font-weight:700;margin-bottom:0.5rem;color:var(--text)">
+                            <i class="fas fa-gavel" style="color:var(--blue);margin-right:.4rem"></i>Your Decision
+                        </h2>
+                        <p style="font-size:0.88rem;color:var(--text-muted);margin-bottom:1.5rem">
+                            Accepting will start the repair. Rejecting will cancel the request and free the technician.
+                        </p>
+
+                        <div class="action-panel">
+
+                            <!-- Accept -->
+                            <div class="action-card accept">
+                                <div class="action-title accept">
+                                    <i class="fas fa-circle-check"></i> Accept
+                                </div>
+                                <p class="action-desc">Approve the quotation and begin the repair process.</p>
+                                @using (Html.BeginForm("AcceptQuotation", "Customer", FormMethod.Post))
+                                {
+                                    @Html.AntiForgeryToken()
+                                    <input type="hidden" name="quotationId" value="@Model.QuotationId" />
+                                    <button type="submit" class="btn-accept">
+                                        <i class="fas fa-check"></i> Accept Quotation
+                                    </button>
+                                }
+                            </div>
+
+                            <!-- Reject -->
+                            <div class="action-card reject">
+                                <div class="action-title reject">
+                                    <i class="fas fa-circle-xmark"></i> Reject
+                                </div>
+                                <p class="action-desc">Decline this quotation and cancel the repair request.</p>
+                                @using (Html.BeginForm("RejectQuotation", "Customer", FormMethod.Post))
+                                {
+                                    @Html.AntiForgeryToken()
+                                    <input type="hidden" name="quotationId" value="@Model.QuotationId" />
+                                    <input type="text" name="rejectionReason" class="reject-input"
+                                           placeholder="Reason for rejection (optional)" />
+                                    <button type="submit" class="btn-danger">
+                                        <i class="fas fa-times"></i> Reject Quotation
+                                    </button>
+                                }
+                            </div>
+
+                        </div>
+                    </div>
+                </div>
+
+            </div>
+        </div>
+    </main>
+</div>
+
+@section Scripts {
+    <script src="~/JS/DashboardScript.js"></script>
+}

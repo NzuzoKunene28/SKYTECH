@@ -1,0 +1,269 @@
+/* GenerateWeekly.css — belongs to Views/Roster/GenerateWeekly.cshtml
+   Path: ~/CSS/HRCSS/GenerateWeekly.css
+   Shares the design tokens of HRDash.css; loads alongside the HR shell. */
+
+:root {
+    --blue: #5f9ea0;
+    --blue-dark: #2d6b6d;
+    --blue-deep: #1f4f50;
+    --bg: #f0f4fc;
+    --border: #dde6f5;
+    --text: #0e1b35;
+    --text-2: #4a5878;
+    --text-m: #8a96b0;
+}
+
+* , *::before, *::after {
+    box-sizing: border-box;
+}
+
+body {
+    margin: 0;
+    font-family: 'Plus Jakarta Sans', sans-serif;
+    background-color: var(--bg);
+    color: var(--text);
+}
+
+.rw-main {
+    padding: 2.5rem 3rem;
+    max-width: 860px;
+}
+
+@media (max-width: 700px) {
+    .rw-main {
+        padding: 1.5rem 1.25rem;
+    }
+}
+
+.rw-eyebrow {
+    font-size: .72rem;
+    font-weight: 700;
+    color: var(--text-m);
+    text-transform: uppercase;
+    letter-spacing: 1.2px;
+    margin: 0 0 .4rem;
+}
+
+.rw-title {
+    font-family: 'Clash Display', 'Plus Jakarta Sans', sans-serif;
+    font-weight: 700;
+    font-size: 1.9rem;
+    letter-spacing: -.5px;
+    color: var(--text);
+    margin: 0 0 .4rem;
+}
+
+.rw-sub {
+    font-size: .9rem;
+    color: var(--text-m);
+    margin: 0 0 1.8rem;
+}
+
+/* ══ VALIDATION ══ */
+.rw-alert {
+    background: #fdf1f1;
+    border: 1.5px solid #f2c9c9;
+    color: #a13d3d;
+    font-size: .85rem;
+    font-weight: 600;
+    padding: .85rem 1.1rem;
+    border-radius: 10px;
+    margin: 0 0 1.4rem;
+}
+
+    .rw-alert ul {
+        margin: .3rem 0 0;
+        padding-left: 1.1rem;
+        font-weight: 500;
+    }
+
+/* ══ FORM SHELL ══ */
+.rw-card {
+    background: #fff;
+    border: 1.5px solid var(--border);
+    border-radius: 16px;
+    padding: 2rem 2.2rem;
+    box-shadow: 0 6px 20px rgba(31, 79, 80, .05);
+}
+
+.rw-section-label {
+    font-size: .68rem;
+    font-weight: 700;
+    color: var(--text-m);
+    text-transform: uppercase;
+    letter-spacing: 1px;
+    margin: 0 0 1rem;
+}
+
+.rw-grid {
+    display: grid;
+    grid-template-columns: repeat(2, 1fr);
+    gap: 1.3rem 1.6rem;
+    margin-bottom: 1.6rem;
+}
+
+@media (max-width: 560px) {
+    .rw-grid {
+        grid-template-columns: 1fr;
+    }
+}
+
+.rw-group {
+    display: flex;
+    flex-direction: column;
+    gap: .4rem;
+}
+
+    .rw-group.rw-span-2 {
+        grid-column: span 2;
+    }
+
+@media (max-width: 560px) {
+    .rw-group.rw-span-2 {
+        grid-column: span 1;
+    }
+}
+
+.rw-label {
+    font-size: .78rem;
+    font-weight: 700;
+    color: var(--text-2);
+}
+
+.rw-hint {
+    font-size: .74rem;
+    color: var(--text-m);
+    margin: 0;
+}
+
+.rw-input,
+.rw-select {
+    font-family: inherit;
+    font-size: .88rem;
+    color: var(--text);
+    background: var(--bg);
+    border: 1.5px solid var(--border);
+    border-radius: 10px;
+    padding: .62rem .8rem;
+    transition: border-color .2s, background .2s;
+    width: 100%;
+}
+
+    .rw-input:focus,
+    .rw-select:focus {
+        outline: none;
+        border-color: var(--blue);
+        background: #fff;
+    }
+
+    .rw-input:focus-visible,
+    .rw-select:focus-visible {
+        outline: 2px solid var(--blue-deep);
+        outline-offset: 1px;
+    }
+
+.rw-divider {
+    border: none;
+    border-top: 1.5px solid var(--border);
+    margin: .4rem 0 1.6rem;
+}
+
+/* ══ POSITIONS TABLE ══ */
+.rw-table-wrap {
+    border: 1.5px solid var(--border);
+    border-radius: 12px;
+    overflow: hidden;
+    margin-bottom: 1.8rem;
+}
+
+.rw-table {
+    width: 100%;
+    border-collapse: collapse;
+}
+
+    .rw-table thead th {
+        background: var(--bg);
+        text-align: left;
+        font-size: .68rem;
+        font-weight: 700;
+        color: var(--text-m);
+        text-transform: uppercase;
+        letter-spacing: .8px;
+        padding: .75rem 1.1rem;
+        border-bottom: 1.5px solid var(--border);
+    }
+
+    .rw-table tbody td {
+        padding: .65rem 1.1rem;
+        font-size: .87rem;
+        color: var(--text);
+        border-bottom: 1px solid var(--border);
+    }
+
+    .rw-table tbody tr:last-child td {
+        border-bottom: none;
+    }
+
+    .rw-table tbody tr:hover {
+        background: rgba(95, 158, 160, .05);
+    }
+
+.rw-position-name {
+    font-weight: 600;
+}
+
+.rw-qty-input {
+    font-family: inherit;
+    font-size: .87rem;
+    color: var(--text);
+    background: var(--bg);
+    border: 1.5px solid var(--border);
+    border-radius: 8px;
+    padding: .45rem .6rem;
+    width: 90px;
+    text-align: center;
+    transition: border-color .2s, background .2s;
+}
+
+    .rw-qty-input:focus {
+        outline: none;
+        border-color: var(--blue);
+        background: #fff;
+    }
+
+    .rw-qty-input:focus-visible {
+        outline: 2px solid var(--blue-deep);
+        outline-offset: 1px;
+    }
+
+/* ══ ACTIONS ══ */
+.rw-actions {
+    display: flex;
+    justify-content: flex-end;
+}
+
+.rw-submit {
+    font-family: inherit;
+    font-weight: 700;
+    font-size: .85rem;
+    color: #fff;
+    background: linear-gradient(135deg, var(--blue), var(--blue-dark));
+    border: none;
+    border-radius: 10px;
+    padding: .75rem 1.7rem;
+    cursor: pointer;
+    transition: filter .2s, transform .15s;
+}
+
+    .rw-submit:hover {
+        filter: brightness(1.06);
+    }
+
+    .rw-submit:active {
+        transform: translateY(1px);
+    }
+
+    .rw-submit:focus-visible {
+        outline: 2px solid var(--blue-deep);
+        outline-offset: 2px;
+    }

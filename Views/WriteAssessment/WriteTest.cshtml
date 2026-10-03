@@ -1,0 +1,142 @@
+﻿@model SkyTech.ViewModels.QuizViewModel
+
+@{
+    ViewData["Title"] = "Recruitment Test";
+    Layout = "~/Views/Shared/_MinimalLayout.cshtml";
+}
+
+@section Styles {
+    <link rel="stylesheet" href="~/CSS/CUSTOMERCSS/WriteTest.css" />
+}
+
+<div class="quiz-wrapper">
+
+    <div class="quiz-timer-bar">
+        <div class="quiz-timer-label">
+            <i class="fa-regular fa-clock"></i>
+            Time Remaining
+        </div>
+        <div id="timer" class="quiz-timer-value">--:--</div>
+    </div>
+
+    <div class="quiz-header">
+        <h2 class="quiz-title">Recruitment Assessment</h2>
+        <p class="quiz-subtitle">Answer all questions to the best of your ability. Your test submits automatically when time runs out.</p>
+    </div>
+
+    <form id="quizForm" asp-action="SubmitTest" method="post">
+
+        @for (int i = 0; i < Model.Questions.Count; i++)
+        {
+            <div class="quiz-question-card">
+
+                <div class="quiz-question-number">Question @(i + 1) of @Model.Questions.Count</div>
+
+                <p class="quiz-question-text">@Model.Questions[i].QuestionText</p>
+
+                <input type="hidden" asp-for="Questions[i].QuestionId" />
+                <input type="hidden" asp-for="Questions[i].QuestionText" />
+
+                <div class="quiz-options">
+
+                    <label class="quiz-option">
+                        <input asp-for="Questions[i].SelectedAnswer" type="radio" value="A" />
+                        <span class="quiz-option-marker">A</span>
+                        <span class="quiz-option-text">@Model.Questions[i].OptionA</span>
+                    </label>
+
+                    <label class="quiz-option">
+                        <input asp-for="Questions[i].SelectedAnswer" type="radio" value="B" />
+                        <span class="quiz-option-marker">B</span>
+                        <span class="quiz-option-text">@Model.Questions[i].OptionB</span>
+                    </label>
+
+                    <label class="quiz-option">
+                        <input asp-for="Questions[i].SelectedAnswer" type="radio" value="C" />
+                        <span class="quiz-option-marker">C</span>
+                        <span class="quiz-option-text">@Model.Questions[i].OptionC</span>
+                    </label>
+
+                    <label class="quiz-option">
+                        <input asp-for="Questions[i].SelectedAnswer" type="radio" value="D" />
+                        <span class="quiz-option-marker">D</span>
+                        <span class="quiz-option-text">@Model.Questions[i].OptionD</span>
+                    </label>
+
+                </div>
+            </div>
+        }
+
+        <button id="submitBtn" type="submit" class="quiz-submit-btn">
+            <i class="fa-solid fa-paper-plane"></i>
+            Submit Test
+        </button>
+
+    </form>
+
+</div>
+
+<script>
+
+    let totalSeconds = @ViewBag.TimeLimit * 60;
+
+    const timer = document.getElementById("timer");
+    const quizForm = document.getElementById("quizForm");
+    const submitBtn = document.getElementById("submitBtn");
+    const timerBar = document.querySelector(".quiz-timer-bar");
+
+    let countdown;
+
+    function updateTimer() {
+
+        let minutes = Math.floor(totalSeconds / 60);
+        let seconds = totalSeconds % 60;
+
+        timer.innerHTML =
+            String(minutes).padStart(2, '0') + ":" +
+            String(seconds).padStart(2, '0');
+
+        timerBar.classList.remove("quiz-timer-safe", "quiz-timer-warning", "quiz-timer-critical");
+
+        if (totalSeconds > 300) {
+            timerBar.classList.add("quiz-timer-safe");
+        }
+        else if (totalSeconds > 60) {
+            timerBar.classList.add("quiz-timer-warning");
+        }
+        else if (totalSeconds > 0) {
+            timerBar.classList.add("quiz-timer-critical");
+
+            if (Math.floor(totalSeconds / 2) % 2 === 0) {
+                timer.style.opacity = "1";
+            } else {
+                timer.style.opacity = "0.3";
+            }
+        }
+        else {
+            clearInterval(countdown);
+
+            timer.innerHTML = "00:00";
+            timerBar.classList.add("quiz-timer-critical");
+            timer.style.opacity = "1";
+
+            alert("Time is up! Your assessment will now be submitted.");
+
+            quizForm.submit();
+
+            return;
+        }
+
+        totalSeconds--;
+    }
+
+    updateTimer();
+    countdown = setInterval(updateTimer, 1000);
+
+    quizForm.addEventListener("submit", function() {
+        clearInterval(countdown);
+        submitBtn.disabled = true;
+        submitBtn.innerHTML = '<i class="fa-solid fa-spinner fa-spin"></i> Submitting...';
+    });
+
+</script>

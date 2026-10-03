@@ -1,0 +1,170 @@
+﻿@model List<SkyTech.ViewModels.HRReviewViewModel>
+
+@{
+    ViewData["Title"] = "HR Dashboard";
+    Layout = "~/Views/Shared/_MinimalLayout.cshtml";
+}
+
+<link rel="stylesheet" href="~/CSS/HRCSS/HRDashboard.css" />
+
+<div class="hr-page">
+    <div class="hr-container">
+
+        <div class="hr-header">
+            <div class="hr-header-top">
+                <div>
+                    <h2>HR Dashboard</h2>
+                    <div class="hr-subtitle">Review applicants, manage assessments and track interview progress</div>
+                </div>
+
+                <div class="hr-actions">
+                    <a asp-action="CreateAssessment" class="btn-hr btn-hr-primary">
+                        Create Quiz
+                    </a>
+                    <a asp-action="ManageAssessments" asp-controller="HR" class="btn-hr btn-hr-ghost">
+                        Manage Assessments
+                    </a>
+                </div>
+            </div>
+        </div>
+
+        @if (TempData["Message"] != null)
+        {
+            <div class="hr-alert">
+                @TempData["Message"]
+            </div>
+        }
+
+        <div class="hr-summary">
+            <span>Applicants Found:</span>
+            <strong>@Model.Count</strong>
+        </div>
+
+        <div class="hr-table-card">
+            <div class="hr-table-scroll">
+                <table class="hr-table">
+                    <thead>
+                        <tr>
+                            <th>Applicant</th>
+                            <th>Email</th>
+                            <th>Job Title</th>
+                            <th>Skill Match</th>
+                            <th>Score</th>
+                            <th>Test Status</th>
+                            <th>Interview Status</th>
+                            <th>Action</th>
+                        </tr>
+                    </thead>
+
+                    <tbody>
+
+                        @if (!Model.Any())
+                        {
+                            <tr class="hr-empty-row">
+                                <td colspan="8">
+                                    No applicants found matching your search/filter.
+                                </td>
+                            </tr>
+                        }
+                        else
+                        {
+                            @foreach (var applicant in Model)
+                            {
+                                <tr>
+
+                                    <td>@applicant.FirstName</td>
+
+                                    <td>@applicant.Email</td>
+
+                                    <td>@applicant.JobTitle</td>
+
+                                    <td>
+                                        <span class="score-value">@applicant.MatchedSkillCount</span>
+                                    </td>
+
+                                    <td>
+                                        @if (applicant.JobStat == SkyTech.Models.JobPostServices.JobApplicationStat.Failed_Test ||
+                                             applicant.JobStat == SkyTech.Models.JobPostServices.JobApplicationStat.Passed_Test)
+                                        {
+                                            <span class="score-value">@applicant.Score</span>
+                                        }
+                                        else
+                                        {
+                                            <span class="no-action">-</span>
+                                        }
+                                    </td>
+
+                                    <td>
+                                        @if (applicant.JobStat == SkyTech.Models.JobPostServices.JobApplicationStat.Passed_Test)
+                                        {
+                                            <span class="pill pill-pass">PASS</span>
+                                        }
+                                        else if (applicant.JobStat == SkyTech.Models.JobPostServices.JobApplicationStat.Failed_Test)
+                                        {
+                                            <span class="pill pill-fail">FAIL</span>
+                                        }
+                                        else if (applicant.IsPublished == true &&
+                                                  applicant.JobStat == SkyTech.Models.JobPostServices.JobApplicationStat.Shortlisted)
+                                        {
+                                            <span class="pill pill-waiting">Waiting Assessment</span>
+                                        }
+                                        else
+                                        {
+                                            <span class="pill pill-neutral">Not Written</span>
+                                        }
+                                    </td>
+
+                                    <td>
+                                        @if (applicant.InterviewStat == SkyTech.Models.Interviews.InterviewStatus.Scheduled)
+                                        {
+                                            <span class="pill pill-neutral">Scheduled for interview</span>
+                                        }
+                                        else if (applicant.InterviewStat == SkyTech.Models.Interviews.InterviewStatus.Completed)
+                                        {
+                                            <span class="pill pill-neutral">Interview Completed</span>
+                                        }
+                                        else if (applicant.InterviewStat == SkyTech.Models.Interviews.InterviewStatus.Pre_Approved)
+                                        {
+                                            <span class="pill pill-neutral">Pre Approved</span>
+                                        }
+                                        else if (applicant.InterviewStat == SkyTech.Models.Interviews.InterviewStatus.Unsuccessful)
+                                        {
+                                            <span class="pill pill-neutral">Interview unsuccessful</span>
+                                        }
+                                        else if (applicant.InterviewStat == SkyTech.Models.Interviews.InterviewStatus.Employed)
+                                        {
+                                            <span class="pill pill-neutral">Already Employed</span>
+                                        }
+                                        else
+                                        {
+                                            <span class="pill pill-neutral">Not invited for interview</span>
+                                        }
+                                    </td>
+
+                                    <td>
+                                        @if (applicant.JobStat == SkyTech.Models.JobPostServices.JobApplicationStat.Applied)
+                                        {
+                                            <a asp-action="Shortlist" asp-route-id="@applicant.ApplicationId" class="btn-hr-sm btn-hr-approve">
+                                                Shortlist
+                                            </a>
+                                            <a asp-action="Reject" asp-route-id="@applicant.ApplicationId" class="btn-hr-sm btn-hr-reject">
+                                                Reject
+                                            </a>
+                                        }
+                                        else
+                                        {
+                                            <span class="no-action">No Action</span>
+                                        }
+                                    </td>
+
+                                </tr>
+                            }
+                        }
+
+                    </tbody>
+                </table>
+            </div>
+        </div>
+
+    </div>
+</div>

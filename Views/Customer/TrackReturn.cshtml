@@ -1,0 +1,271 @@
+﻿@model SkyTech.Models.OrderItem
+@using SkyTech.Models
+@{
+    ViewBag.Title = "Track Return";
+    Layout = "~/Views/Shared/_MinimalLayout.cshtml";
+}
+
+@section Styles {
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link href="https://fonts.googleapis.com/css2?family=DM+Sans:wght@300;400;500;600&family=Space+Mono:wght@400;700&display=swap" rel="stylesheet" />
+    <link rel="stylesheet" href="~/CSS/MyOrdersStyle.css">
+    <style>
+        .tr-stepper         { padding: 20px 0 8px; }
+        .tr-step            { display: flex; align-items: flex-start; gap: 14px; position: relative; padding-bottom: 24px; }
+        .tr-step:last-child { padding-bottom: 0; }
+        .tr-step-line       { position: absolute; left: 15px; top: 32px; width: 2px; height: calc(100% - 8px); background: var(--border); }
+        .tr-step-line.done  { background: var(--accent, #4ade80); }
+        .tr-step-dot        { width: 30px; height: 30px; border-radius: 50%; border: 2px solid var(--border);
+                              display: flex; align-items: center; justify-content: center;
+                              flex-shrink: 0; background: var(--bg-card, #fff); font-size: 12px; color: var(--text-secondary); }
+        .tr-step-dot.done   { border-color: var(--accent, #4ade80); background: var(--accent, #4ade80); color: #fff; }
+        .tr-step-dot.active { border-color: var(--accent, #4ade80); color: var(--accent, #4ade80); }
+        .tr-step-label      { font-size: 14px; font-weight: 500; color: var(--text-secondary); padding-top: 5px; }
+        .tr-step-label.done,
+        .tr-step-label.active { color: var(--text-primary, #111); }
+        .tr-step-sub        { font-size: 12px; color: var(--text-secondary); margin-top: 2px; }
+    </style>
+}
+
+<header class="mo-header">
+    <a href="@Url.Action("MyReturns", "Customer")" class="mo-back-btn" title="Back">&#8592;</a>
+    <div>
+        <div class="mo-header-title">Track Return</div>
+        <div class="mo-header-sub">Return #RET-@(Model?.OrderItemId.ToString() ?? "")</div>
+    </div>
+</header>
+
+<div class="mo-body">
+
+@if (Model == null)
+{
+    <div class="mo-empty">
+        <div class="mo-empty-title">Return not found</div>
+        <div class="mo-empty-sub">@(ViewBag.Message ?? "This return could not be located.")</div>
+        <a href="@Url.Action("MyReturns", "Customer")" class="mo-btn-primary">Back to Returns</a>
+    </div>
+}
+else
+{
+    string statusClass, statusLabel;
+    switch (Model.ReturnPStatus)
+    {
+        case ReturnProduct.Return_Pending:
+            statusClass = "pending";   statusLabel = "Return Pending";      break;
+        case ReturnProduct.Return_Approved:
+            statusClass = "assigned";  statusLabel = "Return Approved";     break;
+        case ReturnProduct.Collection_Assigned:
+            statusClass = "out";       statusLabel = "Collection Assigned"; break;
+        case ReturnProduct.Item_Collected:
+            statusClass = "out";       statusLabel = "Item Collected";      break;
+        case ReturnProduct.Exchange_Dispatched:
+            statusClass = "out";       statusLabel = "Exchange Dispatched"; break;
+        case ReturnProduct.Completed:
+            statusClass = "delivered"; statusLabel = "Completed";           break;
+        default:
+            statusClass = "pending";   statusLabel = "Pending";             break;
+    }
+
+    var stages = new[]
+    {
+        (ReturnProduct.Return_Pending,       "Return Requested",    "Your return request has been submitted"),
+        (ReturnProduct.Return_Approved,      "Return Approved",     "Your return has been approved by the store"),
+        (ReturnProduct.Collection_Assigned,  "Driver Assigned",     "A driver has been assigned to collect your item"),
+        (ReturnProduct.Item_Collected,       "Item Collected",      "Your item has been picked up and is being inspected"),
+        (ReturnProduct.Exchange_Dispatched,  "Exchange Dispatched", "Your replacement item is on its way"),
+        (ReturnProduct.Completed,            "Completed",           "Your return has been fully processed"),
+    };
+
+    <div class="mo-card">
+
+        @* ── Card header ──────────────────────────────────── *@
+        <div class="mo-card-header">
+            <div>
+                <div class="mo-order-id">#RET-@Model.OrderItemId</div>
+                <div class="mo-order-date">From Order #ORD-@Model.OrderId</div>
+            </div>
+            <span class="mo-status-badge @statusClass">@statusLabel</span>
+        </div>
+
+        <div class="mo-divider"></div>
+
+        @* ── Item summary ─────────────────────────────────── *@
+        <div class="mo-row">
+            <div class="mo-row-icon">
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor"
+                     stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                    <path d="M6 2L3 6v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2V6l-3-4z" />
+                    <line x1="3" y1="6" x2="21" y2="6" />
+                    <path d="M16 10a4 4 0 0 1-8 0" />
+                </svg>
+            </div>
+            <div>
+                <div class="mo-row-label">Item</div>
+                <div class="mo-row-value">@Model.ProdName</div>
+                <div class="mo-row-sub">
+                    Qty: @Model.QuantityReturned &nbsp;·&nbsp; R @Model.PriceAtTimeOfPurchase.ToString("0.00")
+                </div>
+            </div>
+        </div>
+
+        @* ── Return reason ────────────────────────────────── *@
+        @if (!string.IsNullOrEmpty(Model.RetunReason))
+        {
+            <div class="mo-row">
+                <div class="mo-row-icon">
+                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor"
+                         stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                        <circle cx="12" cy="12" r="10" />
+                        <line x1="12" y1="8" x2="12" y2="12" />
+                        <line x1="12" y1="16" x2="12.01" y2="16" />
+                    </svg>
+                </div>
+                <div>
+                    <div class="mo-row-label">Reason</div>
+                    <div class="mo-row-value">@Model.RetunReason</div>
+                </div>
+            </div>
+        }
+
+        @* ── Resolution type ──────────────────────────────── *@
+        <div class="mo-row">
+            <div class="mo-row-icon">
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor"
+                     stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                    <polyline points="1 4 1 10 7 10" />
+                    <path d="M3.51 15a9 9 0 1 0 .49-4.5" />
+                </svg>
+            </div>
+            <div>
+                <div class="mo-row-label">Resolution</div>
+                <div class="mo-row-value">
+                    @(Model.RefundOrExchange == GetRefund.Refund ? "Refund" :
+                      Model.RefundOrExchange == GetRefund.Exchange_item ? "Exchange Item" : "N/A")
+                </div>
+            </div>
+        </div>
+
+        @* ── Collection date ──────────────────────────────── *@
+        @if (Model.CollectionDate != null)
+        {
+            <div class="mo-row">
+                <div class="mo-row-icon">
+                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor"
+                         stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                        <rect x="3" y="4" width="18" height="18" rx="2" ry="2" />
+                        <line x1="16" y1="2" x2="16" y2="6" />
+                        <line x1="8" y1="2" x2="8" y2="6" />
+                        <line x1="3" y1="10" x2="21" y2="10" />
+                    </svg>
+                </div>
+                <div>
+                    <div class="mo-row-label">Scheduled Collection</div>
+                    <div class="mo-row-value">
+                        @Model.CollectionDate.Value.ToString("dd MMM yyyy, hh:mm tt")
+                    </div>
+                    <div class="mo-row-sub">
+                        @{
+                            var daysUntil = (Model.CollectionDate.Value.Date - DateTime.Today).Days;
+                            if      (daysUntil == 0) { <text>Today</text> }
+                            else if (daysUntil == 1) { <text>Tomorrow</text> }
+                            else if (daysUntil > 1)  { <text>In @daysUntil days</text> }
+                            else                     { <text>Collection date passed</text> }
+                        }
+                    </div>
+                </div>
+            </div>
+        }
+
+        @* ── New delivery date ───────────────────────────── *@
+@if (Model.NewDeliveryDate != null)
+{
+    <div class="mo-row">
+        <div class="mo-row-icon">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor"
+                 stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                <rect x="3" y="4" width="18" height="18" rx="2" ry="2" />
+                <line x1="16" y1="2" x2="16" y2="6" />
+                <line x1="8" y1="2" x2="8" y2="6" />
+                <line x1="3" y1="10" x2="21" y2="10" />
+                <polyline points="9 14 11 16 15 12" />
+            </svg>
+        </div>
+        <div>
+            <div class="mo-row-label">Estimated Exchange Delivery</div>
+            <div class="mo-row-value">
+                @Model.NewDeliveryDate.Value.ToString("dd MMM yyyy, hh:mm tt")
+            </div>
+        </div>
+    </div>
+}
+
+        @* ── Collection driver ────────────────────────────── *@
+        @if (Model.DeliveryDriver != null)
+        {
+            string initials = "";
+            if (!string.IsNullOrEmpty(Model.DeliveryDriver.DriverName))    initials += Model.DeliveryDriver.DriverName[0];
+            if (!string.IsNullOrEmpty(Model.DeliveryDriver.DriverSurname)) initials += Model.DeliveryDriver.DriverSurname[0];
+
+            <div class="mo-row">
+                <div class="mo-driver-avatar-sm">@initials.ToUpper()</div>
+                <div>
+                    <div class="mo-row-label">Collection Driver</div>
+                    <div class="mo-row-value">
+                        @(Model.DeliveryDriver.DriverName ?? "") @(Model.DeliveryDriver.DriverSurname ?? "")
+                    </div>
+                    <div class="mo-row-sub">@(Model.DeliveryDriver.VehicleNumber ?? "N/A")</div>
+                </div>
+            </div>
+        }
+
+        <div class="mo-divider"></div>
+
+        @* ── Progress stepper ─────────────────────────────── *@
+        <div style="padding: 4px 4px 8px;">
+            <div class="mo-row-label" style="margin-bottom:12px;">Return Progress</div>
+            <div class="tr-stepper">
+                @for (int i = 0; i < stages.Length; i++)
+                {
+                    var (stageEnum, stageTitle, stageSub) = stages[i];
+                    bool isDone   = (int)Model.ReturnPStatus > (int)stageEnum;
+                    bool isActive = Model.ReturnPStatus == stageEnum;
+                    string dotClass   = isDone ? "done" : isActive ? "active" : "";
+                    string labelClass = isDone ? "done" : isActive ? "active" : "";
+                    bool isLast = i == stages.Length - 1;
+
+                    <div class="tr-step">
+                        @if (!isLast)
+                        {
+                            <div class="tr-step-line @(isDone ? "done" : "")"></div>
+                        }
+                        <div class="tr-step-dot @dotClass">
+                            @if (isDone)
+                            {
+                                <svg width="12" height="12" viewBox="0 0 24 24" fill="none"
+                                     stroke="currentColor" stroke-width="3"
+                                     stroke-linecap="round" stroke-linejoin="round">
+                                    <polyline points="20 6 9 17 4 12" />
+                                </svg>
+                            }
+                            else
+                            {
+                                @(i + 1)
+                            }
+                        </div>
+                        <div>
+                            <div class="tr-step-label @labelClass">@stageTitle</div>
+                            @if (isActive)
+                            {
+                                <div class="tr-step-sub">@stageSub</div>
+                            }
+                        </div>
+                    </div>
+                }
+            </div>
+        </div>
+
+    </div>
+}
+
+</div>

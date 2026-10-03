@@ -1,0 +1,160 @@
+﻿@using SkyTech.Models
+@model SkyTech.Models.DeliveryDriver
+@{
+    ViewBag.Title = "Driver Dashboard";
+    Layout = "~/Views/Shared/_MinimalLayout.cshtml";
+
+    bool restricted = ViewBag.ApplicationStatus == Status.Pending
+              || ViewBag.ApplicationStatus == Status.Rejected;
+}
+
+@section Styles {
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+    <link href="https://api.fontshare.com/v2/css?f[]=clash-display@400,500,600,700&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="~/CSS/DriverStyle.css">
+
+
+}
+
+<div class="d-wrap">
+
+    <!-- ══ SIDEBAR ══ -->
+    <<aside class="d-sidebar">
+        <div class="d-brand">
+            <div class="d-brand-icon"><i class="fas fa-truck-fast"></i></div>
+            <div>
+                <div class="d-brand-name">SkyTech</div>
+                <div class="d-brand-sub">Driver Portal</div>
+            </div>
+        </div>
+        <nav class="d-nav">
+            <div class="d-nav-label">NAVIGATION</div>
+            <a href="@Url.Action("DriverDash", "DeliveryDriver")" class="d-link @(ViewBag.ActivePage == "Dashboard" ? "active" : "")">
+                <i class="fas fa-grid-2"></i><span>Dashboard</span>
+            </a>
+
+            <!-- My Deliveries with dropdown -->
+            <div class="nav-item-dropdown">
+                <a href="#" class="d-link d-dropdown-toggle @(ViewBag.ActivePage == "HomeDeliveries" || ViewBag.ActivePage == "BranchTransfers" ? "open" : "")" id="deliveriesDropdown">
+                    <i class="fas fa-bag-shopping"></i>
+                    <span>My Deliveries</span>
+                    <i class="fas fa-chevron-down dropdown-icon"></i>
+                </a>
+                <div class="d-dropdown-menu" id="deliveriesSubmenu" style="display: @(ViewBag.ActivePage == "HomeDeliveries" || ViewBag.ActivePage == "BranchTransfers" ? "block" : "none")">
+                    <a href="@Url.Action("HomeDeliveries", "DeliveryDriver")" class="d-link d-sub-link @(ViewBag.ActivePage == "HomeDeliveries" ? "active" : "")">
+                        <i class="fas fa-truck"></i> Home Deliveries
+                    </a>
+                    <a href="@Url.Action("BranchTransfers", "DeliveryDriver")" class="d-link d-sub-link @(ViewBag.ActivePage == "BranchTransfers" ? "active" : "")">
+                        <i class="fas fa-arrow-right-arrow-left"></i> Branch Transfers
+                    </a>
+                </div>
+            </div>
+          
+            <a href="@Url.Action("MyTasks", "DeliveryDriver")" class="d-link">
+                <i class="fas fa-bag-shopping"></i><span>Returned Order Items</span>
+            </a>
+            <a href="@Url.Action("ProposalCollections", "DeliveryDriver")" class="d-link">
+                <i class="fas fa-bag-shopping"></i><span>Collect Proposed Items</span>
+            </a>
+
+            <div class="d-nav-label" style="margin-top:1rem">ACCOUNT</div>
+            <a href="@Url.Action("DriverProfile", "DeliveryDriver")" class="d-link @(ViewBag.ActivePage == "Profile" ? "active" : "")">
+                <i class="fas fa-circle-user"></i><span>Profile</span>
+            </a>
+        </nav>
+        <div class="d-sidebar-foot">
+            <div class="d-foot-avatar"><i class="fas fa-user-tie"></i></div>
+            <div>
+                <div class="d-foot-name">@(ViewBag.DriverName ?? "Delivery Driver")</div>
+                <div class="d-foot-role">Delivery Driver</div>
+            </div>
+        </div>
+        <div style="padding:.8rem 1.2rem">
+            @using (Html.BeginForm("Logout", "Authentication", FormMethod.Post))
+            {
+                @Html.AntiForgeryToken()
+                <button type="submit" style="width:100%;background:rgba(239,68,68,.08);
+                        border:1.5px solid rgba(239,68,68,.25);border-radius:8px;
+                        padding:.6rem 1rem;cursor:pointer;color:#ef4444;
+                        font-weight:600;font-size:.85rem;display:flex;
+                        align-items:center;gap:.5rem;justify-content:center">
+                    <i class="fas fa-right-from-bracket"></i> Log Out
+                </button>
+            }
+        </div>
+    </aside>
+
+    <!-- ══ MAIN ══ -->
+    <main class="d-main">
+
+        <div class="d-topbar">
+            <div>
+                <div class="d-page-title">Driver Dashboard</div>
+                <div class="d-page-sub">Here's a snapshot of your delivery activity.</div>
+            </div>
+            <div style="display:flex;align-items:center;gap:.6rem">
+                <span class="badge" style="background:rgba(22,163,74,.1);color:#15803d;border:1px solid rgba(22,163,74,.25);font-size:.78rem;padding:.35rem .9rem">
+                    <i class="fas fa-circle" style="font-size:.5rem;color:var(--green)"></i> Online
+                </span>
+            </div>
+        </div>
+
+        <!-- Stat cards -->
+        <div class="d-stat-grid">
+            @*<div class="d-stat teal">
+                <div class="d-stat-icon"><i class="fas fa-bag-shopping"></i></div>
+                <div class="d-stat-label">TOTAL DELIVERIES</div>
+                <div class="d-stat-value">@(ViewBag.TotalDeliveries ?? 0)</div>
+            </div>*@
+            <div class="d-stat green">
+                <div class="d-stat-icon"><i class="fas fa-circle-check"></i></div>
+                <div class="d-stat-label">COMPLETED</div>
+                <div class="d-stat-value">@(ViewBag.CompletedDeliveries ?? 0)</div>
+            </div>
+            <div class="d-stat yellow">
+                <div class="d-stat-icon"><i class="fas fa-truck"></i></div>
+                <div class="d-stat-label">IN PROGRESS</div>
+                <div class="d-stat-value">@(ViewBag.InProgressDeliveries ?? 0)</div>
+            </div>
+        </div>
+
+        <!-- Quick links -->
+        <div class="d-card">
+            <div class="d-card-head">
+                <div class="d-card-title">Quick Actions</div>
+            </div>
+            <div class="d-card-body" style="display:flex;flex-wrap:wrap;gap:.75rem">
+                <a href="@Url.Action("MyDeliveries","DeliveryDriver")" class="btn btn-primary">
+                    <i class="fas fa-bag-shopping"></i> View My Deliveries
+                </a>
+                <a href="@Url.Action("DriverProfile","DeliveryDriver")" class="btn btn-outline">
+                    <i class="fas fa-circle-user"></i> My Profile
+                </a>
+            </div>
+        </div>
+
+    </main>
+
+    <script>
+        document.addEventListener('DOMContentLoaded', function() {
+            const dropdownToggle = document.getElementById('deliveriesDropdown');
+            const dropdownMenu = document.getElementById('deliveriesSubmenu');
+
+            if (dropdownToggle && dropdownMenu) {
+                dropdownToggle.addEventListener('click', function(e) {
+                    e.preventDefault();
+                    e.stopPropagation();
+                    this.classList.toggle('open');
+                    if (dropdownMenu.style.display === 'none' || dropdownMenu.style.display === '') {
+                        dropdownMenu.style.display = 'block';
+                    } else {
+                        dropdownMenu.style.display = 'none';
+                    }
+                });
+            }
+        });
+    </script>
+
+</div>

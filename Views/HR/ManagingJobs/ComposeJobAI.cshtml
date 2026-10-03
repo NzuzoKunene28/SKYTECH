@@ -1,0 +1,106 @@
+﻿@model SkyTech.Models.JobPost
+
+@{
+    ViewData["Title"] = "Compose a Job Post (AI-Assisted)";
+    Layout = "~/Views/Shared/_MinimalLayout.cshtml";
+}
+
+@section Styles {
+    <link rel="stylesheet" href="~/CSS/HRCSS/ComposeJobAI.css" />
+    <link rel="stylesheet" href="~/CSS/HRCSS/ComposeJob.css" />
+}
+
+<div class="hr-page">
+    <div class="hr-container-narrow">
+
+        <div class="hr-header-sm">
+            <span class="hr-eyebrow"><i class="fas fa-robot"></i> AI-Assisted</span>
+            <h2>Compose a Job Post</h2>
+            <p>Confirm the details below and let AI generate the full draft</p>
+        </div>
+
+        <div class="form-container">
+
+            <form asp-controller="HR" asp-action="GenerateJobDraft" method="Post">
+
+                <input type="hidden" name="roleId" value="@ViewBag.RoleId" />
+                <input type="hidden" name="ownerId" value="@ViewBag.OwnerId" />
+
+                <div class="job-title-readout">
+                    <div class="icon"><i class="fas fa-briefcase"></i></div>
+                    <div>
+                        <div class="label">Job Title</div>
+                        <div class="value">@ViewBag.JobTitle</div>
+                    </div>
+                </div>
+                <span asp-validation-for="JobTitle"></span>
+
+                <div class="form-row">
+                    <div class="form-group">
+                        <label asp-for="Department">Select Department</label>
+                        <select asp-for="Department"
+                                asp-items="Html.GetEnumSelectList<SkyTech.Models.SelectDepartment>()">
+                            <option value="">--Select Department--</option>
+                        </select>
+                        <span asp-validation-for="Department"></span>
+                    </div>
+
+                    <div class="form-group">
+                        <label asp-for="Location">Work Location</label>
+                        <select asp-for="Location"
+                                asp-items="Html.GetEnumSelectList<SkyTech.Models.SelectLocation>()">
+                            <option value="">--Select Work Location--</option>
+                        </select>
+                        <span asp-validation-for="Location"></span>
+                    </div>
+                </div>
+
+                <div class="form-row">
+                    <div class="form-group">
+                        <label asp-for="EmploymentType">Employment Type</label>
+                        <select asp-for="EmploymentType"
+                                asp-items="Html.GetEnumSelectList<SkyTech.Models.SelectEmploymentType>()">
+                            <option value="">--Select Employment Type</option>
+                        </select>
+                        <span asp-validation-for="EmploymentType"></span>
+                    </div>
+
+                    <div class="form-group">
+                        <label asp-for="ClosingDate">Closing Date</label>
+                        <input asp-for="ClosingDate" type="date" />
+                        <span asp-validation-for="ClosingDate"></span>
+                    </div>
+                </div>
+
+                <div class="form-row">
+                    <div class="form-group">
+                        <label asp-for="SalaryMin">Minimum Salary</label>
+                        <input asp-for="SalaryMin" type="number" placeholder="Value in Rands" />
+                        <span asp-validation-for="SalaryMin"></span>
+                    </div>
+
+                    <div class="form-group">
+                        <label asp-for="SalaryMax">Maximum Salary</label>
+                        <input asp-for="SalaryMax" type="number" placeholder="Value in Rands" />
+                        <span asp-validation-for="SalaryMax"></span>
+                    </div>
+                </div>
+
+                <div class="form-group">
+                    <label asp-for="ContractTerms">Terms and Conditions</label>
+                    <textarea asp-for="ContractTerms" rows="7" placeholder="List the T&Cs here"></textarea>
+                    <span asp-validation-for="ContractTerms"></span>
+                </div>
+
+                <div class="btn-submit">
+                    <button type="submit">
+                        <i class="fas fa-wand-magic-sparkles"></i> Generate Draft with AI
+                    </button>
+                </div>
+
+            </form>
+
+        </div>
+
+    </div>
+</div>

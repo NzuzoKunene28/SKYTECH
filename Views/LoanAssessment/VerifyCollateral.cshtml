@@ -1,0 +1,441 @@
+﻿@* @model SkyTech.Models.ViewModels.AssessmentViewModel
+
+@{
+    ViewData["Title"] = "Verify Collateral";
+    Layout = "~/Views/Shared/_MinimalLayout.cshtml";
+    var app = Model.LoanApplication;
+}
+
+<style>
+    :root {
+        --blue: #5f9ea0;
+        --blue-dark: #2d6b6d;
+        --blue-deep: #1f4f50;
+        --bg: #f0f4fc;
+        --border: #dde6f5;
+        --text: #0e1b35;
+        --text-2: #4a5878;
+        --text-m: #8a96b0;
+        --red: #dc2626;
+    }
+
+    .assess-page {
+        min-height: 80vh;
+        background: var(--bg);
+        padding: 45px 20px;
+    }
+
+    .assess-container {
+        max-width: 1100px;
+        margin: auto;
+    }
+
+    .step-label {
+        color: var(--blue-dark);
+        font-size: 13px;
+        font-weight: 700;
+        text-transform: uppercase;
+        letter-spacing: 1px;
+    }
+
+    .page-title {
+        color: var(--text);
+        font-size: 34px;
+        font-weight: 750;
+        margin: 7px 0;
+    }
+
+    .page-subtitle {
+        color: var(--text-2);
+        margin-bottom: 25px;
+    }
+
+    .notice {
+        background: white;
+        border: 1px solid var(--border);
+        border-left: 5px solid var(--blue);
+        border-radius: 15px;
+        padding: 18px 20px;
+        color: var(--text-2);
+        margin-bottom: 25px;
+    }
+
+    .items-grid {
+        display: grid;
+        grid-template-columns: repeat(2, 1fr);
+        gap: 22px;
+    }
+
+    .collateral-card {
+        background: white;
+        border: 1px solid var(--border);
+        border-radius: 20px;
+        overflow: hidden;
+        box-shadow: 0 8px 25px rgba(31, 79, 80, 0.06);
+    }
+
+    .collateral-images {
+        display: grid;
+        grid-template-columns: 1fr 1fr;
+    }
+
+    .collateral-image {
+        width: 100%;
+        height: 180px;
+        object-fit: contain;
+        background: white;
+        padding: 8px;
+        border-right: 1px solid var(--border);
+    }
+
+    .collateral-image-placeholder {
+        width: 100%;
+        height: 180px;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        color: var(--text-m);
+        font-size: 13px;
+        background: #f1f4f8;
+        text-align: center;
+        padding: 10px;
+    }
+
+    .image-label {
+        text-align: center;
+        font-size: 11px;
+        color: var(--text-m);
+        padding: 6px;
+        background: white;
+        border-bottom: 1px solid var(--border);
+    }
+
+    .collateral-body {
+        padding: 22px;
+    }
+
+    .collateral-name {
+        color: var(--text);
+        font-weight: 700;
+        margin-bottom: 10px;
+        font-size: 17px;
+    }
+
+    .detail {
+        color: var(--text-2);
+        font-size: 13px;
+        margin-bottom: 6px;
+    }
+
+        .detail strong {
+            color: var(--text);
+        }
+
+    .badge {
+        display: inline-block;
+        padding: 6px 10px;
+        border-radius: 20px;
+        font-size: 12px;
+        font-weight: 700;
+        margin: 8px 6px 0 0;
+    }
+
+    .match {
+        background: #e1f4e9;
+        color: #177245;
+    }
+
+    .mismatch {
+        background: #fde8e8;
+        color: var(--red);
+    }
+
+    .degraded {
+        background: #fff4d6;
+        color: #8a6100;
+    }
+
+    .manual {
+        background: #f1f4f8;
+        color: var(--text-2);
+    }
+
+    .pending {
+        background: #edf1f5;
+        color: var(--text-m);
+    }
+
+    .capture-row {
+        margin-top: 15px;
+        display: flex;
+        gap: 10px;
+        align-items: center;
+    }
+
+    .capture-input {
+        flex: 1;
+        border: 1px solid var(--border);
+        border-radius: 9px;
+        padding: 9px;
+        font-size: 13px;
+        background: #fbfcff;
+    }
+
+    .capture-button {
+        background: var(--blue-dark);
+        color: white;
+        border: none;
+        padding: 10px 16px;
+        border-radius: 9px;
+        font-weight: 650;
+        font-size: 13px;
+        cursor: pointer;
+        white-space: nowrap;
+    }
+
+    .verification-notes {
+        color: var(--text-2);
+        font-size: 13px;
+        margin-top: 10px;
+    }
+
+    .override-link {
+        display: inline-block;
+        margin-top: 8px;
+        font-size: 12px;
+        color: var(--blue-dark);
+        cursor: pointer;
+        text-decoration: underline;
+    }
+
+    .actions {
+        display: flex;
+        gap: 12px;
+        margin-top: 30px;
+    }
+
+    .continue-btn {
+        background: var(--blue-dark);
+        color: white;
+        border: none;
+        padding: 13px 24px;
+        border-radius: 11px;
+        font-weight: 600;
+        text-decoration: none;
+    }
+
+        .continue-btn:hover {
+            background: var(--blue-deep);
+            color: white;
+        }
+
+        .continue-btn[disabled], a.continue-btn.disabled {
+            background: #b7c4d6;
+            pointer-events: none;
+        }
+
+    .back-btn {
+        background: white;
+        color: var(--text-2);
+        border: 1px solid var(--border);
+        padding: 13px 24px;
+        border-radius: 11px;
+        font-weight: 600;
+        text-decoration: none;
+    }
+
+    @@media (max-width: 800px) {
+        .items-grid {
+            grid-template-columns: 1fr;
+        }
+    }
+</style>
+
+<div class="assess-page">
+    <div class="assess-container">
+
+        <div class="step-label">Step 3 of 4</div>
+        <h1 class="page-title">Physical Collateral Verification</h1>
+        <p class="page-subtitle">
+            Application #@app.LoanApplicationId — take a new photo of each physical item the customer has brought in.
+        </p>
+
+        <div class="notice">
+            <strong>Note:</strong> Every item must be verified before you can continue to the final decision.
+        </div>
+
+        <div class="items-grid">
+
+            @foreach (var item in app.CollateralItems)
+            {
+                var verification = Model.VerificationFor(item.CollateralItemId);
+
+                var badgeClass = verification?.Result switch
+                {
+                    SkyTech.Models.SkytechWorkers.CollateralVerificationResult.Match => "match",
+                    SkyTech.Models.SkytechWorkers.CollateralVerificationResult.Mismatch => "mismatch",
+                    SkyTech.Models.SkytechWorkers.CollateralVerificationResult.ConditionDegraded => "degraded",
+                    SkyTech.Models.SkytechWorkers.CollateralVerificationResult.NeedsManualReview => "manual",
+                    _ => "pending"
+                };
+
+                var badgeText = verification is null || verification.Result == SkyTech.Models.SkytechWorkers.CollateralVerificationResult.Pending
+                    ? "Not yet verified"
+                    : verification.Result.ToString();
+
+                <div class="collateral-card" data-item-id="@item.CollateralItemId">
+
+                    <div class="collateral-images">
+                        <div>
+                            <div class="image-label">Original (application)</div>
+                            <img src="@item.ImagePath" class="collateral-image" alt="Original photo" />
+                        </div>
+                        <div>
+                            <div class="image-label">New (in-shop)</div>
+                            @if (verification != null)
+                            {
+                                <img src="@verification.VerificationImagePath" class="collateral-image new-photo-img" alt="Verification photo" />
+                            }
+                            else
+                            {
+                                <div class="collateral-image-placeholder new-photo-img">No photo taken yet</div>
+                            }
+                        </div>
+                    </div>
+
+                    <div class="collateral-body">
+
+                        <div class="collateral-name">@item.Description</div>
+                        <div class="detail"><strong>Declared value:</strong> @item.DeclaredValue.ToString("C")</div>
+                        <div class="detail"><strong>Declared condition:</strong> @item.Condition</div>
+                        @if (!string.IsNullOrWhiteSpace(item.AiMatchedCategory))
+                        {
+                            <div class="detail"><strong>Category:</strong> @item.AiMatchedCategory</div>
+                        }
+
+                        <span class="badge @badgeClass verification-badge">@badgeText</span>
+                        @if (verification?.MatchConfidencePercent != null)
+                        {
+                            <span class="badge manual confidence-badge">AI confidence: @verification.MatchConfidencePercent%</span>
+                        }
+
+                        <div class="verification-notes">@verification?.AiNotes</div>
+
+                        <div class="capture-row">
+                            <input type="file" accept=".jpg,.jpeg,.png" class="capture-input" />
+                            <button type="button"
+                                    class="capture-button verify-btn"
+                                    data-loan-assessment-id="@Model.LoanAssessmentId"
+                                    data-collateral-item-id="@item.CollateralItemId">
+                                Verify
+                            </button>
+                        </div>
+
+                        @if (verification != null && !verification.StaffOverride)
+                        {
+                            <span class="override-link override-link-btn" data-verification-id="@verification.CollateralVerificationId">
+                                Override this verdict
+                            </span>
+                        }
+                        @if (verification?.StaffOverride == true)
+                        {
+                            <div class="verification-notes"><strong>Staff override:</strong> @verification.StaffOverrideReason</div>
+                        }
+
+                    </div>
+
+                </div>
+            }
+
+        </div>
+
+        <div class="actions">
+            <a asp-action="FraudFlags" asp-route-id="@Model.LoanAssessmentId" class="back-btn">← Back</a>
+            <a asp-action="Decision" asp-route-id="@Model.LoanAssessmentId"
+               class="continue-btn @(Model.AllCollateralVerified ? "" : "disabled")">
+                Continue to Decision →
+            </a>
+        </div>
+
+    </div>
+</div>
+
+@Html.AntiForgeryToken()
+
+@section Scripts {
+    <script>
+        function getAntiForgeryToken() {
+            const input = document.querySelector('input[name="__RequestVerificationToken"]');
+            return input ? input.value : "";
+        }
+
+        document.querySelectorAll(".verify-btn").forEach(function(button) {
+            button.addEventListener("click", async function() {
+                const card = button.closest(".collateral-card");
+                const fileInput = card.querySelector(".capture-input");
+
+                if (!fileInput.files || fileInput.files.length === 0) {
+                    alert("Please choose a photo of the physical item first.");
+                    return;
+                }
+
+                const formData = new FormData();
+                formData.append("loanAssessmentId", button.dataset.loanAssessmentId);
+                formData.append("collateralItemId", button.dataset.collateralItemId);
+                formData.append("photo", fileInput.files[0]);
+
+                button.disabled = true;
+                button.innerText = "Verifying...";
+
+                try {
+                    const response = await fetch("@Url.Action("VerifyCollateralItem", "LoanAssessment")", {
+                        method: "POST",
+                        headers: { "RequestVerificationToken": getAntiForgeryToken() },
+                        body: formData
+                    });
+
+                    const result = await response.json();
+
+                    if (result.success) {
+                        window.location.reload();
+                    } else {
+                        alert(result.message || "Verification failed.");
+                    }
+                } catch (err) {
+                    alert("The verification could not be completed. Please try again.");
+                } finally {
+                    button.disabled = false;
+                    button.innerText = "Verify";
+                }
+            });
+        });
+
+        document.querySelectorAll(".override-link-btn").forEach(function(link) {
+            link.addEventListener("click", async function() {
+                const newResult = prompt("Enter the corrected result (Match, Mismatch, ConditionDegraded):");
+                if (!newResult) return;
+
+                const reason = prompt("Reason for overriding the AI verdict:");
+                if (!reason) return;
+
+                const formData = new FormData();
+                formData.append("collateralVerificationId", link.dataset.verificationId);
+                formData.append("overrideResult", newResult);
+                formData.append("reason", reason);
+
+                const response = await fetch("@Url.Action("OverrideVerification", "LoanAssessment")", {
+                    method: "POST",
+                    headers: { "RequestVerificationToken": getAntiForgeryToken() },
+                    body: formData
+                });
+
+                const result = await response.json();
+                if (result.success) {
+                    window.location.reload();
+                } else {
+                    alert(result.message || "Could not override the verdict.");
+                }
+            });
+        });
+    </script>
+} *@

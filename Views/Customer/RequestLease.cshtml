@@ -1,0 +1,236 @@
+﻿@model SkyTech.Models.LeaseProduct
+@{
+    ViewBag.Title = "Request an equipment lease";
+    Layout = "~/Views/Shared/_MinimalLayout.cshtml";
+    int available = ViewBag.AvailableUnits;
+    bool inStock = available > 0;
+}
+
+@section Styles {
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+    <link href="https://api.fontshare.com/v2/css?f[]=clash-display@400,500,600,700&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="~/CSS/ShoppingPageStyle.css">
+    <style>
+        /* Scoped to this page — ShoppingPageStyle.css doesn't have a lease
+           request layout, so these are new but keep the same font stack. */
+        .lease-wrap { max-width: 640px; margin: 0 auto; padding: 1rem 1rem 100px; }
+        .lease-crumb { font-size: .82rem; color: #8a94a6; margin-bottom: .6rem; }
+        .lease-crumb b { color: #16344a; font-weight: 600; }
+        .lease-title { font-family: 'Clash Display', 'Plus Jakarta Sans', sans-serif; font-size: 1.5rem; font-weight: 600; color: #16344a; margin: 0 0 .3rem; }
+        .lease-sub { color: #667085; font-size: .9rem; margin: 0 0 1.2rem; }
+
+        .lease-card { background: #fff; border: 1px solid #e6ebf0; border-radius: 14px; padding: 1.1rem 1.2rem; margin-bottom: 1.1rem; }
+        .lease-item-row { display: flex; align-items: center; gap: 1rem; }
+        .lease-item-img { width: 56px; height: 56px; border-radius: 10px; object-fit: cover; background: #e8f2ef; flex-shrink: 0; }
+        .lease-item-img-placeholder { width: 56px; height: 56px; border-radius: 10px; background: #e8f2ef; display: flex; align-items: center; justify-content: center; color: #3d7a6c; flex-shrink: 0; }
+        .lease-item-name { font-weight: 600; color: #16344a; font-size: .98rem; }
+        .lease-item-code { font-size: .78rem; color: #8a94a6; margin-top: 2px; }
+        .lease-badge { margin-left: auto; font-size: .75rem; font-weight: 600; padding: .3rem .7rem; border-radius: 999px; white-space: nowrap; }
+        .lease-badge.available { background: #e3f6ec; color: #17845a; }
+        .lease-badge.unavailable { background: #fdeaea; color: #c0392b; }
+
+        .lease-card-head { display: flex; align-items: center; gap: .5rem; font-weight: 600; color: #16344a; margin-bottom: 1rem; font-size: .95rem; }
+        .lease-card-head .step-num { width: 22px; height: 22px; border-radius: 50%; background: #16344a; color: #fff; font-size: .75rem; display: flex; align-items: center; justify-content: center; }
+
+        .lease-field-row { display: flex; gap: 1.2rem; flex-wrap: wrap; }
+        .lease-field { flex: 1; min-width: 140px; }
+        .lease-field label { display: block; font-size: .8rem; color: #667085; margin-bottom: .4rem; }
+
+        .lease-slider-wrap { margin-top: 1.2rem; }
+        .lease-slider { width: 100%; accent-color: #17845a; }
+        .lease-slider-labels { display: flex; justify-content: space-between; font-size: .75rem; color: #8a94a6; margin-top: .3rem; }
+
+        .lease-summary { background: linear-gradient(135deg, #16495a, #123a48); color: #fff; border-radius: 14px; padding: 1.3rem 1.3rem 1.1rem; }
+        .lease-summary-title { font-family: 'Clash Display', 'Plus Jakarta Sans', sans-serif; font-size: 1.15rem; font-weight: 600; margin: 0 0 .9rem; }
+        .lease-summary-row { display: flex; justify-content: space-between; font-size: .88rem; padding: .35rem 0; color: rgba(255,255,255,.82); }
+        .lease-summary-total { display: flex; justify-content: space-between; align-items: baseline; margin-top: .6rem; padding-top: .8rem; border-top: 1px solid rgba(255,255,255,.18); }
+        .lease-summary-total span:first-child { font-weight: 600; }
+        .lease-summary-total span:last-child { font-size: 1.35rem; font-weight: 700; }
+
+        .lease-submit-btn { width: 100%; margin-top: 1.1rem; background: #17845a; color: #fff; border: none; border-radius: 10px; padding: .85rem; font-weight: 600; font-size: .95rem; cursor: pointer; display: flex; align-items: center; justify-content: center; gap: .5rem; }
+        .lease-submit-btn:disabled { background: #cfd6dd; cursor: not-allowed; }
+
+        .lease-error { background: #fdeaea; color: #c0392b; border-radius: 10px; padding: .8rem 1rem; margin-bottom: 1.1rem; font-size: .88rem; display: flex; align-items: center; gap: .5rem; }
+
+        /* Document upload inputs */
+        .lease-file-input { width: 100%; font-size: .85rem; color: #16344a; border: 1.5px dashed #cfd6dd; border-radius: 10px; padding: .6rem; background: #fafbfc; cursor: pointer; }
+        .lease-file-input:hover { border-color: #17845a; }
+        .lease-file-hint { color: #8a94a6; font-size: .78rem; margin-top: .6rem; }
+    </style>
+}
+
+<div class="page-wrap">
+    <header class="header">
+        <a href="@Url.Action("ShoppingPage", "Customer")" class="logo">
+            <span class="logo-l">S</span>kyTech
+        </a>
+        <a href="@Url.Action("ViewCart", "Customer")" class="cart-btn" aria-label="Cart">
+            <i class="fas fa-bag-shopping"></i>
+            <span class="cart-count" id="cartCount">@ViewBag.NumberOfCartItems</span>
+        </a>
+    </header>
+
+    <div class="lease-wrap">
+        <div class="lease-crumb">Equipment / <b>Request lease</b></div>
+        <div class="lease-title">Request an equipment lease</div>
+        <div class="lease-sub">Choose an item and lease duration. We'll check availability and calculate the cost before you submit.</div>
+
+        @if (TempData["Error"] != null)
+        {
+            <div class="lease-error"><i class="fas fa-circle-exclamation"></i> @TempData["Error"]</div>
+        }
+
+        <!-- Item card -->
+        <div class="lease-card">
+            <div class="lease-item-row">
+                @{
+                    var pic = Model.LeaseProductPictures?.FirstOrDefault();
+                }
+                @if (pic != null)
+                {
+                    <img src="@pic.FilePath" alt="@Model.LeaseProdName" class="lease-item-img" />
+                }
+                else
+                {
+                    <div class="lease-item-img-placeholder"><i class="fas fa-image"></i></div>
+                }
+                <div>
+                    <div class="lease-item-name">@Model.LeaseProdName</div>
+                    <div class="lease-item-code">Product #LP-@Model.LeaseProdId.ToString("D4") · @Model.Owner?.ShopName</div>
+                </div>
+                <span class="lease-badge @(inStock ? "available" : "unavailable")">
+                    @(inStock ? "Available" : "Currently unavailable")
+                </span>
+            </div>
+        </div>
+
+        @using (Html.BeginForm("RequestLease", "Customer", FormMethod.Post, new { enctype = "multipart/form-data" }))
+        {
+            @Html.AntiForgeryToken()
+            <input type="hidden" name="leaseProdId" value="@Model.LeaseProdId" />
+
+            <!-- Quantity + duration card -->
+            <div class="lease-card">
+                <div class="lease-card-head"><span class="step-num">1</span> Quantity and duration</div>
+
+                <div class="lease-field-row">
+                    <div class="lease-field">
+                        <label>Quantity</label>
+                        <div class="qty-stepper">
+                            <button type="button" class="qty-btn" onclick="stepQty(this,-1)">−</button>
+                            <input type="number" id="qtyInput" name="quantity" value="1" min="1" max="@available" class="qty-input" @(inStock ? "" : "disabled") oninput="updateSummary()" />
+                            <button type="button" class="qty-btn" onclick="stepQty(this,1)" data-max="@available">+</button>
+                        </div>
+                    </div>
+
+                    <div class="lease-field">
+                        <label>Lease duration</label>
+                        <div id="durationLabel" style="font-weight:600;color:#16344a">@Model.MinLeaseMonths months</div>
+                    </div>
+                </div>
+
+                <div class="lease-slider-wrap">
+                    <input type="range" id="termSlider" name="termMonths" class="lease-slider"
+                           min="@Model.MinLeaseMonths" max="@Model.MaxLeaseMonths" value="@Model.MinLeaseMonths"
+                           @(inStock ? "" : "disabled") oninput="updateSummary()" />
+                    <div class="lease-slider-labels">
+                        <span>@Model.MinLeaseMonths months</span>
+                        <span>@Model.MaxLeaseMonths months</span>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Supporting documents card -->
+            <div class="lease-card">
+                <div class="lease-card-head"><span class="step-num">2</span> Supporting documents</div>
+
+                <div class="lease-field-row">
+                    <div class="lease-field">
+                        <label>Bank statement</label>
+                        <input type="file" name="bankStatement" accept=".pdf,.jpg,.jpeg,.png" class="lease-file-input" @(inStock ? "required" : "disabled") />
+                    </div>
+                    <div class="lease-field">
+                        <label>Proof of residence</label>
+                        <input type="file" name="proofOfResidence" accept=".pdf,.jpg,.jpeg,.png" class="lease-file-input" @(inStock ? "required" : "disabled") />
+                    </div>
+                </div>
+                <div class="lease-file-hint">PDF, JPG or PNG, max 5MB each.</div>
+            </div>
+
+            <!-- Cost summary -->
+            <div class="lease-summary">
+                <div class="lease-summary-title">Lease cost summary</div>
+                <div class="lease-summary-row"><span>Monthly rate</span><span id="sumMonthly">R 0.00</span></div>
+                <div class="lease-summary-row"><span>Duration</span><span id="sumDuration">@Model.MinLeaseMonths months</span></div>
+                <div class="lease-summary-row"><span>Security deposit</span><span id="sumDeposit">R 0.00</span></div>
+                <div class="lease-summary-total"><span>Total due today</span><span id="sumTotal">R 0.00</span></div>
+            </div>
+
+            <button type="submit" class="lease-submit-btn" @(inStock ? "" : "disabled")>
+                <i class="fas fa-circle-check"></i> Request lease
+            </button>
+        }
+    </div>
+
+    <nav class="bottom-nav">
+        <a href="@Url.Action("ShoppingPage", "Customer")" class="bn-item">
+            <div class="bn-icon"><i class="fas fa-house"></i></div>
+            <span>Home</span>
+        </a>
+        <a href="@Url.Action("ViewCart", "Customer")" class="bn-item">
+            <div class="bn-icon cart-nav-wrap">
+                <i class="fas fa-bag-shopping"></i>
+                <span class="bn-badge">@ViewBag.NumberOfCartItems</span>
+            </div>
+            <span>Cart</span>
+        </a>
+        @if (Context.Session.GetInt32("UserId") != null)
+        {
+            <a href="@Url.Action("CustomerProfile", "Customer")" class="bn-item">
+                <div class="bn-icon"><i class="far fa-user-circle"></i></div>
+                <span>Account</span>
+            </a>
+        }
+        else
+        {
+            <a href="@Url.Action("LogIn", "Authentication")" class="bn-item">
+                <div class="bn-icon"><i class="far fa-user-circle"></i></div>
+                <span>Account</span>
+            </a>
+        }
+    </nav>
+</div>
+
+<script>
+    const monthlyRate = @Model.MonthlyRate;
+    const deposit = @Model.SecurityDeposit;
+
+    function stepQty(btn, dir) {
+        const input = document.getElementById('qtyInput');
+        const max = parseInt(input.max) || 1;
+        input.value = Math.max(1, Math.min(max, (parseInt(input.value) || 1) + dir));
+        updateSummary();
+    }
+
+    function updateSummary() {
+        const qty = parseInt(document.getElementById('qtyInput').value) || 1;
+        const term = parseInt(document.getElementById('termSlider').value);
+
+        const totalMonthly = monthlyRate * qty;
+        const totalDeposit = deposit * qty;
+        // "Total due today" is deposit + first month only — the remaining
+        // months are billed automatically via the Paystack subscription,
+        // not collected upfront. Duration doesn't change today's charge.
+        const dueToday = totalMonthly + totalDeposit;
+
+        document.getElementById('durationLabel').textContent = term + ' months';
+        document.getElementById('sumMonthly').textContent = 'R ' + totalMonthly.toFixed(2);
+        document.getElementById('sumDuration').textContent = term + ' months';
+        document.getElementById('sumDeposit').textContent = 'R ' + totalDeposit.toFixed(2);
+        document.getElementById('sumTotal').textContent = 'R ' + dueToday.toFixed(2);
+    }
+
+    updateSummary();
+</script>

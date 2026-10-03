@@ -1,0 +1,246 @@
+﻿@using SkyTech.Models
+@model IEnumerable<SkyTech.Models.Order>
+@{
+    ViewBag.Title = "Received Orders";
+    Layout = "~/Views/Shared/_MinimalLayout.cshtml";
+    ViewBag.ActivePage = "Orders";
+
+    int total = Model.Count();
+    int pending = Model.Count(o => o.Status == OrderStatus.Pending);
+    int delivered = Model.Count(o => o.Status == OrderStatus.Delivered);
+    double revenue = Model.Where(o => o.Status == OrderStatus.Delivered).Sum(o => o.TotalAmount);
+}
+
+@section Styles {
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+    <link href="https://api.fontshare.com/v2/css?f[]=clash-display@400,500,600,700&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="~/CSS/ShopOwnerStyle.css">
+    <style>
+        .chip-row {
+            display: flex;
+            flex-wrap: wrap;
+            gap: .75rem;
+            margin-bottom: 1.6rem;
+        }
+
+        .chip {
+            background: var(--white);
+            border: 1.5px solid var(--border);
+            border-radius: var(--radius-sm);
+            padding: .65rem 1.1rem;
+            font-size: .82rem;
+            font-weight: 700;
+            color: var(--text-2);
+            box-shadow: var(--shadow-sm);
+            display: flex;
+            align-items: center;
+            gap: .5rem;
+        }
+
+            .chip .num {
+                font-family: var(--font-display);
+                font-size: 1.3rem;
+                font-weight: 700;
+                color: var(--text);
+                margin-right: .3rem;
+            }
+
+            .chip.blue {
+                border-color: rgba(26,115,232,.28);
+            }
+
+                .chip.blue .num {
+                    color: var(--blue);
+                }
+
+            .chip.yellow {
+                border-color: rgba(217,119,6,.28);
+            }
+
+                .chip.yellow .num {
+                    color: var(--yellow);
+                }
+
+            .chip.green {
+                border-color: rgba(22,163,74,.28);
+            }
+
+                .chip.green .num {
+                    color: var(--green);
+                }
+
+            .chip.orange {
+                border-color: rgba(234,88,12,.28);
+            }
+
+                .chip.orange .num {
+                    color: var(--orange);
+                }
+
+        .items-list {
+            list-style: none;
+            display: flex;
+            flex-direction: column;
+            gap: .2rem;
+        }
+
+            .items-list li {
+                font-size: .78rem;
+                color: var(--text-3);
+                display: flex;
+                align-items: center;
+                gap: .35rem;
+            }
+
+                .items-list li::before {
+                    content: '•';
+                    color: var(--blue);
+                    font-size: .85rem;
+                }
+    </style>
+}
+
+<div class="so-wrap">
+
+    <!-- SIDEBAR -->
+    <aside class="so-sidebar">
+        <div class="so-brand">
+            <div class="so-brand-icon"><i class="fas fa-store"></i></div>
+            <div>
+                <div class="so-brand-name">SkyTech</div>
+                <div class="so-brand-sub">Shop Owner Portal</div>
+            </div>
+        </div>
+        <nav class="so-nav">
+            <div class="so-nav-label">OVERVIEW</div>
+            <a href="@Url.Action("ShopOwnerDash","ShopOwner")" class="so-link"><i class="fas fa-grid-2"></i><span>Dashboard</span></a>
+            <div class="so-nav-label" style="margin-top:1rem">INVENTORY</div>
+            <a href="@Url.Action("AddProductPage","ShopOwner")" class="so-link"><i class="fas fa-circle-plus"></i><span>Add Product</span></a>
+            <a href="@Url.Action("TrackStockLevelPage","ShopOwner")" class="so-link"><i class="fas fa-boxes-stacked"></i><span>Track Stock</span></a>
+            <div class="so-nav-label" style="margin-top:1rem">ORDERS & STAFF</div>
+            <a href="@Url.Action("ReceivedOrders","ShopOwner")" class="so-link active"><i class="fas fa-bag-shopping"></i><span>Received Orders</span></a>
+            <a href="@Url.Action("StaffReg","ShopOwner")" class="so-link"><i class="fas fa-user-plus"></i><span>Register Staff</span></a>
+            <a href="@Url.Action("StaffMembers","ShopOwner")" class="so-link"><i class="fas fa-users"></i><span>Staff Members</span></a>
+            <div class="so-nav-label" style="margin-top:1rem">ACCOUNT</div>
+            <a href="@Url.Action("OwnerProfile","ShopOwner")" class="so-link"><i class="fas fa-circle-user"></i><span>Profile</span></a>
+        </nav>
+        <div class="so-sidebar-foot">
+            <div class="so-foot-avatar"><i class="fas fa-store"></i></div>
+            <div>
+                <div class="so-foot-role">SkyTech</div>
+            </div>
+        </div>
+    </aside>
+
+    <!-- MAIN -->
+    <main class="so-main">
+
+        <div class="so-topbar">
+            <div>
+                <div class="so-page-title">Received Orders</div>
+                <div class="so-page-sub">Manage and assign orders to drivers.</div>
+            </div>
+            <button class="btn btn-outline" onclick="window.print()">
+                <i class="fas fa-print"></i> Print
+            </button>
+        </div>
+
+        <!-- Summary chips -->
+        <div class="chip-row">
+            <div class="chip blue"><span class="num">@total</span> Total Orders</div>
+            <div class="chip yellow"><span class="num">@pending</span> Pending</div>
+            <div class="chip green"><span class="num">@delivered</span> Delivered</div>
+            <div class="chip orange"><span class="num">R @revenue.ToString("N2")</span> Revenue</div>
+        </div>
+
+        <!-- Search + table -->
+        <div class="so-card">
+            <div class="so-card-head">
+                <div class="so-card-title"><i class="fas fa-bag-shopping" style="color:var(--blue);margin-right:.4rem"></i>All Orders</div>
+                <div class="so-search">
+                    <i class="fas fa-magnifying-glass"></i>
+                    <input type="text" id="orderSearch" placeholder="Search orders…" oninput="filterRows(this.value)">
+                </div>
+            </div>
+            <div class="so-table-wrap">
+                <table class="so-table" id="ordersTable">
+                    <thead>
+                        <tr>
+                            <th>Order ID</th>
+                            <th>Items</th>
+                            <th>Amount</th>
+                            <th>Status</th>
+                            <th>Date</th>
+                            <th>Address</th>
+                            <th>Driver</th>
+                            <th>Action</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        @foreach (var order in Model)
+                        {
+                            string statusClass = order.Status == OrderStatus.Pending ? "badge-pending"
+                                               : order.Status == OrderStatus.Assigned ? "badge-assigned"
+                                               : order.Status == OrderStatus.OutForDelivery ? "badge-out"
+                                                                                            : "badge-delivered";
+                            string searchStr = $"{order.OrderId} {order.DeliveryAddress} {order.Status}".ToLower();
+                            <tr data-search="@searchStr">
+                                <td>
+                                    <span style="font-family:var(--font-display);font-weight:700;color:var(--blue)">#@order.OrderId</span>
+                                    <div style="font-size:.72rem;color:var(--text-muted);margin-top:.1rem">@order.OrderedOn.ToString("dd MMM yyyy")</div>
+                                </td>
+                                <td>
+                                    <ul class="items-list">
+                                        @foreach (var item in order.OrderItems)
+                                        {
+                                            <li>@item.ProdName <span style="color:var(--blue);font-weight:700">×@item.Quantity</span></li>
+                                        }
+                                    </ul>
+                                </td>
+                                <td>
+                                    <span style="font-family:var(--font-display);font-weight:700">R @order.TotalAmount.ToString("N2")</span>
+                                </td>
+                                <td><span class="badge @statusClass">@order.Status</span></td>
+                                <td style="font-size:.8rem;color:var(--text-3)">@order.OrderedOn.ToString("HH:mm")</td>
+                                <td style="font-size:.8rem;max-width:150px">@order.DeliveryAddress</td>
+                                <td>
+                                    @if (order.Driver != null)
+                                    {
+                                        <span class="driver-chip">
+                                            <i class="fas fa-user-tie" style="font-size:.7rem"></i>
+                                            @order.Driver.DriverName
+                                        </span>
+                                    }
+                                    else
+                                    {
+                                        <span style="font-size:.78rem;color:var(--text-muted);font-style:italic">Unassigned</span>
+                                    }
+                                </td>
+                                <td>
+                                    @if (order.Status == OrderStatus.Pending)
+                                    {
+                                        <a href="@Url.Action("AssignDriver","ShopOwner",new{id=order.OrderId})"
+                                           class="btn btn-primary btn-sm">
+                                            <i class="fas fa-truck"></i> Assign
+                                        </a>
+                                    }
+                                </td>
+                            </tr>
+                        }
+                    </tbody>
+                </table>
+            </div>
+        </div>
+
+    </main>
+</div>
+
+<script>function filterRows(q) {
+    var rows = document.querySelectorAll('#ordersTable tbody tr');
+    var term = q.toLowerCase();
+    rows.forEach(function(r) {
+        r.style.display = r.dataset.search.includes(term) ? '' : 'none';
+    });
+}</script>

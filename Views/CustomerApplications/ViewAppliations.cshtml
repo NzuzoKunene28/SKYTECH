@@ -1,0 +1,95 @@
+﻿@model IEnumerable<SkyTech.Models.JobPostServices.ApplicationForm>
+
+@{
+    ViewData["Title"] = "My Applications";
+    Layout = "~/Views/Shared/_MinimalLayout.cshtml";
+}
+
+@section Styles {
+    <link rel="stylesheet" href="~/CSS/CUSTOMERCSS/ViewApplications.css" />
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
+}
+
+<div class="cust-page-wrap">
+
+    <div class="va-header">
+        <p class="cust-eyebrow">Recruitment</p>
+        <h1 class="cust-title">My Applications</h1>
+        <p class="cust-sub">Track the status of every job you've applied for.</p>
+    </div>
+
+    @if (!Model.Any())
+    {
+        <div class="va-empty">
+            <i class="fa-regular fa-folder-open"></i>
+            <p>You haven't applied for any positions yet.</p>
+            <a asp-controller="CustomerApplications" asp-action="Careers" class="va-browse-btn">
+                Browse open positions <i class="fa-solid fa-arrow-right"></i>
+            </a>
+        </div>
+    }
+    else
+    {
+        <div class="va-list">
+            @foreach (var app in Model)
+            {
+                var (statusClass, statusIcon, statusLabel) = app.JobStat switch
+                {
+                    SkyTech.Models.JobPostServices.JobApplicationStat.Applied
+                        => ("va-status-pending", "fa-hourglass-half", "Awaiting review"),
+                    SkyTech.Models.JobPostServices.JobApplicationStat.Rejected
+                        => ("va-status-negative", "fa-circle-xmark", "Not shortlisted"),
+                    SkyTech.Models.JobPostServices.JobApplicationStat.Shortlisted
+                        => ("va-status-info", "fa-clipboard-list", "Shortlisted"),
+                    SkyTech.Models.JobPostServices.JobApplicationStat.Passed_Test
+                        => ("va-status-positive", "fa-circle-check", "Passed assessment"),
+                    SkyTech.Models.JobPostServices.JobApplicationStat.Failed_Test
+                        => ("va-status-negative", "fa-circle-xmark", "Did not pass assessment"),
+                    SkyTech.Models.JobPostServices.JobApplicationStat.Online_interview
+                        => ("va-status-positive", "fa-video", "Interview invited"),
+                    _ => ("va-status-pending", "fa-hourglass-half", app.JobStat.ToString())
+                };
+
+                var salaryText = app.SalaryMin > 0 && app.SalaryMax > 0
+                    ? $"R{app.SalaryMin:N0} - R{app.SalaryMax:N0}"
+                    : null;
+
+                <div class="va-card">
+
+                    <div class="va-card-main">
+                        <h2 class="va-job-title">@app.JobTitle</h2>
+
+                        <div class="va-meta">
+                            <span><i class="fa-solid fa-building"></i> @app.Department</span>
+                            <span><i class="fa-solid fa-location-dot"></i> @app.Location</span>
+                            <span><i class="fa-solid fa-briefcase"></i> @app.EmploymentType</span>
+                            @if (salaryText != null)
+                            {
+                                <span><i class="fa-solid fa-sack-dollar"></i> @salaryText</span>
+                            }
+                        </div>
+
+                        <div class="va-sub-meta">
+                            <span><i class="fa-regular fa-calendar"></i> Applied @app.AppliedAt.ToString("dd MMM yyyy")</span>
+                            <span>
+                                <i class="fa-solid fa-wifi"></i>
+                                @(app.HasInternertAccess ? "Has internet access" : "No internet access")
+                            </span>
+                        </div>
+                    </div>
+
+                    <div class="va-status-col">
+                        <span class="va-status-badge @statusClass">
+                            <i class="fa-solid @statusIcon"></i>
+                            @statusLabel
+                        </span>
+                    </div>
+
+                </div>
+            }
+        </div>
+    }
+
+</div>

@@ -1,0 +1,146 @@
+﻿:root {
+    --blue: #5f9ea0;
+    --blue-dark: #2d6b6d;
+    --blue-deep: #1f4f50;
+    --bg: #f0f4fc;
+    --border: #dde6f5;
+    --text: #0e1b35;
+    --text-2: #4a5878;
+    --text-m: #8a96b0;
+    --red: #dc2626;
+}
+
+body {
+    font-family: 'Plus Jakarta Sans', sans-serif;
+    background-color: var(--bg);
+    color: var(--text);
+}
+
+.form-container {
+    max-width: 640px;
+    margin: 30px auto;
+    background: #fff;
+    padding: 32px;
+    border-radius: 20px;
+    border: 1.5px solid var(--border);
+    box-shadow: 0 10px 30px rgba(31, 79, 80, .08);
+}
+
+    .form-container h2 {
+        font-family: 'Clash Display', 'Plus Jakarta Sans', sans-serif;
+        font-weight: 700;
+        color: var(--blue-deep);
+        margin-bottom: 8px;
+    }
+
+    .form-container > p {
+        color: var(--text-m);
+        font-size: .88rem;
+        margin-bottom: 26px;
+    }
+
+        /* TempData cvError message */
+        .form-container > p:first-child {
+            background: rgba(220, 38, 38, .07);
+            border: 1.5px solid rgba(220, 38, 38, .22);
+            border-radius: 12px;
+            padding: .75rem 1rem;
+            color: var(--red);
+            font-weight: 600;
+            font-size: .85rem;
+        }
+
+.form-group,
+.from-group {
+    margin-bottom: 1.1rem;
+}
+
+    .form-group label,
+    .from-group label {
+        display: block;
+        font-size: .78rem;
+        font-weight: 700;
+        color: var(--text-2);
+        margin-bottom: .42rem;
+    }
+
+    .form-group input[type="text"],
+    .form-group input[type="email"],
+    .form-group textarea {
+        width: 100%;
+        padding: .82rem 1rem;
+        background: var(--bg);
+        border: 1.5px solid var(--border);
+        border-radius: 14px;
+        font-family: 'Plus Jakarta Sans', sans-serif;
+        font-size: .9rem;
+        color: var(--text);
+        outline: none;
+        transition: border-color .2s, box-shadow .2s;
+    }
+
+    .form-group textarea {
+        resize: vertical;
+        line-height: 1.5;
+    }
+
+        .form-group input[type="text"]:focus,
+        .form-group input[type="email"]:focus,
+        .form-group textarea:focus {
+            border-color: var(--blue);
+            background: #fff;
+            box-shadow: 0 0 0 3px rgba(95, 158, 160, .1);
+        }
+
+/* Internet-access checkbox row (markup uses "from-group" here) */
+.from-group {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+}
+
+    .from-group label {
+        margin-bottom: 0;
+        cursor: pointer;
+    }
+
+    .from-group input[type="checkbox"] {
+        width: 18px;
+        height: 18px;
+        accent-color: var(--blue);
+        cursor: pointer;
+    }
+
+    span[class*="text-danger"],
+    .form-group span,
+    .from-group span {
+        display: block;
+        font-size: .75rem;
+        color: var(--red);
+        margin-top: .3rem;
+        font-weight: 600;
+    }
+
+.btn-submit {
+    margin-top: 1.4rem;
+}
+
+    .btn-submit button {
+        width: 100%;
+        padding: .9rem;
+        border: none;
+        border-radius: 50px;
+        background: linear-gradient(135deg, var(--blue), var(--blue-dark));
+        color: #fff;
+        font-family: 'Clash Display', 'Plus Jakarta Sans', sans-serif;
+        font-size: 1rem;
+        font-weight: 700;
+        cursor: pointer;
+        box-shadow: 0 4px 18px rgba(95, 158, 160, .3);
+        transition: box-shadow .2s, transform .2s;
+    }
+
+        .btn-submit button:hover {
+            box-shadow: 0 6px 24px rgba(95, 158, 160, .42);
+            transform: translateY(-1px);
+        }

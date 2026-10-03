@@ -1,0 +1,167 @@
+﻿@using SkyTech.Models
+@model IEnumerable<SkyTech.Models.Customer>
+@{
+    ViewBag.Title = "Profile";
+    Layout = "~/Views/Shared/_MinimalLayout.cshtml";
+    ViewBag.ActivePage = "Profile";
+    var customer = Model?.FirstOrDefault();
+}
+
+
+@section Styles {
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+    <link href="https://api.fontshare.com/v2/css?f[]=clash-display@400,500,600,700&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="~/CSS/ShopOwnerStyle.css">
+}
+
+<!-- MAIN -->
+<main class="so-main">
+
+    <div class="so-topbar">
+        <div>
+            <div class="so-page-title">My Profile</div>
+            <div class="so-page-sub">Your account.</div>
+        </div>
+    </div>
+
+    @if (customer == null)
+    {
+        <div class="so-alert so-alert-warning"><i class="fas fa-triangle-exclamation"></i> No profile data found.</div>
+    }
+    else
+    {
+
+        <div style="display:grid;grid-template-columns:1fr 1fr;gap:1.4rem;align-items:start">
+            <!-- LEFT: Personal info -->
+            <div>
+                <div class="so-card" style="overflow:hidden">
+
+                    <div class="profile-hero">
+                        <div class="profile-avatar"><i class="fas fa-user"></i></div>
+                        <h2>@customer.FirstName @customer.LastName</h2>
+                        <p>@customer.Email</p>
+                       
+                    </div>
+
+                    <div style="padding:1.4rem">
+
+                        <div class="profile-row">
+                            <span class="pk"><i class="fas fa-location-dot" style="color:var(--blue);margin-right:.35rem"></i>Residential Address</span>
+                            <span class="pv">@customer.Address</span>
+                        </div>
+
+                        <div class="profile-row">
+                            <span class="pk"><i class="fas fa-calendar" style="color:var(--blue);margin-right:.35rem"></i>Account Created On</span>
+                            <span class="pv">@customer.RegisteredOn.ToString("dd MMM yyyy")</span>
+                        </div>
+
+                        <div class="profile-row">
+                            <span class="pk"><i class="fas fa-calendar" style="color:var(--blue);margin-right:.35rem"></i>Phone Number</span>
+                            <span class="pv">@customer.PhoneNumber</span>
+                        </div>
+
+                        <div class="profile-row">
+                            <span class="pk"><i class="fas fa-calendar" style="color:var(--blue);margin-right:.35rem"></i>Password</span>
+                            <span class="pv">*********</span>
+                        </div>
+
+                    </div>
+                </div>
+            </div>
+
+            <!-- RIGHT: Action Linkes -->
+            <div style="display:flex;flex-direction:column;gap:1.2rem">
+                <div class="so-card">
+
+                    <div class="so-card-head">
+                        <div class="so-card-title">Actions</div>
+                    </div>
+
+                    <div style="padding:.6rem 1.4rem 1.2rem">
+
+                        <div class="profile-row">
+                            <a href="@Url.Action("OrderHistory","Customer")" class="pv">
+                               View Order History
+                            </a>
+                        </div>
+                        
+                        <div class="profile-row">
+                            <a href="@Url.Action("LeasingPage", "Customer")" class="pv">
+                               Lease a product
+                            </a>
+                        </div>
+                        <div class="profile-row">
+                            <a href="@Url.Action("MyLeaseAgreements", "Customer")" class="pv">
+                                View Lease Agreement
+                            </a>
+                        </div>
+
+                        <div class="profile-row">
+                            <a href="@Url.Action("Create", "Request_Repair_Service")" class="pv">
+                                Request Repair Service
+                            </a>
+                        </div>
+
+
+                        <div class="profile-row">
+                            <a href="@Url.Action("MyOrders","Customer")" class="pv">
+                               My Orders
+                            </a>
+                        </div>
+                       
+                        <div class="profile-row">
+                            <a href="@Url.Action("ReturnPolicy","Customer")" class="pv">
+                               Return item
+                            </a>
+                        </div>
+                        <div class="profile-row">
+                            <a href="@Url.Action("MyReturns","Customer")" class="pv">
+                               My Returns
+                            </a>
+                        </div>
+
+                        <div class="profile-row">
+                            <a href="@Url.Action("ProposeItem","Customer")" class="pv">
+                               Sell Item
+                            </a>
+                        </div>
+
+                        <div class="profile-row">
+                                <a href="@Url.Action("MyProposals","Customer")" class="pv">
+                               My Proposal
+                            </a>
+                        </div>
+                        <div class="profile-row">
+                                <a href="@Url.Action("CustomerDash","Customer")" class="pv">
+                               Go To Dashboard
+                            </a>
+                        </div>
+
+                        <!--Logout button-->
+                        <div class="profile-row" style="margin-top:.8rem">
+                            @using (Html.BeginForm("Logout", "Authentication", FormMethod.Post))
+                            {
+                                @Html.AntiForgeryToken()
+                                <button type="submit" style="background:none;border:none;padding:0;cursor:pointer;width:100%">
+                                    <span class="pv" style="color:#ef4444">
+                                        <i class="fas fa-right-from-bracket"></i> Log Out
+                                    </span>
+                                </button>
+                            }
+                        </div>
+                       
+
+                    </div>
+                </div>
+
+              
+
+            </div>
+        </div>
+
+
+    }
+
+</main>

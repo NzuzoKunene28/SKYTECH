@@ -1,0 +1,368 @@
+﻿@using SkyTech.Models
+@model SkyTech.Models.Order
+@{
+    ViewBag.Title = "Assign Driver";
+    Layout = "~/Views/Shared/_MinimalLayout.cshtml";
+    ViewBag.ActivePage = "Orders";
+    bool restricted = ViewBag.ApplicationStatus == ApplicationStat.Pending
+                  || ViewBag.ApplicationStatus == ApplicationStat.Rejected;
+    var drivers = ViewBag.DeliveryDrivers as List<DeliveryDriver> ?? new List<DeliveryDriver>();
+    var transferId = ViewBag.TransferId as int?;
+    var isTransfer = ViewBag.IsTransfer ?? false;
+}
+
+@section Styles {
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+    <link href="https://api.fontshare.com/v2/css?f[]=clash-display@400,500,600,700&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="~/CSS/ShopOwnerStyle.css">
+}
+@section Scripts {
+   
+    <script>
+        // Toggle dropdown for Received Orders
+        const dropdownToggle = document.getElementById('ordersDropdown');
+        const dropdownMenu = document.getElementById('ordersSubmenu');
+
+        if (dropdownToggle && dropdownMenu) {
+            dropdownToggle.addEventListener('click', function(e) {
+                e.preventDefault();
+                this.classList.toggle('open');
+                dropdownMenu.classList.toggle('show');
+            });
+
+            // Keep submenu open if a sub-link is active
+            if (window.location.href.includes('DeliveryOrders') || window.location.href.includes('PickupOrders')) {
+                dropdownToggle.classList.add('open');
+                dropdownMenu.classList.add('show');
+            }
+        }
+    </script>
+
+}
+<div class="so-wrap">
+
+    <!-- SIDEBAR -->
+    <aside class="so-sidebar">
+        <div class="so-brand">
+            <div class="so-brand-icon"><i class="fas fa-store"></i></div>
+            <div>
+                <div class="so-brand-name">SkyTech</div>
+                <div class="so-brand-sub">Shop Owner Portal</div>
+            </div>
+        </div>
+        <nav class="so-nav">
+            <div class="so-nav-label">OVERVIEW</div>
+
+            <a href="@Url.Action("ShopOwnerDash", "ShopOwner")" class="so-link active"><i class="fas fa-grid-2"></i><span>Dashboard</span></a>
+
+            <div class="so-nav-label" style="margin-top:1rem">INVENTORY</div>
+            <a href="@Url.Action("AddProductPage", "ShopOwner")" class="so-link @(restricted ? "disabled-link" : "")"><i class="fas fa-circle-plus"></i><span>Add Product</span></a>
+            <a href="@Url.Action("TrackStockLevelPage", "ShopOwner")" class="so-link @(restricted ? "disabled-link" : "")"><i class="fas fa-boxes-stacked"></i><span>Track Stock</span></a>
+
+            <div class="so-nav-label" style="margin-top:1rem">ORDERS & STAFF</div>
+
+            <!-- Received Orders with submenu -->
+            <div class="nav-item-dropdown">
+                <a href="#" class="so-link so-dropdown-toggle @(restricted ? "disabled-link" : "")" id="ordersDropdown">
+                    <i class="fas fa-bag-shopping"></i>
+                    <span>Received Orders</span>
+                    <i class="fas fa-chevron-down dropdown-icon"></i>
+                </a>
+                <div class="so-dropdown-menu" id="ordersSubmenu">
+                    <a href="@Url.Action("DeliveryOrders", "ShopOwner")" class="so-link so-sub-link @(restricted ? "disabled-link" : "")">
+                        <i class="fas fa-truck"></i> Delivery Orders
+                    </a>
+                    <a href="@Url.Action("PickupOrders", "ShopOwner")" class="so-link so-sub-link @(restricted ? "disabled-link" : "")">
+                        <i class="fas fa-store"></i> In-Store Collection
+                    </a>
+                </div>
+            </div>
+
+            <a href="@Url.Action("StaffReg", "ShopOwner")" class="so-link @(restricted ? "disabled-link" : "")"><i class="fas fa-user-plus"></i><span>Register Staff</span></a>
+            <a href="@Url.Action("StaffMembers", "ShopOwner")" class="so-link @(restricted ? "disabled-link" : "")"><i class="fas fa-users"></i><span>Staff Members</span></a>
+
+            <a href="@Url.Action("ReturnedItems", "ShopOwner")" class="so-link @(restricted ? "disabled-link" : "")"><i class="fas fa-bag-shopping"></i><span>Returned Items</span></a>
+            <a href="@Url.Action("StaffReg", "ShopOwner")" class="so-link @(restricted ? "disabled-link" : "")"><i class="fas fa-user-plus"></i><span>Register Staff</span></a>
+            <a href="@Url.Action("StaffMembers", "ShopOwner")" class="so-link @(restricted ? "disabled-link" : "")"><i class="fas fa-users"></i><span>Staff Members</span></a>
+            <div class="so-nav-label" style="margin-top:1rem">ACCOUNT</div>
+            <a href="@Url.Action("OwnerProfile", "ShopOwner")" class="so-link"><i class="fas fa-circle-user"></i><span>Profile</span></a>
+        </nav>
+        <div class="so-sidebar-foot">
+            <div class="so-foot-avatar"><i class="fas fa-store"></i></div>
+            <div>
+                <div class="so-foot-role">SkyTech</div>
+            </div>
+        </div>
+
+        <!--Logout button-->
+        <div style="padding:.8rem 1.2rem">
+            @using (Html.BeginForm("Logout", "Authentication", FormMethod.Post))
+            {
+                @Html.AntiForgeryToken()
+                <button type="submit" style="width:100%;background:rgba(239,68,68,.08);
+                    border:1.5px solid rgba(239,68,68,.25);border-radius:8px;
+                    padding:.6rem 1rem;cursor:pointer;color:#ef4444;
+                    font-weight:600;font-size:.85rem;display:flex;
+                    align-items:center;gap:.5rem;justify-content:center">
+                    <i class="fas fa-right-from-bracket"></i> Log Out
+                </button>
+            }
+        </div>
+    </aside>
+
+
+    <!-- MAIN -->
+    <main class="so-main">
+
+        <div class="so-topbar">
+            <div>
+                <div class="so-page-title">Assign Driver</div>
+                <div class="so-page-sub">
+                    @if (isTransfer)
+                    {
+                        <span>Pick an available driver to transport items for Transfer #@transferId</span>
+                    }
+                    else
+                    {
+                        <span>Pick an available driver for Order #@Model.OrderId</span>
+                    }
+                </div>
+            </div>
+            <a href="@Url.Action("DeliveryOrders", "ShopOwner")" class="btn btn-outline">
+                <i class="fas fa-arrow-left"></i> Back to Orders
+            </a>
+        </div>
+
+        <!-- Order/Transfer summary card -->
+        <div class="so-card" style="margin-bottom:1.4rem">
+            <div class="so-card-head">
+                <div class="so-card-title">
+                    <i class="fas fa-receipt" style="color:var(--blue);margin-right:.4rem"></i>
+                    @if (isTransfer)
+                    {
+                        <span>Transfer #@transferId Summary</span>
+                    }
+                    else
+                    {
+                        <span>Order #@Model.OrderId Summary</span>
+                    }
+                </div>
+                @if (!isTransfer)
+                {
+                    <span class="badge badge-pending">@Model.Status</span>
+                }
+            </div>
+            <div class="so-card-body">
+                @if (isTransfer && ViewBag.TransferData != null)
+                {
+                    var transfer = ViewBag.TransferData as InterBranchTransfer;
+                    if (transfer != null)
+                    {
+                        <div class="order-info" style="margin-bottom:1.2rem">
+                            <div class="info-block">
+                                <div class="ib-label"><i class="fas fa-box" style="color:var(--blue)"></i> ITEM TO TRANSPORT</div>
+                                <div class="ib-value">@transfer.OrderItem?.ProdName × @transfer.OrderItem?.Quantity</div>
+                            </div>
+                            <div class="info-block">
+                                <div class="ib-label"><i class="fas fa-store" style="color:var(--blue)"></i> FROM BRANCH</div>
+                                <div class="ib-value">@transfer.SourceBranch?.ShopAddress</div>
+                            </div>
+                            <div class="info-block">
+                                <div class="ib-label"><i class="fas fa-location-dot" style="color:var(--blue)"></i> TO BRANCH (Pickup)</div>
+                                <div class="ib-value">@transfer.TargetBranch?.ShopAddress</div>
+                            </div>
+                            <div class="info-block">
+                                <div class="ib-label"><i class="fas fa-hashtag" style="color:var(--blue)"></i> TRANSFER CODE</div>
+                                <div class="ib-value" style="font-family:monospace;font-size:1rem;background:#f3e8ff;display:inline-block;padding:.2rem .8rem;border-radius:8px">@transfer.TransferCode</div>
+                            </div>
+                            <div class="info-block">
+                                <div class="ib-label"><i class="fas fa-calendar" style="color:var(--blue)"></i> SCHEDULED TRANSPORT DATE</div>
+                                <div class="ib-value">@transfer.ScheduledTransferDate.ToString("dd MMM yyyy")</div>
+                            </div>
+                            <div class="info-block">
+                                <div class="ib-label"><i class="fas fa-user" style="color:var(--blue)"></i> CUSTOMER</div>
+                                <div class="ib-value">@transfer.OrderItem?.Order?.Customers?.FirstName @transfer.OrderItem?.Order?.Customers?.LastName</div>
+                            </div>
+                            <div class="info-block">
+                                <div class="ib-label"><i class="fas fa-store" style="color:var(--blue)"></i> COLLECTION BRANCH</div>
+                                <div class="ib-value">@transfer.TargetBranch?.ShopAddress</div>
+                            </div>
+                        </div>
+                    }
+                }
+                else
+                {
+                    <div class="order-info" style="margin-bottom:1.2rem">
+                        <div class="info-block">
+                            <div class="ib-label"><i class="fas fa-location-dot" style="color:var(--blue)"></i> DELIVERY ADDRESS</div>
+                            <div class="ib-value">@Model.DeliveryAddress</div>
+                        </div>
+                        <div class="info-block">
+                            <div class="ib-label"><i class="fas fa-clock" style="color:var(--blue)"></i> ORDERED ON</div>
+                            <div class="ib-value">@Model.OrderedOn.ToString("dd MMM yyyy · HH:mm")</div>
+                        </div>
+                        <div class="meta-block">
+                            <div class="mk">
+                                <i class="fas fa-calendar-check" style="color:var(--blue)"></i>
+                                SCHEDULED DELIVERY
+                            </div>
+                            <div class="mv">
+                                @Model.ScheduledDeliveryDate.ToString("dddd, dd MMM yyyy")
+                            </div>
+                        </div>
+                        <div class="info-block">
+                            <div class="ib-label"><i class="fas fa-money-bill" style="color:var(--blue)"></i> TOTAL AMOUNT</div>
+                            <div class="ib-value" style="font-family:var(--font-display);font-size:1.1rem;color:var(--blue-dark)">R @Model.TotalAmount.ToString("N2")</div>
+                        </div>
+                    </div>
+
+                    if (Model.OrderItems != null && Model.OrderItems.Any())
+                    {
+                        <div style="font-size:.78rem;font-weight:700;color:var(--text-muted);letter-spacing:.5px;margin-bottom:.5rem">ORDER ITEMS</div>
+                        <ul class="items-list">
+                            @foreach (var item in Model.OrderItems)
+                            {
+                                <li>@item.ProdName <span style="color:var(--blue);font-weight:700">×@item.Quantity</span></li>
+                            }
+                        </ul>
+                    }
+                }
+            </div>
+        </div>
+
+        <!-- Driver selection -->
+        <div class="so-card">
+            <div class="so-card-head">
+                <div class="so-card-title"><i class="fas fa-user-tie" style="color:var(--blue);margin-right:.4rem"></i>Available Drivers</div>
+                <span style="font-size:.78rem;color:var(--text-muted)">@drivers.Count available</span>
+            </div>
+            <div class="so-card-body">
+                @using (Html.BeginForm(isTransfer ? "AssignTransferDriver" : "AssignDriver", "ShopOwner", FormMethod.Post))
+                {
+                    @Html.AntiForgeryToken()
+
+                    @if (isTransfer)
+                    {
+                        <input type="hidden" name="transferId" value="@transferId" />
+                    }
+                    else
+                    {
+                        <input type="hidden" name="orderId" value="@Model.OrderId" />
+                    }
+
+                    if (!drivers.Any())
+                    {
+                        <div class="so-alert so-alert-warning">
+                            <i class="fas fa-triangle-exclamation"></i>
+                            No drivers are currently available. Please try again later.
+                        </div>
+                    }
+                    else
+                    {
+                        foreach (var driver in drivers)
+                        {
+                            <label class="driver-option" style="display:flex; align-items:center; padding:1rem; border:1.5px solid var(--border); border-radius:var(--radius-sm); margin-bottom:.8rem; cursor:pointer;">
+                                <input type="radio" name="driverId" value="@driver.DriverId" required style="margin-right:1rem;" />
+                                <div class="d-avatar" style="width:40px; height:40px; background:var(--blue-light); border-radius:50%; display:flex; align-items:center; justify-content:center; margin-right:1rem;">
+                                    <i class="fas fa-user-tie" style="color:var(--blue); font-size:1.2rem;"></i>
+                                </div>
+                                <div style="flex:1">
+                                    <div class="d-name" style="font-weight:700; margin-bottom:.2rem;">@driver.DriverName @driver.DriverSurname</div>
+                                    <div class="d-details" style="font-size:.75rem; color:var(--text-muted);">
+                                        <i class="fas fa-phone"></i> @driver.PhoneNumber &nbsp;|&nbsp;
+                                        <i class="fas fa-car"></i> @driver.VehicleNumber
+                                    </div>
+                                </div>
+                                <div class="d-avail">
+                                    <span style="background:#dcfce7; color:#166534; padding:.2rem .6rem; border-radius:20px; font-size:.7rem;">
+                                        <i class="fas fa-circle" style="font-size:.4rem; color:#22c55e;"></i> Available
+                                    </span>
+                                </div>
+                            </label>
+                        }
+
+                        <div style="display:flex;gap:1rem;margin-top:1.4rem;flex-wrap:wrap">
+                            <button type="submit" class="btn btn-primary btn-lg">
+                                <i class="fas fa-truck"></i> @(isTransfer ? "Assign Driver to Transfer" : "Assign Driver to Order")
+                            </button>
+                            <a href="@Url.Action("DeliveryOrders", "ShopOwner")" class="btn btn-outline btn-lg">
+                                Cancel
+                            </a>
+                        </div>
+                    }
+                }
+            </div>
+        </div>
+
+    </main>
+</div>
+
+<style>
+    .nav-item-dropdown {
+        position: relative;
+    }
+
+    .so-dropdown-toggle {
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        cursor: pointer;
+    }
+
+        .so-dropdown-toggle .dropdown-icon {
+            margin-left: auto;
+            transition: transform 0.3s ease;
+            font-size: 12px;
+        }
+
+        .so-dropdown-toggle.open .dropdown-icon {
+            transform: rotate(180deg);
+        }
+
+    .so-dropdown-menu {
+        margin-left: 1.5rem;
+        margin-top: 0.5rem;
+        margin-bottom: 0.5rem;
+    }
+
+    .so-sub-link {
+        padding: 0.6rem 1rem 0.6rem 2.5rem !important;
+        font-size: 0.85rem;
+    }
+
+        .so-sub-link i {
+            margin-right: 0.5rem;
+            font-size: 0.8rem;
+        }
+
+    .driver-option:hover {
+        background: var(--bg-light);
+        border-color: var(--blue);
+    }
+
+    .driver-option input[type="radio"]:checked + .d-avatar {
+        border-color: var(--blue);
+    }
+</style>
+
+<script>
+    document.addEventListener('DOMContentLoaded', function() {
+        const dropdownToggle = document.getElementById('ordersDropdown');
+        const dropdownMenu = document.querySelector('.so-dropdown-menu');
+
+        if (dropdownToggle && dropdownMenu) {
+            dropdownToggle.addEventListener('click', function(e) {
+                e.preventDefault();
+                e.stopPropagation();
+                this.classList.toggle('open');
+                if (dropdownMenu.style.display === 'none') {
+                    dropdownMenu.style.display = 'block';
+                } else {
+                    dropdownMenu.style.display = 'none';
+                }
+            });
+        }
+    });
+</script>

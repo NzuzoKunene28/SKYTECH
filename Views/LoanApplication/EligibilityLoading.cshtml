@@ -1,0 +1,143 @@
+﻿@model SkyTech.Models.SkytechWorkers.LoanApplication
+
+@{
+    ViewData["Title"] = "Checking Eligibility";
+    Layout = "~/Views/Shared/_MinimalLayout.cshtml";
+}
+
+<style>
+    :root {
+        --blue: #5f9ea0;
+        --blue-dark: #2d6b6d;
+        --blue-deep: #1f4f50;
+        --bg: #f0f4fc;
+        --border: #dde6f5;
+        --text: #0e1b35;
+        --text-2: #4a5878;
+        --text-m: #8a96b0;
+    }
+
+    .eligibility-loading-page {
+        min-height: 80vh;
+        background: var(--bg);
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        padding: 40px 20px;
+    }
+
+    .eligibility-loading-card {
+        width: 100%;
+        max-width: 600px;
+        background: #ffffff;
+        border: 1px solid var(--border);
+        border-radius: 24px;
+        padding: 50px 40px;
+        text-align: center;
+        box-shadow: 0 20px 50px rgba(31, 79, 80, 0.10);
+    }
+
+    .loading-circle {
+        width: 90px;
+        height: 90px;
+        margin: 0 auto 30px;
+        border: 7px solid #dceced;
+        border-top-color: var(--blue-dark);
+        border-radius: 50%;
+        animation: eligibilitySpin 1s linear infinite;
+    }
+
+    @@keyframes eligibilitySpin {
+        from {
+            transform: rotate(0deg);
+        }
+
+        to {
+            transform: rotate(360deg);
+        }
+    }
+
+    .loading-title {
+        color: var(--text);
+        font-size: 30px;
+        font-weight: 700;
+        margin-bottom: 12px;
+    }
+
+    .loading-text {
+        color: var(--text-2);
+        font-size: 16px;
+        margin-bottom: 30px;
+    }
+
+    .progress-track {
+        height: 8px;
+        background: #e8edf5;
+        border-radius: 20px;
+        overflow: hidden;
+    }
+
+    .progress-fill {
+        height: 100%;
+        width: 0%;
+        background: var(--blue);
+        border-radius: 20px;
+        animation: eligibilityProgress 5s linear forwards;
+    }
+
+    @@keyframes eligibilityProgress {
+        from {
+            width: 0%;
+        }
+
+        to {
+            width: 100%;
+        }
+    }
+
+    .loading-note {
+        margin-top: 18px;
+        color: var(--text-m);
+        font-size: 13px;
+    }
+</style>
+
+<div class="eligibility-loading-page">
+
+    <div class="eligibility-loading-card">
+
+        <div class="loading-circle"></div>
+
+        <h1 class="loading-title">
+            Checking your eligibility
+        </h1>
+
+        <p class="loading-text">
+            We're checking your credit and clearance information.
+            Please wait while we process your application.
+        </p>
+
+        <div class="progress-track">
+            <div class="progress-fill"></div>
+        </div>
+
+        <div class="loading-note">
+            This check will take a few seconds.
+        </div>
+
+    </div>
+
+</div>
+
+<script>
+    setTimeout(function() {
+
+        window.location.href =
+            '@Url.Action(
+                                "ShowEligibilityResult",
+                                "LoanApplication",
+                new { id = Model.LoanApplicationId }
+                        )';
+
+    }, 5000);
+</script>

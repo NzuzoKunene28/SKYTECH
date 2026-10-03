@@ -1,0 +1,664 @@
+﻿Add Leaseable product view:
+@model SkyTech.ViewModels.AddLeasableProductViewModel
+@{
+    ViewBag.Title = "Add Leasable Product";
+    Layout = "~/Views/Shared/_MinimalLayout.cshtml";
+    ViewBag.ActivePage = "AddLeasableProduct";
+    bool restricted = ViewBag.ApplicationStatus == ApplicationStat.Pending
+                  || ViewBag.ApplicationStatus == ApplicationStat.Rejected;
+}
+
+@section Styles {
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+    <link href="https://api.fontshare.com/v2/css?f[]=clash-display@400,500,600,700&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="~/CSS/ShopOwnerStyle.css">
+
+    <style>
+        /* Scan modal — layout/structure only, reuses the page's existing
+                           color variables (--blue etc.) and so-card / btn-* classes. */
+        .scan-overlay {
+            display: none;
+            position: fixed;
+            inset: 0;
+            background: rgba(15, 23, 42, 0.55);
+            z-index: 1000;
+            align-items: center;
+            justify-content: center;
+            padding: 1rem;
+        }
+
+            .scan-overlay.open {
+                display: flex;
+            }
+
+        .scan-modal {
+            background: #fff;
+            border-radius: 16px;
+            width: 100%;
+            max-width: 420px;
+            max-height: 90vh;
+            overflow-y: auto;
+            box-shadow: 0 20px 50px rgba(0, 0, 0, 0.25);
+        }
+
+        .scan-modal-head {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            padding: 1rem 1.2rem;
+            border-bottom: 1px solid #eef1f4;
+        }
+
+        .scan-modal-title {
+            font-weight: 700;
+            font-size: 1rem;
+            display: flex;
+            align-items: center;
+            gap: .5rem;
+        }
+
+        .scan-modal-close {
+            background: none;
+            border: none;
+            font-size: 1.1rem;
+            color: #667085;
+            cursor: pointer;
+            padding: .3rem;
+            line-height: 1;
+        }
+
+        .scan-modal-body {
+            padding: 1.2rem;
+        }
+
+        #qr-reader {
+            width: 100%;
+            border-radius: 12px;
+            overflow: hidden;
+            background: #0f172a;
+            min-height: 220px;
+        }
+
+        .scan-status {
+            font-size: .85rem;
+            color: #667085;
+            margin: .8rem 0;
+            text-align: center;
+        }
+
+        .scan-manual-toggle {
+            background: none;
+            border: none;
+            color: var(--blue, #2563eb);
+            font-size: .85rem;
+            font-weight: 600;
+            cursor: pointer;
+            padding: 0;
+            text-decoration: underline;
+            display: block;
+            margin: 0 auto 1rem;
+        }
+
+        .scan-manual-section {
+            display: none;
+            border-top: 1px dashed #e2e8f0;
+            padding-top: 1rem;
+            margin-top: .4rem;
+        }
+
+            .scan-manual-section.open {
+                display: block;
+            }
+
+        .scan-manual-row {
+            display: flex;
+            gap: .6rem;
+        }
+
+            .scan-manual-row input {
+                flex: 1;
+            }
+
+        .scan-hint {
+            font-size: .78rem;
+            color: #98a2b3;
+            margin-top: .6rem;
+            text-align: center;
+        }
+
+    </style>
+}
+
+@section Scripts {
+
+    <script src="https://unpkg.com/html5-qrcode@2.3.8/html5-qrcode.min.js"></script>
+
+    <script>
+        // Toggle dropdown for Received Orders
+        const dropdownToggle = document.getElementById('ordersDropdown');
+        const dropdownMenu = document.getElementById('ordersSubmenu');
+
+        if (dropdownToggle && dropdownMenu) {
+            dropdownToggle.addEventListener('click', function(e) {
+                e.preventDefault();
+                this.classList.toggle('open');
+                dropdownMenu.classList.toggle('show');
+            });
+
+            // Keep submenu open if a sub-link is active
+            if (window.location.href.includes('DeliveryOrders') || window.location.href.includes('PickupOrders')) {
+                dropdownToggle.classList.add('open');
+                dropdownMenu.classList.add('show');
+            }
+        }
+    </script>
+
+}
+
+<div class="so-wrap">
+
+    <!-- SIDEBAR -->
+    <aside class="so-sidebar">
+        <div class="so-brand">
+            <div class="so-brand-icon"><i class="fas fa-store"></i></div>
+            <div>
+                <div class="so-brand-name">SkyTech</div>
+                <div class="so-brand-sub">Shop Owner Portal</div>
+            </div>
+        </div>
+        <nav class="so-nav">
+            <div class="so-nav-label">OVERVIEW</div>
+
+            <a href="@Url.Action("ShopOwnerDash", "ShopOwner")" class="so-link active"><i class="fas fa-grid-2"></i><span>Dashboard</span></a>
+
+            <div class="so-nav-label" style="margin-top:1rem">INVENTORY</div>
+            <a href="@Url.Action("AddProductPage", "ShopOwner")" class="so-link @(restricted ? "disabled-link" : "")"><i class="fas fa-circle-plus"></i><span>Add Product</span></a>
+            <a href="@Url.Action("TrackStockLevelPage", "ShopOwner")" class="so-link @(restricted ? "disabled-link" : "")"><i class="fas fa-boxes-stacked"></i><span>Track Stock</span></a>
+
+            <div class="so-nav-label" style="margin-top:1rem">LEASING</div>
+            <a href="@Url.Action("AddLeasableProductPage", "ShopOwner")" class="so-link @(restricted ? "disabled-link" : "")"><i class="fas fa-calendar-check"></i><span>Add Leasable Product</span></a>
+            <!-- Track Leasable Stock slots in here once that page exists -->
+
+            <div class="so-nav-label" style="margin-top:1rem">ORDERS & STAFF</div>
+
+            <!-- Received Orders with submenu -->
+            <div class="nav-item-dropdown">
+                <a href="#" class="so-link so-dropdown-toggle @(restricted ? "disabled-link" : "")" id="ordersDropdown">
+                    <i class="fas fa-bag-shopping"></i>
+                    <span>Received Orders</span>
+                    <i class="fas fa-chevron-down dropdown-icon"></i>
+                </a>
+                <div class="so-dropdown-menu" id="ordersSubmenu">
+                    <a href="@Url.Action("DeliveryOrders", "ShopOwner")" class="so-link so-sub-link @(restricted ? "disabled-link" : "")">
+                        <i class="fas fa-truck"></i> Delivery Orders
+                    </a>
+                    <a href="@Url.Action("PickupOrders", "ShopOwner")" class="so-link so-sub-link @(restricted ? "disabled-link" : "")">
+                        <i class="fas fa-store"></i> In-Store Collection
+                    </a>
+                </div>
+            </div>
+
+            <a href="@Url.Action("StaffReg", "ShopOwner")" class="so-link @(restricted ? "disabled-link" : "")"><i class="fas fa-user-plus"></i><span>Register Staff</span></a>
+            <a href="@Url.Action("StaffMembers", "ShopOwner")" class="so-link @(restricted ? "disabled-link" : "")"><i class="fas fa-users"></i><span>Staff Members</span></a>
+
+            <a href="@Url.Action("ReturnedItems", "ShopOwner")" class="so-link @(restricted ? "disabled-link" : "")"><i class="fas fa-bag-shopping"></i><span>Returned Items</span></a>
+            <a href="@Url.Action("StaffReg", "ShopOwner")" class="so-link @(restricted ? "disabled-link" : "")"><i class="fas fa-user-plus"></i><span>Register Staff</span></a>
+            <a href="@Url.Action("StaffMembers", "ShopOwner")" class="so-link @(restricted ? "disabled-link" : "")"><i class="fas fa-users"></i><span>Staff Members</span></a>
+            <div class="so-nav-label" style="margin-top:1rem">ACCOUNT</div>
+            <a href="@Url.Action("OwnerProfile", "ShopOwner")" class="so-link"><i class="fas fa-circle-user"></i><span>Profile</span></a>
+        </nav>
+        <div class="so-sidebar-foot">
+            <div class="so-foot-avatar"><i class="fas fa-store"></i></div>
+            <div>
+                <div class="so-foot-role">SkyTech</div>
+            </div>
+        </div>
+
+        <!--Logout button-->
+        <div style="padding:.8rem 1.2rem">
+            @using (Html.BeginForm("Logout", "Authentication", FormMethod.Post))
+            {
+                @Html.AntiForgeryToken()
+                <button type="submit" style="width:100%;background:rgba(239,68,68,.08);
+                    border:1.5px solid rgba(239,68,68,.25);border-radius:8px;
+                    padding:.6rem 1rem;cursor:pointer;color:#ef4444;
+                    font-weight:600;font-size:.85rem;display:flex;
+                    align-items:center;gap:.5rem;justify-content:center">
+                    <i class="fas fa-right-from-bracket"></i> Log Out
+                </button>
+            }
+        </div>
+    </aside>
+
+    <!-- MAIN -->
+    <main class="so-main">
+
+        @if (TempData["Message"] != null)
+        {
+            <div class="so-alert so-alert-success"><i class="fas fa-circle-check"></i> @TempData["Message"]</div>
+        }
+
+        @if (TempData["Error"] != null)
+        {
+            <div class="so-alert so-alert-error"><i class="fas fa-circle-exclamation"></i> @TempData["Error"]</div>
+        }
+
+        <div class="so-topbar">
+            <div>
+                <div class="so-page-title">Add Leasable Product</div>
+                <div class="so-page-sub">List a new item available for lease.</div>
+            </div>
+            <a href="@Url.Action("ShopOwnerDash", "ShopOwner")" class="btn btn-outline">
+                <i class="fas fa-arrow-left"></i> Back to Dashboard
+            </a>
+        </div>
+
+        <!-- Tips banner -->
+        <div class="so-alert so-alert-info" style="margin-bottom:1.6rem">
+            <i class="fas fa-lightbulb"></i>
+            Set accurate rates and lease terms — customers see these directly when requesting a lease.
+        </div>
+
+        @using (Html.BeginForm("AddLeasableProductPage", "ShopOwner", FormMethod.Post, new { enctype = "multipart/form-data" }))
+        {
+            @Html.AntiForgeryToken()
+            @Html.ValidationSummary(true, "", new { @class = "so-alert so-alert-error" })
+
+            <div class="so-card">
+                <div class="so-card-head">
+                    <div class="so-card-title"><i class="fas fa-tag" style="color:var(--blue);margin-right:.4rem"></i>Product Details</div>
+                </div>
+                <div class="so-card-body">
+                    <div class="so-form-grid">
+
+                        <div class="so-form-group">
+                            <label class="so-label"><i class="fas fa-pen"></i> Product Name</label>
+                            @Html.TextBoxFor(m => m.LeaseProdName, new { @class = "so-input", placeholder = "e.g. DeWalt Cordless Drill Set" })
+                            @Html.ValidationMessageFor(m => m.LeaseProdName, "", new { @class = "text-danger" })
+                        </div>
+
+                        <div class="so-form-group">
+                            <label class="so-label"><i class="fas fa-tag"></i> Category</label>
+                            <select asp-for="LeaseProdCategory" asp-items="Html.GetEnumSelectList<SkyTech.Models.SelectCategory>()" class="so-select">
+                                <option value="">-- Select Category --</option>
+                            </select>
+                            @Html.ValidationMessageFor(m => m.LeaseProdCategory, "", new { @class = "text-danger" })
+                        </div>
+
+                        <div class="so-form-group">
+                            <label class="so-label"><i class="fas fa-rand-sign"></i> Monthly Rate (R)</label>
+                            <div class="so-input-prefix-group">
+                                <span class="so-input-prefix">R</span>
+                                @Html.TextBoxFor(m => m.MonthlyRate, new { @class = "so-input prefix-wrap", placeholder = "0.00" })
+                            </div>
+                            @Html.ValidationMessageFor(m => m.MonthlyRate, "", new { @class = "text-danger" })
+                        </div>
+
+                        <div class="so-form-group">
+                            <label class="so-label"><i class="fas fa-shield-halved"></i> Security Deposit (R)</label>
+                            <div class="so-input-prefix-group">
+                                <span class="so-input-prefix">R</span>
+                                @Html.TextBoxFor(m => m.SecurityDeposit, new { @class = "so-input prefix-wrap", placeholder = "0.00" })
+                            </div>
+                            @Html.ValidationMessageFor(m => m.SecurityDeposit, "", new { @class = "text-danger" })
+                        </div>
+
+                        <div class="so-form-group">
+                            <label class="so-label"><i class="fas fa-clock"></i> Late Payment Fee (R)</label>
+                            <div class="so-input-prefix-group">
+                                <span class="so-input-prefix">R</span>
+                                @Html.TextBoxFor(m => m.LateFeeAmount, new { @class = "so-input prefix-wrap", placeholder = "0.00" })
+                            </div>
+                            @Html.ValidationMessageFor(m => m.LateFeeAmount, "", new { @class = "text-danger" })
+                        </div>
+
+                        <div class="so-form-group">
+                            <label class="so-label"><i class="fas fa-rotate-left"></i> Early Return Fee (%)</label>
+                            @Html.TextBoxFor(m => m.EarlyReturnFeePercentage, new { @class = "so-input", placeholder = "e.g. 5" })
+                            @Html.ValidationMessageFor(m => m.EarlyReturnFeePercentage, "", new { @class = "text-danger" })
+                        </div>
+
+                        <div class="so-form-group">
+                            <label class="so-label"><i class="fas fa-calendar-minus"></i> Min Lease Duration (months)</label>
+                            @Html.TextBoxFor(m => m.MinLeaseMonths, new { @class = "so-input", placeholder = "3", type = "number", min = "1" })
+                            @Html.ValidationMessageFor(m => m.MinLeaseMonths, "", new { @class = "text-danger" })
+                        </div>
+
+                        <div class="so-form-group">
+                            <label class="so-label"><i class="fas fa-calendar-plus"></i> Max Lease Duration (months)</label>
+                            @Html.TextBoxFor(m => m.MaxLeaseMonths, new { @class = "so-input", placeholder = "12", type = "number", min = "1" })
+                            @Html.ValidationMessageFor(m => m.MaxLeaseMonths, "", new { @class = "text-danger" })
+                        </div>
+
+                        <div class="so-form-group">
+                            <label class="so-label"><i class="fas fa-ruler"></i> Size / Weight</label>
+                            @Html.TextBoxFor(m => m.LeaseProdSize, new { @class = "so-input", placeholder = "e.g. Compact, 2kg" })
+                            @Html.ValidationMessageFor(m => m.LeaseProdSize, "", new { @class = "text-danger" })
+                        </div>
+
+                        <div class="so-form-group span-2">
+                            <label class="so-label"><i class="fas fa-align-left"></i> Description</label>
+                            @Html.TextAreaFor(m => m.LeaseProdDescription, new { @class = "so-textarea", placeholder = "Describe the item — condition, accessories included, usage notes..." })
+                            @Html.ValidationMessageFor(m => m.LeaseProdDescription, "", new { @class = "text-danger" })
+                        </div>
+
+                    </div>
+                </div>
+            </div>
+
+            <!-- Serial numbers card — one row per physical unit; quantity is implicit -->
+            <div class="so-card" style="margin-top:1.2rem">
+                <div class="so-card-head">
+                    <div class="so-card-title"><i class="fas fa-hashtag" style="color:var(--blue);margin-right:.4rem"></i>Serial Numbers</div>
+                </div>
+                <div class="so-card-body">
+                    <p style="color:#667085;font-size:.85rem;margin:-.3rem 0 1rem">
+                        One row per physical unit you're listing — the number of rows is the quantity.
+                        Scanning is optional — type the serial number in by hand any time.
+                    </p>
+
+                    <div id="serialRows">
+                        <div class="serial-row" style="display:flex;gap:.8rem;align-items:flex-start;margin-bottom:.8rem">
+                            <div style="flex:1">
+                                <input type="text" name="SerialNumbers[0]" class="so-input" placeholder="Serial number">
+                            </div>
+                            <div style="flex:1">
+                                <input type="text" name="ConditionNotes[0]" class="so-input" placeholder="Condition notes (optional)">
+                            </div>
+                            <button type="button" class="btn btn-outline" onclick="openScanner(this)" style="padding:.6rem .9rem" title="Scan barcode / QR code">
+                                <i class="fas fa-camera"></i>
+                            </button>
+                            <button type="button" class="btn btn-outline" onclick="removeSerialRow(this)" style="padding:.6rem .9rem">
+                                <i class="fas fa-trash"></i>
+                            </button>
+                        </div>
+                    </div>
+
+                    <button type="button" class="btn btn-outline" onclick="addSerialRow()">
+                        <i class="fas fa-plus"></i> Add another unit
+                    </button>
+                </div>
+            </div>
+
+            <!-- Image upload card -->
+            <div class="so-card" style="margin-top:1.2rem">
+                <div class="so-card-head">
+                    <div class="so-card-title"><i class="fas fa-image" style="color:var(--blue);margin-right:.4rem"></i>Product Image</div>
+                </div>
+                <div class="so-card-body">
+                    <div class="so-file-card" style="position:relative" onclick="document.getElementById('picInput').click()">
+                        <img id="imgPreview" class="preview-img" src="" alt="Preview">
+                        <i class="fas fa-cloud-arrow-up" id="uploadIcon"></i>
+                        <p id="uploadText">Click to upload · JPG, PNG, JPEG</p>
+                        <input type="file" id="picInput" name="ProductPicture" accept=".jpg,.png,.jpeg"
+                               style="display:none"
+                               onchange="previewImg(this)">
+                    </div>
+                </div>
+            </div>
+
+            <!-- Actions -->
+            <div style="display:flex;align-items:center;gap:1rem;margin-top:1.4rem;flex-wrap:wrap">
+                <button type="submit" class="btn btn-primary btn-lg">
+                    <i class="fas fa-circle-check"></i> Save Leasable Product
+                </button>
+                <a href="@Url.Action("ShopOwnerDash", "ShopOwner")" class="btn btn-outline btn-lg">
+                    Cancel
+                </a>
+            </div>
+        }
+    </main>
+</div>
+
+<!-- Scan modal: reused for every serial-number row. The row currently being
+     filled is tracked via activeScanRow (a DOM reference), so it keeps
+     working correctly no matter how rows are added/removed/renumbered. -->
+<div class="scan-overlay" id="scanOverlay">
+    <div class="scan-modal">
+        <div class="scan-modal-head">
+            <div class="scan-modal-title"><i class="fas fa-qrcode" style="color:var(--blue)"></i> Scan Item Code</div>
+            <button type="button" class="scan-modal-close" onclick="closeScanner()" aria-label="Close">
+                <i class="fas fa-xmark"></i>
+            </button>
+        </div>
+        <div class="scan-modal-body">
+            <div id="qr-reader"></div>
+            <p class="scan-status" id="scanStatus">Point your camera at the item's barcode or QR code.</p>
+
+            <button type="button" class="scan-manual-toggle" onclick="toggleManualEntry()">
+                Scanner not working? Enter the code manually
+            </button>
+
+            <div class="scan-manual-section" id="scanManualSection">
+                <div class="scan-manual-row">
+                    <input type="text" id="manualScanInput" class="so-input" placeholder="Type the serial number or code">
+                    <button type="button" class="btn btn-primary" onclick="confirmManualScanEntry()">Use this</button>
+                </div>
+                <p class="scan-hint">
+                    Tip: if you label your own stock, a QR code formatted as <strong>ProductName|SerialNumber</strong>
+                    will fill in both the product name and the serial number automatically.
+                </p>
+            </div>
+        </div>
+    </div>
+</div>
+
+<script>
+    function previewImg(input) {
+        var file = input.files[0];
+        if (!file) return;
+        var reader = new FileReader();
+        reader.onload = function(e) {
+            var img = document.getElementById('imgPreview');
+            var icon = document.getElementById('uploadIcon');
+            var txt = document.getElementById('uploadText');
+            img.src = e.target.result;
+            img.style.display = 'block';
+            icon.style.display = 'none';
+            txt.textContent = file.name;
+        };
+        reader.readAsDataURL(file);
+    }
+
+    // Serial number rows — dynamic add/remove. ASP.NET Core's List<T> model
+    // binder requires contiguous indices starting at 0, so removal renumbers
+    // the remaining rows rather than just deleting the DOM node.
+    let serialRowCount = document.querySelectorAll('.serial-row').length;
+
+    function addSerialRow() {
+        const container = document.getElementById('serialRows');
+        const row = document.createElement('div');
+        row.className = 'serial-row';
+        row.style.cssText = 'display:flex;gap:.8rem;align-items:flex-start;margin-bottom:.8rem';
+        row.innerHTML =
+            '<div style="flex:1">' +
+            '<input type="text" name="SerialNumbers[' + serialRowCount + ']" class="so-input" placeholder="Serial number">' +
+            '</div>' +
+            '<div style="flex:1">' +
+            '<input type="text" name="ConditionNotes[' + serialRowCount + ']" class="so-input" placeholder="Condition notes (optional)">' +
+            '</div>' +
+            '<button type="button" class="btn btn-outline" onclick="openScanner(this)" style="padding:.6rem .9rem" title="Scan barcode / QR code">' +
+            '<i class="fas fa-camera"></i>' +
+            '</button>' +
+            '<button type="button" class="btn btn-outline" onclick="removeSerialRow(this)" style="padding:.6rem .9rem">' +
+            '<i class="fas fa-trash"></i>' +
+            '</button>';
+        container.appendChild(row);
+        serialRowCount++;
+    }
+
+    function removeSerialRow(button) {
+        const rows = document.querySelectorAll('.serial-row');
+        if (rows.length <= 1) return; // always keep at least one row
+        button.closest('.serial-row').remove();
+        renumberSerialRows();
+    }
+
+    function renumberSerialRows() {
+        const rows = document.querySelectorAll('.serial-row');
+        rows.forEach((row, index) => {
+            const inputs = row.querySelectorAll('input[type="text"]');
+            inputs[0].name = 'SerialNumbers[' + index + ']';
+            inputs[1].name = 'ConditionNotes[' + index + ']';
+        });
+        serialRowCount = rows.length;
+    }
+
+    /* ---------------------------------------------------------------------
+       Barcode / QR scanning (html5-qrcode)
+       ---------------------------------------------------------------------
+       Scan contract (kept deliberately simple so the same rule can be ported
+       to the Android app later):
+         - "ProductName|SerialNumber"  -> fills both fields (name only if the
+                                           Product Name field is currently empty)
+         - anything else (a plain manufacturer barcode, a bare code, etc.)
+                                        -> used as the Serial Number only
+       ------------------------------------------------------------------ */
+
+    let html5QrCode = null;
+    let activeScanRow = null;
+
+    function openScanner(buttonEl) {
+        activeScanRow = buttonEl.closest('.serial-row');
+
+        document.getElementById('scanOverlay').classList.add('open');
+        document.getElementById('scanManualSection').classList.remove('open');
+        document.getElementById('manualScanInput').value = '';
+        setScanStatus('Point your camera at the item\'s barcode or QR code.');
+
+        if (typeof Html5Qrcode === 'undefined') {
+            setScanStatus('Scanner library failed to load. Please enter the code manually.');
+            toggleManualEntry(true);
+            return;
+        }
+
+        // Accept both 1D barcodes and 2D codes, and use the phone's native
+        // BarcodeDetector where available (much better at 1D barcodes).
+        const F = Html5QrcodeSupportedFormats;
+        html5QrCode = new Html5Qrcode('qr-reader', {
+            formatsToSupport: [
+                F.QR_CODE, F.DATA_MATRIX, F.AZTEC, F.PDF_417,
+                F.CODE_128, F.CODE_39, F.CODE_93, F.CODABAR,
+                F.EAN_13, F.EAN_8, F.UPC_A, F.UPC_E, F.ITF
+            ],
+            useBarCodeDetectorIfSupported: true,
+            verbose: false
+        });
+
+        const config = {
+            fps: 10,
+            // Wide rectangle: fits 1D barcodes, and QR codes still scan fine inside it
+            qrbox: (viewfinderWidth, viewfinderHeight) => {
+                const width = Math.floor(viewfinderWidth * 0.9);
+                const height = Math.max(100, Math.floor(Math.min(viewfinderHeight * 0.6, width * 0.5)));
+                return { width: width, height: height };
+            },
+            videoConstraints: {
+                facingMode: 'environment',
+                width: { ideal: 1280 },
+                height: { ideal: 720 }
+            }
+        };
+
+        const onSuccess = (decodedText) => {
+            applyScanResult(decodedText);
+            closeScanner();
+        };
+        const onFrame = () => { /* per-frame "no code found yet" — ignore */ };
+
+        // Ask for the rear camera directly (no dependency on camera labels)
+        html5QrCode.start({ facingMode: 'environment' }, config, onSuccess, onFrame)
+            .catch(() => {
+                // Fallback for devices/browsers that reject facingMode: pick from the camera list
+                return Html5Qrcode.getCameras().then(cameras => {
+                    if (!cameras || cameras.length === 0) {
+                        setScanStatus('No camera found on this device.');
+                        toggleManualEntry(true);
+                        return;
+                    }
+                    const camera = cameras.find(c => /back|rear|environment/i.test(c.label || '')) || cameras[cameras.length - 1];
+                    return html5QrCode.start(camera.id, { fps: config.fps, qrbox: config.qrbox }, onSuccess, onFrame);
+                });
+            })
+            .catch(() => {
+                setScanStatus('Camera access was denied or is unavailable. You can enter the code manually instead.');
+                toggleManualEntry(true);
+            });
+    }
+
+    function closeScanner() {
+        if (html5QrCode) {
+            html5QrCode.stop().then(() => html5QrCode.clear()).catch(() => { });
+            html5QrCode = null;
+        }
+        document.getElementById('scanOverlay').classList.remove('open');
+        activeScanRow = null;
+    }
+
+    function toggleManualEntry(forceOpen) {
+        const section = document.getElementById('scanManualSection');
+        if (forceOpen) {
+            section.classList.add('open');
+        } else {
+            section.classList.toggle('open');
+        }
+    }
+
+    function confirmManualScanEntry() {
+        const input = document.getElementById('manualScanInput');
+        const value = input.value.trim();
+        if (!value) return;
+        applyScanResult(value);
+        input.value = '';
+        closeScanner();
+    }
+
+    function applyScanResult(decodedText) {
+        if (!activeScanRow) return;
+
+        const parsed = parseScannedCode(decodedText);
+
+        const snInput = activeScanRow.querySelector('input[name^="SerialNumbers"]');
+        if (snInput) snInput.value = parsed.serialNumber;
+
+        if (parsed.productName) {
+            const nameInput = document.getElementById('LeaseProdName');
+            if (nameInput && !nameInput.value.trim()) {
+                nameInput.value = parsed.productName;
+            }
+        }
+    }
+
+    function parseScannedCode(text) {
+        text = (text || '').trim();
+
+        // Primary contract: "ProductName|SerialNumber"
+        if (text.includes('|')) {
+            const parts = text.split('|').map(p => p.trim()).filter(Boolean);
+            if (parts.length >= 2) {
+                return { productName: parts[0], serialNumber: parts[1] };
+            }
+        }
+
+        // Fallback: try a JSON payload, e.g. {"name":"...","sn":"..."}
+        try {
+            const obj = JSON.parse(text);
+            const name = obj.name || obj.productName || obj.Name || obj.ProductName || null;
+            const sn = obj.sn || obj.serialNumber || obj.SN || obj.SerialNumber || obj.serial;
+            if (sn) return { productName: name, serialNumber: String(sn) };
+        } catch (e) {
+            // not JSON — fall through
+        }
+
+        // No structure detected (typical for standard manufacturer barcodes) —
+        // use the whole value as the serial number.
+        return { productName: null, serialNumber: text };
+    }
+
+    function setScanStatus(message) {
+        document.getElementById('scanStatus').textContent = message;
+    }
+</script>
+

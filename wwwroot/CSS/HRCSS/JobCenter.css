@@ -1,0 +1,189 @@
+/* ============================================================
+   Job Center styles
+   Place at: CSS/HRCSS/JobCenter.css
+   Shares the same palette/components as the other HR pages
+   ============================================================ */
+
+@import url('https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&display=swap');
+
+:root {
+    --blue: #5f9ea0;
+    --blue-dark: #2d6b6d;
+    --blue-deep: #1f4f50;
+    --bg: #f0f4fc;
+    --border: #dde6f5;
+    --text: #0e1b35;
+    --text-2: #4a5878;
+    --text-m: #8a96b0;
+    --red: #dc2626;
+}
+
+*, *::before, *::after {
+    box-sizing: border-box;
+}
+
+.hr-page {
+    font-family: 'Plus Jakarta Sans', sans-serif;
+    background-color: var(--bg);
+    min-height: 100vh;
+    padding: 2.5rem 2rem;
+    color: var(--text);
+    position: relative;
+}
+
+.hr-page::before {
+    content: '';
+    position: fixed;
+    inset: 0;
+    pointer-events: none;
+    z-index: 0;
+    background-image: linear-gradient(rgba(31,79,80,.03) 1px, transparent 1px),
+                       linear-gradient(90deg, rgba(31,79,80,.03) 1px, transparent 1px);
+    background-size: 40px 40px;
+}
+
+.hr-container {
+    position: relative;
+    z-index: 1;
+    max-width: 980px;
+    margin: 0 auto;
+}
+
+/* ---------- Header banner ---------- */
+.hr-header {
+    background: linear-gradient(135deg, cadetblue, var(--blue-dark));
+    border-radius: 24px;
+    padding: 2.25rem;
+    box-shadow: 0 18px 50px rgba(31,79,80,.22);
+    margin-bottom: 2rem;
+    position: relative;
+    overflow: hidden;
+}
+
+    .hr-header::before {
+        content: '';
+        position: absolute;
+        inset: 0;
+        pointer-events: none;
+        background-image: linear-gradient(rgba(255,255,255,.05) 1px, transparent 1px),
+                           linear-gradient(90deg, rgba(255,255,255,.05) 1px, transparent 1px);
+        background-size: 30px 30px;
+    }
+
+.hr-header h1 {
+    position: relative;
+    z-index: 1;
+    font-size: 1.8rem;
+    font-weight: 800;
+    color: #fff;
+    letter-spacing: -.5px;
+    margin-bottom: .4rem;
+}
+
+.hr-header p {
+    position: relative;
+    z-index: 1;
+    font-size: .85rem;
+    color: rgba(255,255,255,.7);
+}
+
+/* ---------- Action grid ---------- */
+.job-center-grid {
+    display: grid;
+    grid-template-columns: repeat(3, 1fr);
+    gap: 1.25rem;
+}
+
+@media (max-width: 860px) {
+    .job-center-grid {
+        grid-template-columns: 1fr;
+    }
+}
+
+.job-center-card {
+    display: flex;
+    flex-direction: column;
+    gap: .9rem;
+    background: #fff;
+    border: 1px solid var(--border);
+    border-radius: 22px;
+    padding: 1.9rem 1.7rem;
+    text-decoration: none;
+    box-shadow: 0 14px 40px rgba(31,79,80,.08);
+    transition: transform .2s, box-shadow .2s, border-color .2s;
+}
+
+    .job-center-card:hover {
+        transform: translateY(-4px);
+        box-shadow: 0 20px 50px rgba(31,79,80,.16);
+        border-color: var(--blue);
+    }
+
+.job-center-icon {
+    width: 52px;
+    height: 52px;
+    border-radius: 14px;
+    background: linear-gradient(135deg, cadetblue, var(--blue-dark));
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    color: #fff;
+    font-size: 1.25rem;
+    box-shadow: 0 6px 18px rgba(95,158,160,.3);
+}
+
+.job-center-card h3 {
+    font-size: 1.05rem;
+    font-weight: 800;
+    color: var(--text);
+    letter-spacing: -.2px;
+}
+
+.job-center-card p {
+    font-size: .82rem;
+    color: var(--text-m);
+    line-height: 1.55;
+    flex-grow: 1;
+}
+
+.job-center-link {
+    display: inline-flex;
+    align-items: center;
+    gap: .4rem;
+    font-size: .8rem;
+    font-weight: 700;
+    color: var(--blue-dark);
+}
+
+    .job-center-card:hover .job-center-link {
+        color: var(--blue-deep);
+    }
+
+    .job-center-link i {
+        font-size: .72rem;
+        transition: transform .2s;
+    }
+
+.job-center-card:hover .job-center-link i {
+    transform: translateX(3px);
+}
+
+/* Optional accent variant for the AI-assisted card */
+.job-center-card.accent .job-center-icon {
+    background: linear-gradient(135deg, #7c3aed, #5b21b6);
+    box-shadow: 0 6px 18px rgba(124,58,237,.3);
+}
+
+@media (max-width: 640px) {
+    .hr-page {
+        padding: 1.5rem 1rem;
+    }
+
+    .hr-header {
+        padding: 1.5rem;
+    }
+
+        .hr-header h1 {
+            font-size: 1.4rem;
+        }
+}

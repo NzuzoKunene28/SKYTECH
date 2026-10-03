@@ -1,0 +1,324 @@
+@model RepairAssignment
+@{
+    ViewBag.Title = "Repair Detail";
+    Layout = "~/Views/Shared/_MinimalLayout.cshtml";
+}
+
+@section Styles {
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+    <link href="https://api.fontshare.com/v2/css?f[]=clash-display@400,500,600,700&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="~/CSS/DashboardStyle.css">
+    <style>
+        .status-badge {
+            display: inline-block;
+            padding: 0.4rem 0.8rem;
+            border-radius: var(--radius-pill);
+            font-size: 0.75rem;
+            font-weight: 600;
+            text-transform: uppercase;
+        }
+        .status-pending { background: #fef3c7; color: #92400e; }
+        .status-assigned { background: #dbeafe; color: #0c4a6e; }
+        .status-quoted { background: #c7d2fe; color: #312e81; }
+        .status-inprogress { background: #fed7aa; color: #92400e; }
+        .status-completed { background: #bbf7d0; color: #065f46; }
+        .detail-row {
+            display: grid;
+            grid-template-columns: 200px 1fr;
+            gap: 1rem;
+            padding: 1rem;
+            border-bottom: 1px solid var(--border);
+        }
+        .detail-label {
+            font-weight: 600;
+            color: var(--text);
+        }
+        .detail-value {
+            color: var(--text-2);
+        }
+        .action-btn {
+            padding: 0.6rem 1.2rem;
+            border-radius: var(--radius-sm);
+            border: none;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.3s;
+            margin-right: 0.5rem;
+        }
+        .btn-primary {
+            background: var(--blue);
+            color: white;
+        }
+        .btn-primary:hover {
+            background: var(--blue-dark);
+            transform: translateY(-2px);
+        }
+        .btn-secondary {
+            background: transparent;
+            color: var(--blue);
+            border: 1px solid var(--blue);
+        }
+        .btn-secondary:hover {
+            background: var(--blue-soft);
+        }
+        .quotation-card {
+            border: 1px solid var(--border);
+            border-radius: var(--radius-sm);
+            padding: 1.5rem;
+            margin-top: 1.5rem;
+            background: var(--blue-soft);
+        }
+        .quotation-item {
+            display: grid;
+            grid-template-columns: 2fr 1fr 1fr;
+            gap: 1rem;
+            padding: 0.75rem 0;
+            border-bottom: 1px solid var(--border);
+        }
+        .quotation-item:last-child {
+            border: none;
+        }
+        .quotation-total {
+            display: flex;
+            justify-content: space-between;
+            padding-top: 1rem;
+            border-top: 2px solid var(--border);
+            margin-top: 1rem;
+            font-weight: 700;
+        }
+    </style>
+}
+
+<div class="dash-wrap">
+    <!-- ══ SIDEBAR ══ -->
+    <aside class="dash-sidebar">
+        <div class="dash-brand">
+            <div class="dash-brand-icon"><i class="fas fa-tools"></i></div>
+            <div>
+                <div class="dash-brand-name">SkyTech</div>
+                <div class="dash-brand-sub">Technician Portal</div>
+            </div>
+        </div>
+        <nav class="dash-nav">
+            <div class="dash-nav-label">OVERVIEW</div>
+            <a href="@Url.Action("Dashboard", "Technician")" class="dash-link">
+                <i class="fas fa-grid-2"></i><span>Dashboard</span>
+            </a>
+
+            <div class="dash-nav-label">WORK</div>
+            <a href="@Url.Action("MyAssignments", "Technician")" class="dash-link">
+                <i class="fas fa-tasks"></i><span>My Assignments</span>
+            </a>
+            <a href="@Url.Action("ActiveRepairs", "Technician")" class="dash-link">
+                <i class="fas fa-wrench"></i><span>Active Repairs</span>
+            </a>
+            <a href="@Url.Action("ViewQuotations", "Technician")" class="dash-link active">
+                <i class="fas fa-file-invoice-dollar"></i><span>Quotations</span>
+            </a>
+            <a href="@Url.Action("CompletedRepairs", "Technician")" class="dash-link">
+                <i class="fas fa-check-double"></i><span>Completed</span>
+            </a>
+
+            <div class="dash-nav-label">ACCOUNT</div>
+            <a href="@Url.Action("Profile", "Technician")" class="dash-link">
+                <i class="fas fa-user"></i><span>Profile</span>
+            </a>
+        </nav>
+
+        <div class="dash-sidebar-foot">
+            <div class="dash-foot-avatar"><i class="fas fa-user-tie"></i></div>
+            <div>
+                <div class="dash-foot-name">Technician</div>
+                <div class="dash-foot-role">Account</div>
+            </div>
+        </div>
+
+        <div style="padding:.8rem 1.2rem;margin-top:1rem">
+            @using (Html.BeginForm("Logout", "Authentication", FormMethod.Post))
+            {
+                @Html.AntiForgeryToken()
+                <button type="submit" style="width:100%;background:rgba(220,38,38,.08);border:1.5px solid rgba(220,38,38,.25);border-radius:8px;padding:.6rem 1rem;cursor:pointer;color:#dc2626;font-weight:600;font-size:.85rem;display:flex;align-items:center;gap:.5rem;justify-content:center">
+                    <i class="fas fa-right-from-bracket"></i> Log Out
+                </button>
+            }
+        </div>
+    </aside>
+
+    <!-- ══ MAIN ══ -->
+    <main class="dash-main">
+        <div class="dash-header">
+            <div>
+                <h1 class="dash-title">Repair #@Model.RepairRequestId</h1>
+                <p class="dash-subtitle">Item: @Model.RepairRequest?.ItemName</p>
+            </div>
+            <a href="@Url.Action("MyAssignments", "Technician")" class="dash-btn-secondary">
+                <i class="fas fa-arrow-left"></i> Back to Assignments
+            </a>
+        </div>
+
+        <div class="dash-content">
+            <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 2rem;">
+                <!-- Repair Details -->
+                <div>
+                    <div class="dash-card">
+                        <h2 style="margin-bottom: 1.5rem; color: var(--text); font-size: 1.1rem;">Repair Information</h2>
+
+                        <div class="detail-row" style="border: none;">
+                            <div class="detail-label">Item:</div>
+                            <div class="detail-value">@Model.RepairRequest?.ItemName</div>
+                        </div>
+                        <div class="detail-row">
+                            <div class="detail-label">Description:</div>
+                            <div class="detail-value">@Model.RepairRequest?.ItemDescription</div>
+                        </div>
+                        <div class="detail-row">
+                            <div class="detail-label">Issue:</div>
+                            <div class="detail-value">@Model.RepairRequest?.IssueDescription</div>
+                        </div>
+                        <div class="detail-row">
+                            <div class="detail-label">Category:</div>
+                            <div class="detail-value">@Model.RepairRequest?.Category?.CategoryName</div>
+                        </div>
+                        <div class="detail-row">
+                            <div class="detail-label">Status:</div>
+                            <div class="detail-value">
+                                <span class="status-badge status-@Model.RepairRequest?.Status.ToString().ToLower().Replace(" ", "")">
+                                    @Model.RepairRequest?.Status
+                                </span>
+                            </div>
+                        </div>
+
+                        <h2 style="margin-top: 2rem; margin-bottom: 1rem; color: var(--text); font-size: 1.1rem;">Customer Information</h2>
+
+                        <div class="detail-row" style="border: none;">
+                            <div class="detail-label">Name:</div>
+                            <div class="detail-value">@Model.RepairRequest?.Customers?.FirstName @Model.RepairRequest?.Customers?.LastName</div>
+                        </div>
+                        <div class="detail-row">
+                            <div class="detail-label">Email:</div>
+                            <div class="detail-value">@Model.RepairRequest?.Customers?.Email</div>
+                        </div>
+                        <div class="detail-row">
+                            <div class="detail-label">Phone:</div>
+                            <div class="detail-value">@Model.RepairRequest?.Customers?.PhoneNumber</div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Quotations & Actions -->
+                <div>
+                    <div class="dash-card">
+                        <h2 style="margin-bottom: 1.5rem; color: var(--text); font-size: 1.1rem;">Quotations</h2>
+
+                        @if (ViewBag.Quotations?.Count > 0)
+                        {
+                            @foreach (var quotation in ViewBag.Quotations)
+                            {
+                                <div class="quotation-card">
+                                    <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 1rem;">
+                                        <strong>Quotation #@quotation.QuotationId</strong>
+                                        <span class="status-badge status-@quotation.Status.ToString().ToLower()">
+                                            @quotation.Status
+                                        </span>
+                                    </div>
+
+                                    @if (quotation.QuotationItems?.Count > 0)
+                                    {
+                                        <div style="margin-bottom: 1rem;">
+                                            @foreach (var item in quotation.QuotationItems)
+                                            {
+                                                <div class="quotation-item">
+                                                    <div>
+                                                        <strong>@item.ItemDescription</strong>
+                                                        <div style="font-size: 0.85rem; color: var(--text-muted);">Qty: @item.Quantity</div>
+                                                    </div>
+                                                    <div style="text-align: right;">
+                                                        <div style="font-size: 0.85rem;">R@item.UnitCost:N2</div>
+                                                    </div>
+                                                    <div style="text-align: right; font-weight: 600;">
+                                                        R@(item.UnitCost * item.Quantity):N2
+                                                    </div>
+                                                </div>
+                                            }
+                                        </div>
+                                    }
+
+                                    <div class="quotation-total">
+                                        <span>Total Cost:</span>
+                                        <span style="color: var(--green); font-size: 1.2rem;">@($"R{quotation.TotalCost:N2}")</span>
+                                    </div>
+
+                                    @if (!string.IsNullOrEmpty(quotation.TechnicianNotes))
+                                    {
+                                        <div style="margin-top: 1rem; background: white; padding: 1rem; border-left: 4px solid var(--blue); border-radius: var(--radius-sm);">
+                                            <strong style="color: var(--text-muted); font-size: 0.85rem;">Notes:</strong>
+                                            <p style="margin: 0.5rem 0 0; color: var(--text);">@quotation.TechnicianNotes</p>
+                                        </div>
+                                    }
+
+                                    <div style="margin-top: 1rem; display: flex; gap: 0.5rem;">
+                                        @if (quotation.Status == QuotationStatus.Pending)
+                                        {
+                                            <a href="@Url.Action("EditQuotation", "Technician", new { id = quotation.QuotationId })" 
+                                               class="action-btn btn-primary">
+                                                <i class="fas fa-edit"></i> Edit
+                                            </a>
+                                        }
+                                        @if (quotation.Status == QuotationStatus.Approved)
+                                        {
+                                            <form method="post" action="@Url.Action("StartRepair", "Technician")" style="display: inline;">
+                                                @Html.AntiForgeryToken()
+                                                <input type="hidden" name="id" value="@quotation.QuotationId">
+                                                <button type="submit" class="action-btn btn-primary">
+                                                    <i class="fas fa-play"></i> Start Repair
+                                                </button>
+                                            </form>
+                                        }
+                                    </div>
+                                </div>
+                            }
+                        }
+                        else
+                        {
+                            <div style="padding: 2rem; text-align: center; background: var(--blue-soft); border-radius: var(--radius-sm);">
+                                <p style="color: var(--text-muted);">No quotations created yet for this repair.</p>
+                                <a href="@Url.Action("CreateQuotation", "Technician", new { id = Model.RepairRequestId })" 
+                                   class="action-btn btn-primary" style="margin-top: 1rem; display: inline-block;">
+                                    <i class="fas fa-plus"></i> Create Quotation
+                                </a>
+                            </div>
+                        }
+
+                        @if (ViewBag.Quotations?.Count == 0)
+                        {
+                            <!-- No quotation, show create button in a cleaner way -->
+                        }
+                        else
+                        {
+                            <div style="margin-top: 1.5rem;">
+                                <a href="@Url.Action("CreateQuotation", "Technician", new { id = Model.RepairRequestId })" 
+                                   class="action-btn btn-secondary">
+                                    <i class="fas fa-plus"></i> Create New Quotation
+                                </a>
+                            </div>
+                        }
+                    </div>
+                </div>
+            </div>
+
+            <!-- Assignment Notes -->
+            <div class="dash-card" style="margin-top: 2rem;">
+                <h2 style="margin-bottom: 1rem; color: var(--text); font-size: 1.1rem;">Assignment Notes</h2>
+                <p style="color: var(--text-2); margin: 0;">
+                    @(string.IsNullOrEmpty(Model.AssignmentNotes) ? "No assignment notes" : Model.AssignmentNotes)
+                </p>
+            </div>
+        </div>
+    </main>
+</div>
+
+@section Scripts {
+    <script src="~/JS/DashboardScript.js"></script>
+}

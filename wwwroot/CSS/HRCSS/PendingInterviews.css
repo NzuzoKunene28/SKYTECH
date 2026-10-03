@@ -1,0 +1,207 @@
+/* PendingInterviews.css — belongs to Views/Interview/PendingInterviews.cshtml
+   Path: ~/CSS/HRCSS/PendingInterviews.css
+   Standalone — this page loads ONLY this file (plus fonts/icons), nothing else.
+   Shares the design tokens used by the rest of the HR CSS set. */
+
+:root {
+    --blue: #5f9ea0;
+    --blue-dark: #2d6b6d;
+    --blue-deep: #1f4f50;
+    --bg: #f0f4fc;
+    --border: #dde6f5;
+    --text: #0e1b35;
+    --text-2: #4a5878;
+    --text-m: #8a96b0;
+    --danger: #c0392b;
+    --danger-bg: #fdecea;
+    --danger-border: #f3c6c1;
+    --score-bg: #e6f6ee;
+    --score-text: #1f7a4d;
+}
+
+*, *::before, *::after {
+    box-sizing: border-box;
+}
+
+body {
+    margin: 0;
+    font-family: 'Plus Jakarta Sans', sans-serif;
+    background-color: var(--bg);
+    color: var(--text);
+}
+
+.pi-wrap {
+    max-width: 1080px;
+    margin: 0 auto;
+    padding: 2.5rem 1.5rem 4rem;
+}
+
+/* ══ HEADER ══ */
+.pi-eyebrow {
+    font-size: .72rem;
+    font-weight: 700;
+    color: var(--text-m);
+    text-transform: uppercase;
+    letter-spacing: 1.2px;
+    margin: 0 0 .4rem;
+}
+
+.pi-title {
+    font-family: 'Clash Display', 'Plus Jakarta Sans', sans-serif;
+    font-weight: 700;
+    font-size: 1.8rem;
+    letter-spacing: -.5px;
+    color: var(--text);
+    margin: 0 0 .4rem;
+}
+
+.pi-sub {
+    font-size: .9rem;
+    color: var(--text-m);
+    margin: 0 0 1.6rem;
+}
+
+/* ══ ALERT ══ */
+.pi-alert {
+    display: flex;
+    align-items: center;
+    gap: .6rem;
+    background: var(--danger-bg);
+    border: 1.5px solid var(--danger-border);
+    color: var(--danger);
+    border-radius: 12px;
+    padding: .85rem 1.1rem;
+    font-size: .85rem;
+    font-weight: 600;
+    margin-bottom: 1.6rem;
+}
+
+/* ══ TABLE CARD ══ */
+.pi-table-wrap {
+    background: #fff;
+    border: 1.5px solid var(--border);
+    border-radius: 16px;
+    overflow: hidden;
+    overflow-x: auto;
+    box-shadow: 0 8px 24px -18px rgba(15, 40, 60, .35);
+}
+
+.pi-table {
+    width: 100%;
+    border-collapse: collapse;
+    font-size: .87rem;
+    min-width: 760px;
+}
+
+    .pi-table thead th {
+        text-align: left;
+        background: var(--bg);
+        color: var(--text-2);
+        font-size: .72rem;
+        font-weight: 700;
+        text-transform: uppercase;
+        letter-spacing: .6px;
+        padding: .85rem 1.2rem;
+        border-bottom: 1.5px solid var(--border);
+        white-space: nowrap;
+    }
+
+    .pi-table tbody td {
+        padding: .75rem 1.2rem;
+        border-bottom: 1px solid var(--border);
+        color: var(--text);
+        font-weight: 500;
+        vertical-align: middle;
+    }
+
+    .pi-table tbody tr:last-child td {
+        border-bottom: none;
+    }
+
+    .pi-table tbody tr:hover {
+        background: rgba(95, 158, 160, .05);
+    }
+
+.pi-name {
+    font-weight: 700;
+    color: var(--text);
+}
+
+.pi-score {
+    display: inline-flex;
+    align-items: center;
+    font-size: .78rem;
+    font-weight: 700;
+    background: var(--score-bg);
+    color: var(--score-text);
+    padding: .3rem .6rem;
+    border-radius: 8px;
+}
+
+.pi-date {
+    color: var(--text-2);
+}
+
+/* ══ FORM ELEMENTS ══ */
+.pi-datetime-input {
+    width: 100%;
+    min-width: 190px;
+    font-family: 'Plus Jakarta Sans', sans-serif;
+    font-size: .85rem;
+    color: var(--text);
+    background: var(--bg);
+    border: 1.5px solid var(--border);
+    border-radius: 8px;
+    padding: .5rem .7rem;
+    transition: border-color .2s, box-shadow .2s;
+}
+
+    .pi-datetime-input:focus {
+        outline: none;
+        border-color: var(--blue);
+        box-shadow: 0 0 0 3px rgba(95, 158, 160, .18);
+        background: #fff;
+    }
+
+.pi-schedule-btn {
+    display: inline-flex;
+    align-items: center;
+    gap: .45rem;
+    background: linear-gradient(135deg, var(--blue), var(--blue-dark));
+    color: #fff;
+    font-family: 'Plus Jakarta Sans', sans-serif;
+    font-weight: 700;
+    font-size: .8rem;
+    border: none;
+    border-radius: 999px;
+    padding: .55rem 1.1rem;
+    cursor: pointer;
+    white-space: nowrap;
+    transition: transform .15s ease, box-shadow .15s ease;
+    box-shadow: 0 8px 16px -10px rgba(45, 107, 109, .55);
+}
+
+    .pi-schedule-btn:hover {
+        transform: translateY(-1px);
+        box-shadow: 0 12px 22px -10px rgba(45, 107, 109, .6);
+    }
+
+    .pi-schedule-btn:focus-visible {
+        outline: 2px solid var(--blue-deep);
+        outline-offset: 2px;
+    }
+
+/* ══ EMPTY STATE ══ */
+.pi-empty {
+    text-align: center;
+    padding: 3rem 1.5rem;
+    color: var(--text-m);
+    font-size: .9rem;
+}
+
+    .pi-empty i {
+        display: block;
+        font-size: 1.8rem;
+        color: var(--border);
+        margin-bottom: .8rem;
+    }

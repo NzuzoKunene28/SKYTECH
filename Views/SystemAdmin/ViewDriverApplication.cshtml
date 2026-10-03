@@ -1,0 +1,232 @@
+﻿@using SkyTech.Models
+@model IEnumerable<SkyTech.Models.DeliveryDriver>
+@{
+    ViewBag.Title = "Driver Applications";
+    Layout = "~/Views/Shared/_MinimalLayout.cshtml";
+
+    int total = Model.Count();
+    int pending = Model.Count(d => d.ApplicationStatus== Status.Pending);
+
+    int approved = Model.Count(d => d.ApplicationStatus == Status.Approved);
+    int rejected = Model.Count(d => d.ApplicationStatus == Status.Rejected);
+    int available = Model.Count(d => d.IsAvailable);
+}
+
+@section Styles {
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+    <link href="https://api.fontshare.com/v2/css?f[]=clash-display@400,500,600,700&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="~/CSS/ShopOwnerStyle.css">
+    <link rel="stylesheet" href="~/CSS/ViewApplicationStyle.css">
+}
+
+<div class="admin-page">
+
+    <!-- Topbar -->
+    <div class="admin-topbar">
+        <div>
+            <div class="admin-title">Driver Applications</div>
+            <div class="admin-sub">Review driver registrations, check documents, and approve or reject.</div>
+        </div>
+    </div>
+
+    <!-- Chips -->
+    <div class="chip-row">
+        <div class="chip blue">  <span class="ch-num">@total</span>    <span class="ch-lbl">Total</span></div>
+        <div class="chip yellow"><span class="ch-num">@pending</span>   <span class="ch-lbl">Pending</span></div>
+        <div class="chip green"> <span class="ch-num">@approved</span>  <span class="ch-lbl">Approved</span></div>
+        <div class="chip red">   <span class="ch-num">@rejected</span>  <span class="ch-lbl">Rejected</span></div>
+        <div class="chip green" style="margin-left:auto;border-color:rgba(22,163,74,.35)">
+            <span class="ch-num">@available</span>
+            <span class="ch-lbl">Available Now</span>
+        </div>
+    </div>
+
+    <!-- Toolbar -->
+    <div class="toolbar">
+        <div class="so-search">
+            <i class="fas fa-magnifying-glass"></i>
+            <input type="text" id="drvSearch" placeholder="Search by name, email, vehicle, licence…" oninput="filterCards(this.value)">
+        </div>
+        <div class="filter-btns">
+            <button class="flt active" onclick="setFilter('all',this)">All</button>
+            <button class="flt" onclick="setFilter('pending',this)">Pending</button>
+            <button class="flt" onclick="setFilter('approved',this)">Approved</button>
+            <button class="flt" onclick="setFilter('rejected',this)">Rejected</button>
+        </div>
+    </div>
+
+    @if (!Model.Any())
+    {
+        <div class="admin-empty">
+            <i class="fas fa-truck"></i>
+            <p>No driver applications found.</p>
+        </div>
+    }
+    else
+    {
+        <div class="appl-grid" id="applGrid">
+            @foreach (var item in Model)
+            {
+                string statusClass = item.ApplicationStatus == Status.Approved ? "badge-approved"
+                                   : item.ApplicationStatus == Status.Rejected ? "badge-rejected"
+                                                                                        : "badge-pending";
+                string initials = ((item.DriverName?.Length > 0 ? item.DriverName[0].ToString() : "")
+                                  + (item.DriverSurname?.Length > 0 ? item.DriverSurname[0].ToString() : "")).ToUpper();
+                string filterTag = item.ApplicationStatus.ToString().ToLower();
+                string searchTag = $"{item.DriverName} {item.DriverSurname} {item.Email} {item.VehicleType} {item.LicenceNumber} {item.ApplicationStatus}".ToLower();
+                bool isPending = item.ApplicationStatus == Status.Pending;
+
+                <div class="appl-card" data-filter="@filterTag" data-search="@searchTag">
+
+                    <!-- Header -->
+                    <div class="ac-head">
+                        <div class="ac-avatar">@initials</div>
+                        <div>
+                            <div class="ac-name">@item.DriverName @item.DriverSurname</div>
+                            <div class="ac-email">@item.Email</div>
+                        </div>
+                        <div class="ac-head-right">
+                            <span class="badge @statusClass">@item.ApplicationStatus</span>
+                            @if (item.IsAvailable)
+                            {
+                                <span class="avail-pill avail-yes"><i class="fas fa-circle" style="font-size:.45rem"></i> Available</span>
+                            }
+                            else
+                            {
+                                <span class="avail-pill avail-no"><i class="fas fa-circle" style="font-size:.45rem"></i> Unavailable</span>
+                            }
+                        </div>
+                    </div>
+
+                    <!-- Details -->
+                    <div class="ac-body">
+                        <div class="ac-row">
+                            <span class="ak"><i class="fas fa-phone"></i> Phone</span>
+                            <span class="av">@item.PhoneNumber</span>
+                        </div>
+                        <div class="ac-row">
+                            <span class="ak"><i class="fas fa-location-dot"></i> Address</span>
+                            <span class="av">@item.ResidentialAddress</span>
+                        </div>
+                        <div class="ac-row">
+                            <span class="ak"><i class="fas fa-id-card"></i> Licence No.</span>
+                            <span class="av mono">@item.LicenceNumber</span>
+                        </div>
+                        <div class="ac-row">
+                            <span class="ak"><i class="fas fa-truck"></i> Vehicle</span>
+                            <span class="av">
+                                <span class="vehicle-pill">
+                                    <i class="fas fa-car" style="font-size:.72rem"></i>
+                                    @item.VehicleType · @item.VehicleNumber
+                                </span>
+                            </span>
+                        </div>
+                        <div class="ac-row">
+                            <span class="ak"><i class="fas fa-building-columns"></i> Account No.</span>
+                            <span class="av mono">
+                                @{
+                                    var acct = item.AccountNumber ?? "";
+                                    var masked = acct.Length > 4 ? new string('•', acct.Length - 4) + acct.Substring(acct.Length - 4) : acct;
+                                }
+                                @masked
+                            </span>
+                        </div>
+                        <div class="ac-row">
+                            <span class="ak"><i class="fas fa-calendar"></i> Registered</span>
+                            <span class="av">@item.RegisteredOn.ToString("dd MMM yyyy · HH:mm")</span>
+                        </div>
+                    </div>
+
+                    <!-- Documents -->
+                    <div class="ac-docs">
+                        <div class="doc-label"><i class="fas fa-paperclip" style="color:#1a73e8;margin-right:.3rem"></i>DOCUMENTS</div>
+
+                        @if (item.DriverIdentityBooks != null && item.DriverIdentityBooks.Any())
+                        {
+                            foreach (var doc in item.DriverIdentityBooks)
+                            {
+                                @Html.ActionLink("Identity Book", "DownloadDriverIdentityBooks", "SystemAdmin",
+                                         new { id = doc.DriverIdentityBookId }, new { @class = "doc-link", target = "_blank" })
+                            }
+                        }
+                        else
+                        { <span class="doc-none">No identity book</span>}
+
+                        @if (item.DriversLicences != null && item.DriversLicences.Any())
+                        {
+                            foreach (var doc in item.DriversLicences)
+                            {
+                                @Html.ActionLink("Driver's Licence", "DownloadLicence", "SystemAdmin",
+                                         new { id = doc.LicenceId }, new { @class = "doc-link", target = "_blank" })
+                            }
+                        }
+                        else
+                        { <span class="doc-none">No licence on file</span>}
+                    </div>
+
+                    <!-- Action buttons -->
+                    <div class="ac-actions">
+                        @if (isPending)
+                        {
+                            using (Html.BeginForm("ApproveDriverAppl", "SystemAdmin", FormMethod.Post, new { style = "flex:1" }))
+                            {
+                                @Html.Hidden("id", item.DriverId)
+                                <button type="submit" class="btn-approve">
+                                    <i class="fas fa-circle-check"></i> Approve
+                                </button>
+                            }
+                            using (Html.BeginForm("RejectDriverAppl", "SystemAdmin", FormMethod.Post, new { style = "flex:1" }))
+                            {
+                                @Html.Hidden("id", item.DriverId)
+                                <button type="submit" class="btn-reject"
+                                        onclick="return confirm('Reject this driver application?')">
+                                    <i class="fas fa-circle-xmark"></i> Reject
+                                </button>
+                            }
+                        }
+                        else
+                        {
+                            <div style="flex:1;text-align:center;font-size:.82rem;font-weight:600;padding:.4rem 0">
+                                @if (item.ApplicationStatus == Status.Approved)
+                                {
+                                    <span style="color:#16a34a"><i class="fas fa-circle-check"></i> Approved</span>
+                                }
+                                else
+                                {
+                                    <span style="color:#dc2626"><i class="fas fa-circle-xmark"></i> Rejected</span>
+                                }
+                            </div>
+                        }
+                    </div>
+
+                </div>
+            }
+        </div>
+    }
+
+</div>
+
+<script>
+    var currentFilter = 'all';
+    var currentSearch = '';
+
+    function setFilter(val, btn) {
+        currentFilter = val;
+        document.querySelectorAll('.flt').forEach(b => b.classList.remove('active'));
+        btn.classList.add('active');
+        applyFilters();
+    }
+    function filterCards(q) {
+        currentSearch = q.toLowerCase();
+        applyFilters();
+    }
+    function applyFilters() {
+        document.querySelectorAll('#applGrid .appl-card').forEach(function (c) {
+            var matchFilter = currentFilter === 'all' || c.dataset.filter === currentFilter;
+            var matchSearch = !currentSearch || (c.dataset.search || '').includes(currentSearch);
+            c.style.display = matchFilter && matchSearch ? '' : 'none';
+        });
+    }
+</script>

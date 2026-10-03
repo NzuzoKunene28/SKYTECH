@@ -1,0 +1,82 @@
+﻿@model SkyTech.Models.Interviews.Interview
+@{
+    ViewData["Title"] = "My interview";
+    Layout = "~/Views/Shared/_MinimalLayout.cshtml";
+}
+
+@section Styles {
+    <link rel="stylesheet" href="~/CSS/CUSTOMERCSS/MyInterview.css" />
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
+}
+
+@{
+    var statusText = Model.Status.ToString().Replace("_", " ");
+    var statusClass = Model.Status.ToString() switch
+    {
+        "Scheduled" => "mi-status-upcoming",
+        "Completed" => "mi-status-done",
+        "Cancelled" => "mi-status-cancelled",
+        _ => "mi-status-default"
+    };
+    var isUpcoming = string.Equals(Model.Status.ToString(), "Scheduled", StringComparison.OrdinalIgnoreCase);
+}
+
+<div class="cust-page-wrap">
+
+    <div class="cust-topnav">
+        <div class="cust-topnav-title">
+            <p class="cust-eyebrow">Recruitment</p>
+            <h1 class="cust-title">My Interview</h1>
+        </div>
+        <a href="@Url.Action("MyContracts", "CustomerApplications")" class="mi-contract-link">
+            <i class="fa-solid fa-file-contract"></i>
+            My Contract
+        </a>
+    </div>
+
+    <div class="mi-hero">
+        <div class="mi-hero-icon">
+            <i class="fa-solid fa-video"></i>
+        </div>
+
+        <div class="mi-hero-body">
+            <span class="mi-status-badge @statusClass">@statusText</span>
+            <h2 class="mi-hero-date">@Model.ScheduledDate.ToString("dddd, dd MMMM yyyy")</h2>
+            <p class="mi-hero-time"><i class="fa-regular fa-clock"></i> @Model.ScheduledDate.ToString("HH:mm")</p>
+        </div>
+    </div>
+
+    <div class="mi-info-card">
+        <div class="mi-info-row">
+            <i class="fa-solid fa-circle-info"></i>
+            <p>
+                @if (isUpcoming)
+                {
+                    <span>Join a few minutes early to make sure your camera and microphone are working.</span>
+                }
+                else
+                {
+                    <span>This interview has already taken place. You'll be notified here once a decision has been made.</span>
+                }
+            </p>
+        </div>
+
+        @if (!string.IsNullOrEmpty(Model.JitsiMeetingLink))
+        {
+            <a asp-action="JoinMeeting" asp-route-id="@Model.InterviewId" class="mi-join-btn">
+                <i class="fa-solid fa-video"></i>
+                Join interview
+            </a>
+        }
+        else
+        {
+            <div class="mi-no-link">
+                <i class="fa-regular fa-clock"></i>
+                Meeting link not yet available
+            </div>
+        }
+    </div>
+
+</div>

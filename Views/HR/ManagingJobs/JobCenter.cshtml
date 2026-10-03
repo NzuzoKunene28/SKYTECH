@@ -1,0 +1,55 @@
+﻿@using SkyTech.Models
+@{
+    ViewData["Title"] = "Job Center";
+    Layout = "~/Views/Shared/_MinimalLayout.cshtml";
+}
+
+<link rel="stylesheet" href="~/CSS/HRCSS/JobCenter.css" />
+
+<div class="hr-page">
+    <div class="hr-container">
+
+        <div class="hr-header">
+            <h1>Job Center</h1>
+            <p>Post vacancies and manage the information behind your job roles</p>
+        </div>
+
+        <div class="job-center-grid">
+
+            <a href="@Url.Action("ComposeJob", "HR")" class="job-center-card">
+                <div class="job-center-icon">
+                    <i class="fas fa-plus-circle"></i>
+                </div>
+                <h3>Post New Job</h3>
+                <p>Write and publish a new vacancy from scratch.</p>
+                <span class="job-center-link">
+                    Get started <i class="fas fa-arrow-right"></i>
+                </span>
+            </a>
+
+            <a href="@Url.Action("SelectJobRole", "HR")" class="job-center-card accent">
+                <div class="job-center-icon">
+                    <i class="fas fa-robot"></i>
+                </div>
+                <h3>Post New Job (AI-Assisted)</h3>
+                <p>Choose a job role and let AI help you draft the vacancy.</p>
+                <span class="job-center-link">
+                    Get started <i class="fas fa-arrow-right"></i>
+                </span>
+            </a>
+
+            <a href="@Url.Action("Index", "JobRoleKnowledge")" class="job-center-card">
+                <div class="job-center-icon">
+                    <i class="fas fa-book"></i>
+                </div>
+                <h3>Manage Job Role Information</h3>
+                <p>Review and update the reference information used for each role.</p>
+                <span class="job-center-link">
+                    Manage <i class="fas fa-arrow-right"></i>
+                </span>
+            </a>
+
+        </div>
+
+    </div>
+</div>

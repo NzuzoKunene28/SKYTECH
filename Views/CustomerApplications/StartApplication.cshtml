@@ -1,0 +1,49 @@
+﻿@model SkyTech.Models.JobPost
+
+@{
+    ViewData["Title"] = "Apply for " + Model.JobTitle;
+    Layout = "~/Views/Shared/_MinimalLayout.cshtml";
+}
+
+@section Styles {
+    <link rel="stylesheet" href="~/CSS/CUSTOMERCSS/StartApplication.css" />
+}
+
+<div class="job-details">
+    <h1>@Model.JobTitle</h1>
+    <p>@Model.Department — @Model.Location — @Model.EmploymentType</p>
+    <p>Salary: R @Model.SalaryMin - R @Model.SalaryMax</p>
+
+    <h3>Responsibilities</h3>
+    <p>@Model.Responsibilities</p>
+
+    <h3>Required Certifications</h3>
+    <p>@Model.RequiredCerts</p>
+
+    <h3>Required Skills and Experience</h3>
+    <p>@Model.RequiredSkillsAndXP</p>
+
+    <p>Closing Date: @Model.ClosingDate?.ToShortDateString()</p>
+</div>
+
+<div class="cv-upload">
+    <h3>Upload Your CV</h3>
+
+    <form asp-controller="CustomerApplications"
+          asp-action="UploadCv"
+          method="post"
+          enctype="multipart/form-data">
+
+        <input type="hidden" name="postId" value="@Model.PostId" />
+
+        <div class="form-group">
+            <label for="cvFile">Select your CV (PDF or Word document)</label>
+            <input type="file" id="cvFile" name="cvFile" accept=".pdf,.doc,.docx" required />
+        </div>
+
+        <div class="btn-submit">
+            <button type="submit">Upload and Continue</button>
+        </div>
+
+    </form>
+</div>

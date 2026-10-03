@@ -1,0 +1,433 @@
+﻿/* =============================================================
+   My Orders Page — MyOrdersStyle.css
+   Place this file in: Content/css/MyOrdersStyle.css
+   ============================================================= */
+
+*, *::before, *::after {
+    box-sizing: border-box;
+    margin: 0;
+    padding: 0;
+}
+
+/* ── CSS Variables ─────────────────────────────────────────── */
+:root {
+    --green: #1D9E75;
+    --green-light: #E1F5EE;
+    --green-dark: #0F6E56;
+    --green-darker: #085041;
+    --amber: #EF9F27;
+    --amber-light: #FEF3DC;
+    --amber-dark: #BA7517;
+    --blue-light: #E8F0FE;
+    --blue: #4A7CF7;
+    --bg-page: #F2F1EC;
+    --bg-card: #FFFFFF;
+    --bg-muted: #F5F5F3;
+    --text-primary: #111111;
+    --text-secondary: #666666;
+    --text-muted: #AAAAAA;
+    --border: rgba(0, 0, 0, 0.08);
+    --border-strong: rgba(0, 0, 0, 0.16);
+    --radius-card: 16px;
+    --radius-md: 10px;
+    --shadow-card: 0 1px 4px rgba(0,0,0,0.06), 0 1px 2px rgba(0,0,0,0.04);
+}
+
+/* ── Base ──────────────────────────────────────────────────── */
+body {
+    font-family: 'DM Sans', sans-serif;
+    background: var(--bg-page);
+    min-height: 100vh;
+    color: var(--text-primary);
+    -webkit-font-smoothing: antialiased;
+}
+
+/* ── Header ────────────────────────────────────────────────── */
+.mo-header {
+    background: var(--bg-card);
+    border-bottom: 1px solid var(--border);
+    padding: 14px 20px;
+    display: flex;
+    align-items: center;
+    gap: 14px;
+    position: sticky;
+    top: 0;
+    z-index: 100;
+}
+
+.mo-back-btn {
+    width: 34px;
+    height: 34px;
+    border-radius: 50%;
+    border: 1px solid var(--border-strong);
+    background: transparent;
+    cursor: pointer;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    color: var(--text-primary);
+    font-size: 15px;
+    text-decoration: none;
+    transition: background 0.15s;
+    flex-shrink: 0;
+}
+
+    .mo-back-btn:hover {
+        background: var(--bg-muted);
+    }
+
+.mo-header-title {
+    font-size: 15px;
+    font-weight: 600;
+    color: var(--text-primary);
+}
+
+.mo-header-sub {
+    font-size: 12px;
+    color: var(--text-secondary);
+    margin-top: 1px;
+}
+
+/* ── Body ──────────────────────────────────────────────────── */
+.mo-body {
+    max-width: 1100px;
+    margin: 0 auto;
+    padding: 20px 16px 56px;
+    display: flex;
+    flex-direction: column;
+    gap: 14px;
+}
+
+/* ── Order count pill ──────────────────────────────────────── */
+.mo-count {
+    font-size: 11px;
+    font-weight: 600;
+    color: var(--text-secondary);
+    text-transform: uppercase;
+    letter-spacing: 0.09em;
+    padding: 0 2px;
+}
+
+/* ── Grid — 3 cards per row ────────────────────────────────── */
+.mo-grid {
+    display: grid;
+    grid-template-columns: repeat(3, 1fr);
+    gap: 14px;
+}
+
+/* ── Empty state ───────────────────────────────────────────── */
+.mo-empty {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    text-align: center;
+    padding: 60px 24px 40px;
+    gap: 12px;
+}
+
+.mo-empty-icon {
+    width: 64px;
+    height: 64px;
+    border-radius: 50%;
+    background: var(--bg-muted);
+    border: 1px solid var(--border);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    margin-bottom: 4px;
+}
+
+    .mo-empty-icon svg {
+        width: 28px;
+        height: 28px;
+        stroke: var(--text-muted);
+    }
+
+.mo-empty-title {
+    font-size: 16px;
+    font-weight: 600;
+    color: var(--text-primary);
+}
+
+.mo-empty-sub {
+    font-size: 13px;
+    color: var(--text-secondary);
+    line-height: 1.55;
+}
+
+.mo-btn-primary {
+    margin-top: 8px;
+    display: inline-flex;
+    align-items: center;
+    gap: 6px;
+    background: var(--green);
+    color: #ffffff;
+    font-family: 'DM Sans', sans-serif;
+    font-size: 13px;
+    font-weight: 500;
+    padding: 11px 24px;
+    border-radius: var(--radius-md);
+    text-decoration: none;
+    transition: background 0.15s;
+}
+
+    .mo-btn-primary:hover {
+        background: var(--green-dark);
+    }
+
+/* ── Order card ────────────────────────────────────────────── */
+.mo-card {
+    background: var(--bg-card);
+    border-radius: var(--radius-card);
+    border: 1px solid var(--border);
+    box-shadow: var(--shadow-card);
+    padding: 18px 20px;
+    display: flex;
+    flex-direction: column;
+    gap: 14px;
+    animation: cardIn 0.3s ease both;
+}
+
+@keyframes cardIn {
+    from {
+        opacity: 0;
+        transform: translateY(10px);
+    }
+
+    to {
+        opacity: 1;
+        transform: translateY(0);
+    }
+}
+
+/* ── Card header ───────────────────────────────────────────── */
+.mo-card-header {
+    display: flex;
+    align-items: flex-start;
+    justify-content: space-between;
+    gap: 12px;
+}
+
+.mo-order-id {
+    font-family: 'Space Mono', monospace;
+    font-size: 14px;
+    font-weight: 700;
+    color: var(--text-primary);
+}
+
+.mo-order-date {
+    font-size: 12px;
+    color: var(--text-secondary);
+    margin-top: 3px;
+}
+
+/* ── Status badge ──────────────────────────────────────────── */
+.mo-status-badge {
+    display: inline-block;
+    font-size: 10px;
+    font-weight: 700;
+    padding: 4px 11px;
+    border-radius: 20px;
+    text-transform: uppercase;
+    letter-spacing: 0.06em;
+    white-space: nowrap;
+    flex-shrink: 0;
+}
+
+    .mo-status-badge.delivered {
+        background: var(--green-light);
+        color: var(--green-dark);
+    }
+
+    .mo-status-badge.out {
+        background: var(--amber-light);
+        color: var(--amber-dark);
+    }
+
+    .mo-status-badge.assigned {
+        background: var(--blue-light);
+        color: var(--blue);
+    }
+
+    .mo-status-badge.pending {
+        background: var(--bg-muted);
+        color: var(--text-secondary);
+    }
+
+/* ── Divider ───────────────────────────────────────────────── */
+.mo-divider {
+    height: 1px;
+    background: var(--border);
+    margin: 0 -2px;
+}
+
+/* ── Info row ──────────────────────────────────────────────── */
+.mo-row {
+    display: flex;
+    gap: 12px;
+    align-items: flex-start;
+}
+
+.mo-row-icon {
+    width: 32px;
+    height: 32px;
+    border-radius: 8px;
+    background: var(--bg-muted);
+    border: 1px solid var(--border);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    flex-shrink: 0;
+}
+
+    .mo-row-icon svg {
+        width: 14px;
+        height: 14px;
+        stroke: var(--text-secondary);
+    }
+
+.mo-row-label {
+    font-size: 10px;
+    font-weight: 600;
+    color: var(--text-muted);
+    text-transform: uppercase;
+    letter-spacing: 0.07em;
+    margin-bottom: 3px;
+}
+
+.mo-row-value {
+    font-size: 13px;
+    color: var(--text-primary);
+    line-height: 1.45;
+}
+
+.mo-row-sub {
+    font-size: 11px;
+    color: var(--text-secondary);
+    margin-top: 2px;
+}
+
+/* ── Items list ────────────────────────────────────────────── */
+.mo-items-list {
+    flex: 1;
+    min-width: 0;
+}
+
+.mo-item-row {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    padding: 4px 0;
+    font-size: 13px;
+    border-bottom: 1px solid var(--border);
+}
+
+    .mo-item-row:last-child {
+        border-bottom: none;
+    }
+
+.mo-item-name {
+    flex: 1;
+    color: var(--text-primary);
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+}
+
+.mo-item-qty {
+    font-size: 11px;
+    font-weight: 600;
+    color: var(--text-secondary);
+    background: var(--bg-muted);
+    border-radius: 4px;
+    padding: 2px 6px;
+    flex-shrink: 0;
+}
+
+.mo-item-price {
+    font-family: 'Space Mono', monospace;
+    font-size: 11px;
+    color: var(--text-secondary);
+    flex-shrink: 0;
+}
+
+/* ── Driver avatar small ───────────────────────────────────── */
+.mo-driver-avatar-sm {
+    width: 32px;
+    height: 32px;
+    border-radius: 50%;
+    background: #9FE1CB;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 12px;
+    font-weight: 700;
+    color: var(--green-darker);
+    flex-shrink: 0;
+}
+
+/* ── Card footer ───────────────────────────────────────────── */
+.mo-card-footer {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 12px;
+    margin-top: auto;
+}
+
+.mo-total-label {
+    font-size: 10px;
+    font-weight: 600;
+    color: var(--text-muted);
+    text-transform: uppercase;
+    letter-spacing: 0.07em;
+}
+
+.mo-total-value {
+    font-family: 'Space Mono', monospace;
+    font-size: 16px;
+    font-weight: 700;
+    color: var(--text-primary);
+    margin-top: 2px;
+}
+
+.mo-track-btn {
+    display: inline-flex;
+    align-items: center;
+    gap: 6px;
+    background: var(--green);
+    color: #ffffff;
+    font-family: 'DM Sans', sans-serif;
+    font-size: 12px;
+    font-weight: 600;
+    padding: 9px 18px;
+    border-radius: var(--radius-md);
+    text-decoration: none;
+    transition: background 0.15s;
+    white-space: nowrap;
+}
+
+    .mo-track-btn:hover {
+        background: var(--green-dark);
+    }
+
+/* ── Responsive ────────────────────────────────────────────── */
+@media (max-width: 800px) {
+    .mo-grid {
+        grid-template-columns: repeat(2, 1fr);
+    }
+}
+
+@media (max-width: 500px) {
+    .mo-grid {
+        grid-template-columns: 1fr;
+    }
+
+    .mo-body {
+        padding: 14px 10px 44px;
+    }
+
+    .mo-card {
+        padding: 16px 14px;
+    }
+}

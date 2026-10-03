@@ -1,0 +1,196 @@
+﻿@model SkyTech.Models.SkytechWorkers.RosterShift
+@using SkyTech.Models.SkytechWorkers
+
+@{
+    ViewData["Title"] = "Request Shift Change";
+    Layout = "~/Views/Shared/_MinimalLayout.cshtml";
+}
+
+@section Styles {
+    <link rel="stylesheet" href="~/CSS/STAFFCSS/RequestChange.css" />
+}
+
+<div class="container mt-4">
+
+    <div class="card shadow-sm">
+        <div class="card-header bg-primary text-white">
+            <h3 class="mb-0">Request Shift Change</h3>
+        </div>
+
+        <div class="card-body">
+
+            <!-- Shift Details -->
+            <div class="alert alert-info">
+                <h5>Selected Shift</h5>
+                <hr />
+
+                <div class="row">
+                    <div class="col-md-6">
+                        <p><strong>Position:</strong> @Model.Position?.PositionName</p>
+                        <p><strong>Branch:</strong> @Model.Branch?.BranchName</p>
+                    </div>
+
+                    <div class="col-md-6">
+                        <p><strong>Date:</strong> @Model.WorkDate.ToString("dddd, dd MMM yyyy")</p>
+                        <p>
+                            <strong>Time:</strong>
+                            @Model.StartTime.ToString(@"hh\:mm")
+                            -
+                            @Model.EndTime.ToString(@"hh\:mm")
+                        </p>
+                    </div>
+                </div>
+            </div>
+
+            <form asp-action="RequestChange" method="post">
+
+                <input type="hidden"
+                       name="rosterShiftId"
+                       value="@Model.RosterShiftId" />
+
+                <div asp-validation-summary="ModelOnly"
+                     class="text-danger mb-3"></div>
+
+                <!-- Request Type -->
+
+                <div class="mb-3">
+                    <label class="form-label">
+                        Request Type
+                    </label>
+
+                    <select class="form-select"
+                            id="requestType"
+                            name="type">
+
+                        <option value="">-- Select Request Type --</option>
+
+                        @foreach (RequestType type in Enum.GetValues(typeof(RequestType)))
+                        {
+                            <option value="@type">@type</option>
+                        }
+
+                    </select>
+                </div>
+
+                <!-- Reason -->
+
+                <div class="mb-3">
+                    <label class="form-label">
+                        Reason
+                    </label>
+
+                    <textarea class="form-control"
+                              rows="4"
+                              name="reason"
+                              placeholder="Explain why you're requesting this change..."
+                              required></textarea>
+                </div>
+
+                <!-- Time Change -->
+
+                <div id="timeChangeFields" style="display:none;">
+
+                    <div class="row">
+
+                        <div class="col-md-4">
+                            <label class="form-label">
+                                Requested Start Time
+                            </label>
+                            
+                            <input type="time"
+                                   class="form-control"
+                                   name="requestedStartTime" />
+                        </div>
+
+                    </div>
+
+                    <hr />
+                </div>
+
+                <!-- Shift Swap -->
+
+                <div id="swapFields" style="display:none;">
+
+                    <div class="mb-3">
+
+                        <label class="form-label">
+                            Swap With
+                        </label>
+
+                        <select class="form-select"
+                                name="swapWithStaffId"
+                                asp-items="ViewBag.Colleagues">
+
+                            <option value="">
+                                -- Select Staff Member --
+                            </option>
+
+                        </select>
+
+                    </div>
+
+                </div>
+
+                <div class="mt-4">
+
+                    <button type="submit"
+                            class="btn btn-success">
+
+                        Submit Request
+
+                    </button>
+
+                    <a asp-action="MyRequests"
+                           class="btn btn-secondary">
+
+                        Cancel
+
+                    </a>
+
+                </div>
+
+            </form>
+
+        </div>
+    </div>
+
+</div>
+
+@section Scripts {
+
+    <partial name="_ValidationScriptsPartial" />
+
+    <script>
+
+        const requestType = document.getElementById("requestType");
+
+        const timeFields = document.getElementById("timeChangeFields");
+
+        const swapFields = document.getElementById("swapFields");
+
+        function toggleFields() {
+
+            const value = requestType.value;
+
+            timeFields.style.display = "none";
+            swapFields.style.display = "none";
+
+            if (value === "TimeChange") {
+
+                timeFields.style.display = "block";
+
+            }
+
+            if (value === "ShiftSwap") {
+
+                swapFields.style.display = "block";
+
+            }
+
+        }
+
+        requestType.addEventListener("change", toggleFields);
+
+    </script>
+
+}

@@ -1,0 +1,375 @@
+@model SkyTech.Models.ViewModels.LoanApplyViewModel
+
+@{
+    ViewData["Title"] = "Apply for a Loan";
+    Layout = "~/Views/Shared/_MinimalLayout.cshtml";
+}
+
+<style>
+    :root {
+        --blue: #5f9ea0;
+        --blue-dark: #2d6b6d;
+        --blue-deep: #1f4f50;
+        --bg: #f0f4fc;
+        --border: #dde6f5;
+        --text: #0e1b35;
+        --text-2: #4a5878;
+        --text-m: #8a96b0;
+        --red: #dc2626;
+    }
+
+    .loan-page {
+        min-height: 80vh;
+        background: var(--bg);
+        padding: 45px 20px;
+    }
+
+    .loan-container {
+        max-width: 850px;
+        margin: auto;
+    }
+
+    .step-label {
+        color: var(--blue-dark);
+        font-size: 13px;
+        font-weight: 700;
+        text-transform: uppercase;
+        letter-spacing: 1px;
+    }
+
+    .page-title {
+        color: var(--text);
+        font-size: 35px;
+        font-weight: 750;
+        margin: 7px 0;
+    }
+
+    .page-subtitle {
+        color: var(--text-2);
+        margin-bottom: 30px;
+    }
+
+    .form-card {
+        background: white;
+        border: 1px solid var(--border);
+        border-radius: 22px;
+        padding: 35px;
+        box-shadow: 0 12px 35px rgba(31, 79, 80, 0.07);
+    }
+
+    .field {
+        margin-bottom: 22px;
+    }
+
+    .field-label {
+        display: block;
+        color: var(--text);
+        font-weight: 650;
+        margin-bottom: 8px;
+    }
+
+    .field-input,
+    .field-select {
+        width: 100%;
+        border: 1px solid var(--border);
+        border-radius: 10px;
+        padding: 12px 14px;
+        background: #fbfcff;
+        color: var(--text);
+        outline: none;
+        box-sizing: border-box;
+    }
+
+        .field-input:focus,
+        .field-select:focus {
+            border-color: var(--blue);
+            box-shadow: 0 0 0 3px rgba(95, 158, 160, 0.14);
+        }
+
+    .field-help {
+        color: var(--text-m);
+        font-size: 13px;
+        margin-top: 6px;
+    }
+
+    .employment-options {
+        display: flex;
+        gap: 12px;
+    }
+
+    .employment-option {
+        flex: 1;
+    }
+
+        .employment-option input {
+            display: none;
+        }
+
+        .employment-option label {
+            display: block;
+            text-align: center;
+            padding: 13px;
+            border: 1px solid var(--border);
+            border-radius: 10px;
+            cursor: pointer;
+            color: var(--text-2);
+            background: white;
+            transition: 0.2s ease;
+        }
+
+        .employment-option input:checked + label {
+            background: #e6f3f3;
+            border-color: var(--blue);
+            color: var(--blue-deep);
+            font-weight: 700;
+        }
+
+    .validation-summary,
+    .validation-message {
+        color: var(--red);
+        font-size: 14px;
+    }
+
+    .submit-button {
+        width: 100%;
+        background: var(--blue-dark);
+        color: white;
+        border: none;
+        padding: 14px;
+        border-radius: 11px;
+        font-size: 16px;
+        font-weight: 700;
+        cursor: pointer;
+        margin-top: 10px;
+    }
+
+        .submit-button:hover {
+            background: var(--blue-deep);
+        }
+
+    @@media (max-width: 600px) {
+        .form-card {
+            padding: 25px;
+        }
+
+        .employment-options {
+            flex-direction: column;
+        }
+    }
+</style>
+
+<div class="loan-page">
+
+    <div class="loan-container">
+
+        <div class="step-label">
+            Step 1 of 4
+        </div>
+
+        <h1 class="page-title">
+            Apply for a Loan
+        </h1>
+
+        <p class="page-subtitle">
+            Complete your application details to check your eligibility.
+        </p>
+
+        <div class="form-card">
+
+            <div asp-validation-summary="ModelOnly"
+                 class="validation-summary">
+            </div>
+
+            <form asp-action="Apply"
+                  asp-controller="LoanApplication"
+                  method="post"
+                  enctype="multipart/form-data">
+
+                <div class="field">
+
+                    <label asp-for="NationalId"
+                           class="field-label">
+                    </label>
+
+                    <input asp-for="NationalId"
+                           class="field-input"
+                           placeholder="e.g. 9001015800081" />
+
+                    <span asp-validation-for="NationalId"
+                          class="validation-message">
+                    </span>
+
+                </div>
+
+
+                <div class="field">
+
+                    <label asp-for="BranchId"
+                           class="field-label">
+                    </label>
+
+                    <select asp-for="BranchId"
+                            class="field-select"
+                            asp-items="Model.AvailableBranches">
+
+                        <option value="">
+                            -- Select a branch --
+                        </option>
+
+                    </select>
+
+                    <span asp-validation-for="BranchId"
+                          class="validation-message">
+                    </span>
+
+                    <div class="field-help">
+                        Choose the shop where you'll bring your collateral in person.
+                    </div>
+
+                </div>
+
+
+                <div class="field">
+
+                    <label asp-for="RequestedAmount"
+                           class="field-label">
+                    </label>
+
+                    <input asp-for="RequestedAmount"
+                           class="field-input"
+                           type="number"
+                           step="0.01"
+                           min="1" />
+
+                    <span asp-validation-for="RequestedAmount"
+                          class="validation-message">
+                    </span>
+
+                </div>
+
+                <div class="field">
+
+                    <label asp-for="MonthlySalary"
+                           class="field-label">
+                    </label>
+
+                    <input asp-for="MonthlySalary"
+                           class="field-input"
+                           type="number"
+                           step="0.01"
+                           min="0" />
+
+                    <span asp-validation-for="MonthlySalary"
+                          class="validation-message">
+                    </span>
+
+                    <div class="field-help">
+                        Gross monthly income, before deductions.
+                    </div>
+
+                </div>
+
+                <div class="field">
+
+                    <label asp-for="ProofOfIncomeDoc"
+                           class="field-label">
+                    </label>
+
+                    <input asp-for="ProofOfIncomeDoc"
+                           class="field-input"
+                           type="file"
+                           accept=".pdf,.jpg,.jpeg,.png" />
+
+                    <span asp-validation-for="ProofOfIncomeDoc"
+                          class="validation-message">
+                    </span>
+
+                    <div class="field-help">
+                        Payslip or bank statement. PDF, JPG or PNG, maximum 5MB.
+                    </div>
+
+                </div>
+
+                <div class="field">
+
+                    <label asp-for="Purpose"
+                           class="field-label">
+                    </label>
+
+                    <select asp-for="Purpose"
+                            class="field-select"
+                            asp-items="Html.GetEnumSelectList<SkyTech.Models.SkytechWorkers.LoanPurpose>()">
+
+                        <option value="">
+                            -- Select (optional) --
+                        </option>
+
+                    </select>
+
+                </div>
+
+                <div class="field">
+
+                    <label class="field-label">
+                        Are you currently employed?
+                    </label>
+
+                    <div class="employment-options">
+
+                        <div class="employment-option">
+
+                            <input type="radio"
+                                   asp-for="IsEmployed"
+                                   id="employedYes"
+                                   value="true" />
+
+                            <label for="employedYes">
+                                Yes
+                            </label>
+
+                        </div>
+
+                        <div class="employment-option">
+
+                            <input type="radio"
+                                   asp-for="IsEmployed"
+                                   id="employedNo"
+                                   value="false" />
+
+                            <label for="employedNo">
+                                No
+                            </label>
+
+                        </div>
+
+                    </div>
+
+                    <span asp-validation-for="IsEmployed"
+                          class="validation-message">
+                    </span>
+
+                </div>
+
+                <button type="submit"
+                        class="submit-button">
+
+                    Check Eligibility
+
+                </button>
+
+            </form>
+
+        </div>
+
+    </div>
+
+</div>
+
+@section Scripts {
+
+    @{
+        await Html.RenderPartialAsync(
+            "_ValidationScriptsPartial");
+    }
+
+}

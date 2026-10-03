@@ -1,0 +1,261 @@
+/* RosterGenerate.css — belongs to Views/HR/GenerateWeekly.cshtml
+   Path: ~/CSS/HRCSS/RosterGenerate.css
+   Standalone — this page loads ONLY this file (plus fonts/icons), nothing else.
+   Shares the design tokens used by HRDash.css so pages feel consistent. */
+
+:root {
+    --blue: #5f9ea0;
+    --blue-dark: #2d6b6d;
+    --blue-deep: #1f4f50;
+    --bg: #f0f4fc;
+    --border: #dde6f5;
+    --text: #0e1b35;
+    --text-2: #4a5878;
+    --text-m: #8a96b0;
+    --danger: #c0392b;
+    --danger-bg: #fdecea;
+    --danger-border: #f3c6c1;
+}
+
+*, *::before, *::after {
+    box-sizing: border-box;
+}
+
+body {
+    margin: 0;
+    font-family: 'Plus Jakarta Sans', sans-serif;
+    background-color: var(--bg);
+    color: var(--text);
+}
+
+/* ══ PAGE SHELL ══ */
+.roster-wrap {
+    max-width: 860px;
+    margin: 0 auto;
+    padding: 2.5rem 1.5rem 4rem;
+}
+
+.roster-eyebrow {
+    font-size: .72rem;
+    font-weight: 700;
+    color: var(--text-m);
+    text-transform: uppercase;
+    letter-spacing: 1.2px;
+    margin: 0 0 .4rem;
+}
+
+.roster-title {
+    font-family: 'Clash Display', 'Plus Jakarta Sans', sans-serif;
+    font-weight: 700;
+    font-size: 1.9rem;
+    letter-spacing: -.5px;
+    color: var(--text);
+    margin: 0 0 .4rem;
+}
+
+.roster-sub {
+    font-size: .9rem;
+    color: var(--text-m);
+    margin: 0 0 1.8rem;
+}
+
+/* ══ ALERT ══ */
+.roster-alert {
+    display: flex;
+    align-items: flex-start;
+    gap: .65rem;
+    background: var(--danger-bg);
+    border: 1.5px solid var(--danger-border);
+    color: var(--danger);
+    border-radius: 12px;
+    padding: .9rem 1.1rem;
+    font-size: .85rem;
+    font-weight: 600;
+    margin-bottom: 1.6rem;
+}
+
+    .roster-alert i {
+        margin-top: .15rem;
+    }
+
+/* ══ CARD ══ */
+.roster-card {
+    background: #fff;
+    border: 1.5px solid var(--border);
+    border-radius: 18px;
+    padding: 2rem;
+    box-shadow: 0 8px 24px -18px rgba(15, 40, 60, .35);
+}
+
+.roster-section-title {
+    font-family: 'Clash Display', 'Plus Jakarta Sans', sans-serif;
+    font-weight: 700;
+    font-size: 1.15rem;
+    color: var(--text);
+    margin: 0 0 .3rem;
+}
+
+.roster-section-note {
+    font-size: .82rem;
+    color: var(--text-m);
+    margin: 0 0 1.3rem;
+    line-height: 1.5;
+}
+
+/* ══ FORM GRID ══ */
+.roster-grid {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 1.1rem 1.4rem;
+    margin-bottom: 1.6rem;
+}
+
+@media (max-width: 640px) {
+    .roster-grid {
+        grid-template-columns: 1fr;
+    }
+}
+
+.roster-field {
+    display: flex;
+    flex-direction: column;
+    gap: .4rem;
+}
+
+.roster-field label {
+    font-size: .78rem;
+    font-weight: 700;
+    color: var(--text-2);
+}
+
+.roster-field input,
+.roster-field select {
+    font-family: 'Plus Jakarta Sans', sans-serif;
+    font-size: .88rem;
+    color: var(--text);
+    background: var(--bg);
+    border: 1.5px solid var(--border);
+    border-radius: 10px;
+    padding: .62rem .8rem;
+    transition: border-color .2s, box-shadow .2s;
+    width: 100%;
+}
+
+    .roster-field input:focus,
+    .roster-field select:focus {
+        outline: none;
+        border-color: var(--blue);
+        box-shadow: 0 0 0 3px rgba(95, 158, 160, .18);
+        background: #fff;
+    }
+
+.roster-hint {
+    font-size: .72rem;
+    color: var(--text-m);
+}
+
+.roster-shift-row {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 1.1rem 1.4rem;
+}
+
+/* ══ DIVIDER ══ */
+.roster-divider {
+    border: none;
+    border-top: 1.5px solid var(--border);
+    margin: 1.8rem 0 1.5rem;
+}
+
+/* ══ TABLE ══ */
+.roster-table-wrap {
+    border: 1.5px solid var(--border);
+    border-radius: 14px;
+    overflow: hidden;
+    margin-bottom: 1.8rem;
+}
+
+.roster-table {
+    width: 100%;
+    border-collapse: collapse;
+    font-size: .87rem;
+}
+
+    .roster-table thead th {
+        text-align: left;
+        background: var(--bg);
+        color: var(--text-2);
+        font-size: .72rem;
+        font-weight: 700;
+        text-transform: uppercase;
+        letter-spacing: .6px;
+        padding: .8rem 1.1rem;
+        border-bottom: 1.5px solid var(--border);
+    }
+
+    .roster-table tbody td {
+        padding: .75rem 1.1rem;
+        border-bottom: 1px solid var(--border);
+        color: var(--text);
+        font-weight: 500;
+        vertical-align: middle;
+    }
+
+    .roster-table tbody tr:last-child td {
+        border-bottom: none;
+    }
+
+    .roster-table tbody tr:hover {
+        background: rgba(95, 158, 160, .05);
+    }
+
+.roster-num-input {
+    width: 100px;
+    font-family: 'Plus Jakarta Sans', sans-serif;
+    font-size: .88rem;
+    color: var(--text);
+    background: var(--bg);
+    border: 1.5px solid var(--border);
+    border-radius: 8px;
+    padding: .5rem .7rem;
+    transition: border-color .2s, box-shadow .2s;
+}
+
+    .roster-num-input:focus {
+        outline: none;
+        border-color: var(--blue);
+        box-shadow: 0 0 0 3px rgba(95, 158, 160, .18);
+        background: #fff;
+    }
+
+/* ══ BUTTON ══ */
+.roster-submit {
+    display: inline-flex;
+    align-items: center;
+    gap: .55rem;
+    background: linear-gradient(135deg, var(--blue), var(--blue-dark));
+    color: #fff;
+    font-family: 'Plus Jakarta Sans', sans-serif;
+    font-weight: 700;
+    font-size: .88rem;
+    border: none;
+    border-radius: 999px;
+    padding: .8rem 1.7rem;
+    cursor: pointer;
+    transition: transform .15s ease, box-shadow .15s ease;
+    box-shadow: 0 10px 20px -10px rgba(45, 107, 109, .55);
+}
+
+    .roster-submit:hover {
+        transform: translateY(-1px);
+        box-shadow: 0 14px 26px -10px rgba(45, 107, 109, .6);
+    }
+
+    .roster-submit:active {
+        transform: translateY(0);
+    }
+
+    .roster-submit:focus-visible {
+        outline: 2px solid var(--blue-deep);
+        outline-offset: 2px;
+    }

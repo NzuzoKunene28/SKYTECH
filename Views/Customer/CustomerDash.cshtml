@@ -1,0 +1,239 @@
+@using SkyTech.Models
+@model IEnumerable<SkyTech.Models.Customer>
+@{
+    ViewBag.Title = "Dashboard";
+    Layout = "~/Views/Shared/_MinimalLayout.cshtml";
+    ViewBag.ActivePage = "Dashboard";
+    var customer = Model?.FirstOrDefault();
+}
+
+@section Styles {
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+    <link href="https://api.fontshare.com/v2/css?f[]=clash-display@400,500,600,700&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="~/CSS/DashboardStyle.css">
+}
+
+<div class="dash-wrap">
+
+    <!-- ══ SIDEBAR ══ -->
+    <aside class="dash-sidebar">
+        <div class="dash-brand">
+            <div class="dash-brand-icon"><i class="fas fa-user-circle"></i></div>
+            <div>
+                <div class="dash-brand-name">SkyTech</div>
+                <div class="dash-brand-sub">Customer Portal</div>
+            </div>
+        </div>
+        <nav class="dash-nav">
+            <div class="dash-nav-label">MAIN</div>
+            <a href="@Url.Action("CustomerDash", "Customer")" class="dash-link active">
+                <i class="fas fa-grid-2"></i><span>Dashboard</span>
+            </a>
+
+            <div class="dash-nav-label">SHOPPING</div>
+            <a href="@Url.Action("ShoppingPage", "Customer")" class="dash-link">
+                <i class="fas fa-shopping-bag"></i><span>Shop</span>
+            </a>
+            <a href="@Url.Action("MyOrders", "Customer")" class="dash-link">
+                <i class="fas fa-bag-shopping"></i><span>My Orders</span>
+            </a>
+            <a href="@Url.Action("OrderHistory", "Customer")" class="dash-link">
+                <i class="fas fa-history"></i><span>Order History</span>
+            </a>
+
+            <div class="dash-nav-label">REPAIRS</div>
+            <a href="@Url.Action("CustomerRepairRequests", "Customer")" class="dash-link">
+                <i class="fas fa-tools"></i><span>My Repair Requests</span>
+            </a>
+            <a href="@Url.Action("Create", "Request_Repair_Service")" class="dash-link">
+                <i class="fas fa-plus-circle"></i><span>New Repair Request</span>
+            </a>
+
+            <div class="dash-nav-label">ACCOUNT</div>
+            <a href="@Url.Action("CustomerProfile", "Customer")" class="dash-link">
+                <i class="fas fa-user"></i><span>Profile</span>
+            </a>
+            <a href="@Url.Action("MyReturns", "Customer")" class="dash-link">
+                <i class="fas fa-undo"></i><span>Returns</span>
+            </a>
+            <a href="@Url.Action("MyTests", "WriteAssessment")" class="dash-link">
+                <i class="fas fa-undo"></i><span>Tests</span>
+            </a>
+            
+            <a href="@Url.Action("Careers", "CustomerApplications")" class="dash-link">
+                <i class="fas fa-undo"></i><span>Job Posts</span>
+            </a>
+            
+            <a href="@Url.Action("Apply", "LoanApplication")" class="dash-link">
+                <i class="fas fa-undo"></i><span>Loan Application</span>
+            </a>
+            
+            <a href="@Url.Action("MyLoan", "LoanRepayment")" class="dash-link">
+                <i class="fas fa-undo"></i><span>Settle Loan</span>
+            </a>
+            
+        </nav>
+
+        <div class="dash-sidebar-foot">
+            <div class="dash-foot-avatar"><i class="fas fa-user"></i></div>
+            <div>
+                <div class="dash-foot-name">@(customer?.FirstName ?? "Customer")</div>
+                <div class="dash-foot-role">Customer</div>
+            </div>
+        </div>
+
+        <div style="padding:.8rem 1.2rem;margin-top:1rem">
+            @using (Html.BeginForm("Logout", "Authentication", FormMethod.Post))
+            {
+                @Html.AntiForgeryToken()
+                <button type="submit" style="width:100%;background:rgba(220,38,38,.08);border:1.5px solid rgba(220,38,38,.25);border-radius:8px;padding:.6rem 1rem;cursor:pointer;color:#dc2626;font-weight:600;font-size:.85rem;display:flex;align-items:center;gap:.5rem;justify-content:center">
+                    <i class="fas fa-right-from-bracket"></i> Log Out
+                </button>
+            }
+        </div>
+    </aside>
+
+    <!-- ══ MAIN CONTENT ══ -->
+    <main class="dash-main">
+
+        <!-- Top Bar -->
+        <div class="dash-topbar">
+            <div>
+                <div class="dash-page-title">Welcome Back, @(customer?.FirstName)!</div>
+                <div class="dash-page-sub">Your personal dashboard and repair service hub.</div>
+            </div>
+        </div>
+
+        @if (customer == null)
+        {
+            <div class="dash-alert dash-alert-warning">
+                <i class="fas fa-triangle-exclamation"></i>
+                <div>No profile data found. Please contact support.</div>
+            </div>
+        }
+        else
+        {
+            <!-- Quick Action Cards -->
+            <div class="dash-grid dash-grid-2" style="margin-bottom:2rem">
+                <!-- Request Repair Service Card -->
+                <div class="dash-card">
+                    <div class="dash-card-head">
+                        <div>
+                            <div class="dash-card-title">Request Repair Service</div>
+                            <p style="font-size:0.9rem;color:var(--text-muted);margin-top:0.3rem">Need something fixed? Start here</p>
+                        </div>
+                    </div>
+                    <div style="text-align:center;padding:1rem">
+                        <div style="font-size:3rem;color:var(--orange);margin-bottom:1rem"><i class="fas fa-tools"></i></div>
+                        <p style="color:var(--text-muted);margin-bottom:1.2rem">Submit a repair request and our technicians will get in touch with you.</p>
+                        <a href="@Url.Action("Create", "Request_Repair_Service")" class="dash-btn dash-btn-primary" style="width:100%;justify-content:center">
+                            <i class="fas fa-plus"></i> New Repair Request
+                        </a>
+                    </div>
+                </div>
+
+                <!-- My Orders Card -->
+                <div class="dash-card">
+                    <div class="dash-card-head">
+                        <div>
+                            <div class="dash-card-title">Recent Orders</div>
+                            <p style="font-size:0.9rem;color:var(--text-muted);margin-top:0.3rem">Track your purchases</p>
+                        </div>
+                    </div>
+                    <div style="text-align:center;padding:1rem">
+                        <div style="font-size:3rem;color:var(--blue);margin-bottom:1rem"><i class="fas fa-bag-shopping"></i></div>
+                        <p style="color:var(--text-muted);margin-bottom:1.2rem">View and manage all your orders in one place.</p>
+                        <a href="@Url.Action("MyOrders", "Customer")" class="dash-btn dash-btn-primary" style="width:100%;justify-content:center">
+                            <i class="fas fa-eye"></i> View Orders
+                        </a>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Stats Row -->
+            <div class="dash-grid dash-grid-3" style="margin-bottom:2rem">
+                <div class="dash-stat">
+                    <div class="dash-stat-header">
+                        <div>
+                            <div class="dash-stat-value">@(ViewBag.ActiveOrders ?? 0)</div>
+                            <div class="dash-stat-label">Active Orders</div>
+                        </div>
+                        <div class="dash-stat-icon">
+                            <i class="fas fa-box"></i>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="dash-stat">
+                    <div class="dash-stat-header">
+                        <div>
+                            <div class="dash-stat-value">@(ViewBag.PendingRepairs ?? 0)</div>
+                            <div class="dash-stat-label">Pending Repairs</div>
+                        </div>
+                        <div class="dash-stat-icon">
+                            <i class="fas fa-wrench"></i>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="dash-stat">
+                    <div class="dash-stat-header">
+                        <div>
+                            <div class="dash-stat-value">@(ViewBag.CompletedRepairs ?? 0)</div>
+                            <div class="dash-stat-label">Completed Repairs</div>
+                        </div>
+                        <div class="dash-stat-icon">
+                            <i class="fas fa-check-circle"></i>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Profile Info Card -->
+            <div class="dash-card" style="margin-bottom:2rem">
+                <div class="dash-card-head">
+                    <div class="dash-card-title">Account Information</div>
+                </div>
+
+                <div style="display:grid;grid-template-columns:1fr 1fr;gap:1.4rem">
+                    <div>
+                        <div style="font-size:0.9rem;color:var(--text-muted);font-weight:500;margin-bottom:0.3rem">
+                            <i class="fas fa-envelope" style="color:var(--blue);margin-right:0.5rem;width:16px"></i>Email
+                        </div>
+                        <div style="font-size:1rem;color:var(--text);font-weight:500">@customer.Email</div>
+                    </div>
+
+                    <div>
+                        <div style="font-size:0.9rem;color:var(--text-muted);font-weight:500;margin-bottom:0.3rem">
+                            <i class="fas fa-phone" style="color:var(--blue);margin-right:0.5rem;width:16px"></i>Phone
+                        </div>
+                        <div style="font-size:1rem;color:var(--text);font-weight:500">@customer.PhoneNumber</div>
+                    </div>
+
+                    <div>
+                        <div style="font-size:0.9rem;color:var(--text-muted);font-weight:500;margin-bottom:0.3rem">
+                            <i class="fas fa-location-dot" style="color:var(--blue);margin-right:0.5rem;width:16px"></i>Address
+                        </div>
+                        <div style="font-size:1rem;color:var(--text);font-weight:500">@customer.Address</div>
+                    </div>
+
+                    <div>
+                        <div style="font-size:0.9rem;color:var(--text-muted);font-weight:500;margin-bottom:0.3rem">
+                            <i class="fas fa-calendar" style="color:var(--blue);margin-right:0.5rem;width:16px"></i>Member Since
+                        </div>
+                        <div style="font-size:1rem;color:var(--text);font-weight:500">@customer.RegisteredOn.ToString("dd MMM yyyy")</div>
+                    </div>
+                </div>
+
+                <div style="margin-top:1.4rem;padding-top:1.4rem;border-top:1px solid var(--border);display:flex;gap:0.8rem">
+                    <a href="@Url.Action("CustomerProfile", "Customer")" class="dash-btn dash-btn-secondary">
+                        <i class="fas fa-edit"></i> Edit Profile
+                    </a>
+                </div>
+            </div>
+        }
+
+    </main>
+</div>

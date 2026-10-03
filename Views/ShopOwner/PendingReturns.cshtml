@@ -1,0 +1,98 @@
+@model IEnumerable<SkyTech.Models.LeaseAgreementItem>
+@{
+    ViewData["Title"] = "Pending Returns";
+}
+
+<style>
+    .pr-page { padding: 32px 20px; font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif; max-width: 900px; margin: 0 auto; }
+    .pr-title { font-weight: 800; font-size: 1.3rem; margin: 0 0 18px; }
+    .pr-msg { background: #eaf5f4; border: 1px solid #d7ece9; color: #3d7873; border-radius: 10px; padding: 12px 16px; margin-bottom: 16px; font-size: 0.9rem; }
+    .pr-error { background: #fdeceb; border: 1px solid #f3bcb9; color: #b3261e; border-radius: 10px; padding: 12px 16px; margin-bottom: 16px; font-size: 0.9rem; }
+    table { width: 100%; border-collapse: collapse; background: #fff; border-radius: 12px; overflow: hidden; box-shadow: 0 4px 14px rgba(0,0,0,0.08); }
+    th, td { padding: 12px 14px; text-align: left; font-size: 0.88rem; border-bottom: 1px solid #eef1f0; }
+    th { background: #eaf5f4; color: #3d7873; text-transform: uppercase; font-size: 0.74rem; letter-spacing: 0.4px; }
+    .pr-badge { padding: 4px 10px; border-radius: 999px; font-size: 0.76rem; font-weight: 700; }
+    .pr-badge.pending { background: #fdf0dc; color: #a35c00; }
+    .pr-badge.collected { background: #dcf0ef; color: #3d7873; }
+    .pr-btn { display: inline-block; padding: 7px 14px; border-radius: 8px; border: none; color: #fff; font-weight: 700; font-size: 0.8rem; cursor: pointer; text-decoration: none; }
+    .pr-btn-receive { background: #4a8f8c; }
+    .pr-btn-inspect { background: #f5820d; }
+    .pr-empty { text-align: center; padding: 40px; color: #6b8481; }
+</style>
+
+<div class="pr-page">
+    <div class="pr-title">Pending Returns</div>
+
+    @if (TempData["Message"] != null)
+    {
+        <div class="pr-msg">@TempData["Message"]</div>
+    }
+    @if (TempData["Error"] != null)
+    {
+        <div class="pr-error">@TempData["Error"]</div>
+    }
+
+    @if (!Model.Any())
+    {
+        <div class="pr-empty">Nothing awaiting collection or inspection right now.</div>
+    }
+    else
+    {
+        <table>
+            <thead>
+                <tr>
+                    <th>Item</th>
+                    <th>Serial</th>
+                    <th>Customer</th>
+                    <th>Scheduled / Collected</th>
+                    <th>Status</th>
+                    <th>Action</th>
+                </tr>
+            </thead>
+            <tbody>
+                @foreach (var item in Model)
+                {
+                    <tr>
+                        <td>@(item.LeaseUnit?.LeaseProduct?.LeaseProdName ?? "-")</td>
+                        <td>@item.LeaseUnit?.SerialNumber</td>
+                        <td>@item.LeaseAgreement?.Customer?.FirstName @item.LeaseAgreement?.Customer?.LastName</td>
+                        <td>
+                            @if (item.ReturnStatus == SkyTech.Models.LeaseReturnStatus.Return_Pending)
+                            {
+                                @(item.ScheduledCollectionDate?.ToString("dd MMM yyyy") ?? "-")
+                            }
+                            else
+                            {
+                                @(item.ActualCollectionDate?.ToString("dd MMM yyyy") ?? "-")
+                            }
+                        </td>
+                        <td>
+                            @if (item.ReturnStatus == SkyTech.Models.LeaseReturnStatus.Return_Pending)
+                            {
+                                <span class="pr-badge pending">Awaiting Collection</span>
+                            }
+                            else
+                            {
+                                <span class="pr-badge collected">Collected</span>
+                            }
+                        </td>
+                        <td>
+                            @if (item.ReturnStatus == SkyTech.Models.LeaseReturnStatus.Return_Pending)
+                            {
+                                <form method="post" action="@Url.Action("LogReturnedEquipment")" style="display:inline;">
+                                    @Html.AntiForgeryToken()
+                                    <input type="hidden" name="leaseAgreementItemId" value="@item.LeaseAgreementItemId" />
+                                    <button type="submit" class="pr-btn pr-btn-receive">Mark Received</button>
+                                </form>
+                            }
+                            else
+                            {
+                                <a href="@Url.Action("InspectReturn", new { leaseAgreementItemId = item.LeaseAgreementItemId })" class="pr-btn pr-btn-inspect">Inspect</a>
+                            }
+                        </td>
+                    </tr>
+                }
+            </tbody>
+        </table>
+    }
+</div>

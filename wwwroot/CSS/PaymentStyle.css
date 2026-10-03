@@ -1,0 +1,437 @@
+﻿.pay-bg {
+    min-height: 100vh;
+    background-color: cadetblue;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    padding: 2rem 1rem;
+    position: relative;
+    overflow: hidden;
+}
+
+    .pay-bg::before {
+        content: '';
+        position: absolute;
+        inset: 0;
+        pointer-events: none;
+        background-image: linear-gradient(rgba(255,255,255,.04) 1px, transparent 1px), linear-gradient(90deg, rgba(255,255,255,.04) 1px, transparent 1px);
+        background-size: 36px 36px;
+    }
+
+    .pay-bg::after {
+        content: '';
+        position: absolute;
+        width: 520px;
+        height: 520px;
+        border-radius: 50%;
+        border: 1px solid rgba(255,255,255,.07);
+        top: -120px;
+        right: -120px;
+        pointer-events: none;
+    }
+
+.pay-card {
+    background: #fff;
+    border-radius: 24px;
+    box-shadow: 0 20px 60px rgba(31,79,80,.25);
+    max-width: 440px;
+    width: 100%;
+    overflow: hidden;
+    position: relative;
+    z-index: 1;
+    animation: fadeUp .38s ease;
+}
+
+@keyframes fadeUp {
+    from {
+        opacity: 0;
+        transform: translateY(20px)
+    }
+
+    to {
+        opacity: 1;
+        transform: translateY(0)
+    }
+}
+
+.pay-card-head {
+    background-color: cadetblue;
+    padding: 1.8rem 2rem;
+    position: relative;
+    overflow: hidden;
+}
+
+    .pay-card-head::before {
+        content: '';
+        position: absolute;
+        width: 200px;
+        height: 200px;
+        border-radius: 50%;
+        border: 1px solid rgba(255,255,255,.1);
+        top: -80px;
+        right: -60px;
+        pointer-events: none;
+    }
+
+    .pay-card-head::after {
+        content: '';
+        position: absolute;
+        width: 120px;
+        height: 120px;
+        border-radius: 50%;
+        border: 1px solid rgba(255,255,255,.08);
+        bottom: -50px;
+        left: 20px;
+        pointer-events: none;
+    }
+
+.pay-store-badge {
+    display: inline-flex;
+    align-items: center;
+    gap: .4rem;
+    background: rgba(255,255,255,.15);
+    border: 1px solid rgba(255,255,255,.2);
+    border-radius: 20px;
+    padding: .25rem .8rem;
+    font-size: .72rem;
+    font-weight: 700;
+    color: rgba(255,255,255,.9);
+    letter-spacing: .5px;
+    margin-bottom: .9rem;
+}
+
+.pay-card-head h2 {
+    font-family: 'Clash Display', 'Plus Jakarta Sans', sans-serif;
+    font-size: 1.3rem;
+    font-weight: 700;
+    color: #fff;
+    letter-spacing: -.3px;
+    margin-bottom: .2rem;
+}
+
+.pay-card-head p {
+    font-size: .82rem;
+    color: rgba(255,255,255,.65);
+}
+
+.lock-ring {
+    position: absolute;
+    right: 1.8rem;
+    top: 50%;
+    transform: translateY(-50%);
+    width: 48px;
+    height: 48px;
+    border-radius: 50%;
+    background: rgba(255,255,255,.12);
+    border: 1.5px solid rgba(255,255,255,.2);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    color: #fff;
+    font-size: 1.1rem;
+}
+
+.pay-body {
+    padding: 1.6rem 2rem;
+}
+
+.info-row {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: .7rem 0;
+    border-bottom: 1px solid #dde6f5;
+    font-size: .875rem;
+}
+
+    .info-row:last-of-type {
+        border-bottom: none;
+    }
+
+    .info-row .key {
+        color: #8a96b0;
+        font-weight: 600;
+        display: flex;
+        align-items: center;
+        gap: .4rem;
+    }
+
+    .info-row .val {
+        color: #0e1b35;
+        font-weight: 700;
+        text-align: right;
+        word-break: break-all;
+        max-width: 220px;
+    }
+
+.pay-amount-block {
+    background: linear-gradient(135deg, #e8f4f4, #f0f4fc);
+    border: 1.5px solid rgba(95,158,160,.2);
+    border-radius: 14px;
+    padding: 1.1rem 1.4rem;
+    text-align: center;
+    margin: 1.2rem 0;
+}
+
+.pay-amount-label {
+    font-size: .72rem;
+    font-weight: 700;
+    color: #8a96b0;
+    letter-spacing: .6px;
+    margin-bottom: .2rem;
+}
+
+.pay-amount-value {
+    font-family: 'Clash Display', 'Plus Jakarta Sans', sans-serif;
+    font-size: 2.2rem;
+    font-weight: 700;
+    color: #2d6b6d;
+    letter-spacing: -1px;
+}
+
+    .pay-amount-value span {
+        font-size: 1.1rem;
+        margin-right: .1rem;
+    }
+
+.pay-btn {
+    width: 100%;
+    padding: 1rem;
+    border: none;
+    border-radius: 50px;
+    cursor: pointer;
+    background-color: cadetblue;
+    color: #fff;
+    font-family: 'Clash Display', 'Plus Jakarta Sans', sans-serif;
+    font-size: 1.05rem;
+    font-weight: 700;
+    letter-spacing: .2px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: .55rem;
+    box-shadow: 0 6px 22px rgba(95,158,160,.35);
+    transition: all .2s;
+    margin-top: .5rem;
+}
+
+    .pay-btn:hover {
+        transform: translateY(-2px);
+        box-shadow: 0 10px 30px rgba(95,158,160,.42);
+    }
+
+    .pay-btn:active {
+        transform: translateY(0);
+    }
+
+    .pay-btn .spinner {
+        display: none;
+        width: 18px;
+        height: 18px;
+        border: 2.5px solid rgba(255,255,255,.3);
+        border-top-color: #fff;
+        border-radius: 50%;
+        animation: spin .7s linear infinite;
+    }
+
+@keyframes spin {
+    to {
+        transform: rotate(360deg);
+    }
+}
+
+.secure-strip {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: .5rem;
+    font-size: .72rem;
+    color: #8a96b0;
+    margin-top: .9rem;
+    padding-top: .9rem;
+    border-top: 1px solid #dde6f5;
+}
+
+    .secure-strip i {
+        color: #5f9ea0;
+    }
+
+.cancel-link {
+    display: block;
+    text-align: center;
+    margin-top: .9rem;
+    font-size: .8rem;
+    color: #8a96b0;
+    text-decoration: none;
+    transition: color .18s;
+}
+
+    .cancel-link:hover {
+        color: #dc2626;
+    }
+
+/* ── SUCCESS / RECEIPT ── */
+.receipt {
+    background: #fff;
+    border-radius: 24px;
+    box-shadow: 0 20px 60px rgba(31,79,80,.25);
+    max-width: 460px;
+    width: 100%;
+    overflow: hidden;
+    position: relative;
+    z-index: 1;
+    animation: fadeUp .38s ease;
+}
+
+.r-head {
+    background: linear-gradient(135deg, #15803d, #22c55e);
+    padding: 2.4rem 2rem 2rem;
+    text-align: center;
+    position: relative;
+    overflow: hidden;
+}
+
+    .r-head::before {
+        content: '';
+        position: absolute;
+        width: 220px;
+        height: 220px;
+        border-radius: 50%;
+        border: 1px solid rgba(255,255,255,.1);
+        top: -90px;
+        right: -70px;
+        pointer-events: none;
+    }
+
+.check-ring {
+    width: 74px;
+    height: 74px;
+    border-radius: 50%;
+    margin: 0 auto 1.1rem;
+    background: rgba(255,255,255,.18);
+    border: 2.5px solid rgba(255,255,255,.35);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 2rem;
+    color: #fff;
+    animation: popIn .45s .1s both;
+}
+
+@keyframes popIn {
+    from {
+        transform: scale(.35);
+        opacity: 0
+    }
+
+    to {
+        transform: scale(1);
+        opacity: 1
+    }
+}
+
+.r-head h2 {
+    font-family: 'Clash Display', 'Plus Jakarta Sans', sans-serif;
+    font-size: 1.55rem;
+    font-weight: 700;
+    color: #fff;
+    letter-spacing: -.4px;
+    margin-bottom: .25rem;
+}
+
+.r-head p {
+    font-size: .84rem;
+    color: rgba(255,255,255,.75);
+}
+
+.r-body {
+    padding: 1.6rem 2rem;
+}
+
+.r-row {
+    display: flex;
+    justify-content: space-between;
+    align-items: flex-start;
+    padding: .72rem 0;
+    border-bottom: 1px solid #dde6f5;
+    font-size: .875rem;
+}
+
+    .r-row:last-of-type {
+        border-bottom: none;
+    }
+
+    .r-row .k {
+        color: #8a96b0;
+        font-weight: 600;
+        display: flex;
+        align-items: center;
+        gap: .4rem;
+        white-space: nowrap;
+        margin-right: 1rem;
+        flex-shrink: 0;
+    }
+
+    .r-row .v {
+        color: #0e1b35;
+        font-weight: 700;
+        text-align: right;
+        word-break: break-all;
+    }
+
+        .r-row .v.amount {
+            font-family: 'Clash Display', 'Plus Jakarta Sans', sans-serif;
+            font-size: 1.3rem;
+            color: #2d6b6d;
+            letter-spacing: -.5px;
+        }
+
+.ref-pill {
+    display: inline-block;
+    background: #e8f4f4;
+    border: 1.5px solid rgba(95,158,160,.25);
+    border-radius: 8px;
+    padding: .22rem .65rem;
+    font-family: 'Courier New', monospace;
+    font-size: .75rem;
+    font-weight: 700;
+    color: #5f9ea0;
+    word-break: break-all;
+}
+
+.r-divider {
+    border: none;
+    border-top: 2px dashed #dde6f5;
+    margin: .4rem 0;
+}
+
+.r-foot {
+    padding: 0 2rem 2rem;
+    display: flex;
+    flex-direction: column;
+    gap: .75rem;
+}
+
+.btn-g {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: .5rem;
+    width: 100%;
+    padding: .9rem;
+    border: none;
+    border-radius: 50px;
+    background: #16a34a;
+    color: #fff;
+    cursor: pointer;
+    text-decoration: none;
+    font-family: 'Clash Display', 'Plus Jakarta Sans', sans-serif;
+    font-size: .95rem;
+    font-weight: 700;
+    box-shadow: 0 4px 16px rgba(22,163,74,.3);
+    transition: all .2s;
+}
+
+    .btn-g:hover {
+        background: #15803d;
+        trans

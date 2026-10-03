@@ -1,0 +1,184 @@
+﻿@using SkyTech.Models
+@model List<SkyTech.Models.ProposeItem>
+@{
+    Layout = "~/Views/Shared/_MinimalLayout.cshtml";
+    ViewData["Title"] = "Accepted Proposals";
+}
+
+
+@section Styles {
+    <link rel="stylesheet" href="~/CSS/AcceptProposal.css">
+    }
+
+<div class="orb orb-1"></div>
+<div class="orb orb-2"></div>
+
+<div class="page-wrapper">
+
+    <!-- Topbar -->
+    <div class="page-topbar">
+        <div class="page-title-group">
+            <div class="page-title-icon">✅</div>
+            <div>
+                <h1>Accepted Proposals</h1>
+                <p>Manage payments and collection logistics</p>
+            </div>
+        </div>
+        <a asp-action="EvaluateProposal" asp-controller="ShopOwner" class="btn-pill btn-pill-outline">
+            ← Back to Pending
+        </a>
+    </div>
+
+    <!-- Alerts -->
+    @if (TempData["Error"] != null)
+    {
+        <div class="alert alert-danger">⚠️ @TempData["Error"]</div>
+    }
+    @if (TempData["Success"] != null)
+    {
+        <div class="alert alert-success">✅ @TempData["Success"]</div>
+    }
+
+    <!-- Content -->
+    @if (!Model.Any())
+    {
+        <div class="empty-card">
+            <div class="empty-icon">📭</div>
+            <h3>No accepted proposals yet</h3>
+            <p>Proposals you accept will appear here for further processing.</p>
+        </div>
+    }
+    else
+    {
+        <div class="table-card">
+            <div class="table-scroll">
+                <table>
+                    <thead>
+                        <tr>
+                            <th>Product</th>
+                            <th>Category</th>
+                            <th>Condition</th>
+                            <th>Offered</th>
+                            <th>Status</th>
+                            <th>Delivery</th>
+                            <th>Customer</th>
+                            <th>Actions</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        @foreach (var item in Model)
+                        {
+                            bool checkoutSubmitted = item.Checkout != null;
+                            bool customerBringing  = checkoutSubmitted && item.Checkout.SelectDelivery == Delivery.Customer_Will_Bring;
+                            bool shopCollects      = checkoutSubmitted && item.Checkout.SelectDelivery == Delivery.Shop_Will_Collect;
+
+                            string badgeClass = item.ProdStatus switch {
+                                Status.Approved            => "badge badge-approved",
+                                Status.CustomerAccepted    => "badge badge-customer-accepted",
+                                Status.CollectionScheduled => "badge badge-collection",
+                                Status.PaymentMade         => "badge badge-payment-made",
+                                _                          => "badge badge-default"
+                            };
+
+                            <tr>
+                                <td class="cell-name">@item.ProdName</td>
+                                <td>@item.ProdCategory</td>
+                                <td>@item.ProdCondition.ToString().Replace("_", " ")</td>
+                                <td><strong>R @item.AmountProposed.ToString("F2")</strong></td>
+
+                                <!-- Status -->
+                                <td>
+                                    <span class="@badgeClass">
+                                        @item.ProdStatus.ToString().Replace("_", " ")
+                                    </span>
+                                </td>
+
+                                <!-- Delivery -->
+                                <td>
+                                    @if (customerBringing)
+                                    {
+                                        <span class="badge badge-bringing">🚶 Customer Bringing</span>
+                                    }
+                                    else
+                                    {
+                                        <span class="badge badge-collect">🚚 Shop Collects</span>
+                                        @if (item.CollectionDate.HasValue)
+                                        {
+                                            <span class="collection-date">📅 @item.CollectionDate.Value.ToString("dd MMM yyyy")</span>
+                                        }
+                                    }
+                                </td>
+
+                                <!-- Customer details -->
+                                <td>
+                                    @if (checkoutSubmitted)
+                                    {
+                                        <span class="badge badge-submitted">✔ Submitted</span>
+                                    }
+                                    else
+                                    {
+                                        <span class="badge badge-pending">⏳ Pending</span>
+                                    }
+                                </td>
+
+                                <!-- Actions -->
+                                <td>
+                                    <div class="action-col">
+
+                                        @if (shopCollects && (item.ProdStatus == Status.Approved || item.ProdStatus == Status.CustomerAccepted))
+                                        {
+                                            <a asp-action="ScheduleCollection"
+                                               asp-controller="ShopOwner"
+                                               asp-route-id="@item.PropItemId"
+                                               class="btn-action btn-action-info">
+                                                📅 Schedule Collection
+                                            </a>
+                                        }
+                                        else if (shopCollects && item.ProdStatus == Status.CollectionScheduled)
+                                        {
+                                            <button class="btn-action btn-action-done-blue" disabled>
+                                                ✅ Collection Scheduled
+                                            </button>
+                                        }
+                                        else
+                                        {
+                                            <button class="btn-action btn-action-outline" disabled
+                                                    title="@(!checkoutSubmitted ? "Awaiting customer details" : "Customer is bringing the item")">
+                                                📅 Schedule Collection
+                                            </button>
+                                        }
+
+                                        @if (checkoutSubmitted && item.ProdStatus != Status.PaymentMade)
+                                        {
+                                            <a asp-action="MakePayment"
+                                               asp-controller="ShopOwner"
+                                               asp-route-id="@item.PropItemId"
+                                               class="btn-action btn-action-success">
+                                                💳 Make Payment
+                                            </a>
+                                        }
+                                        else if (item.ProdStatus == Status.PaymentMade)
+                                        {
+                                            <button class="btn-action btn-action-done-green" disabled>
+                                                ✅ Payment Done
+                                            </button>
+                                        }
+                                        else
+                                        {
+                                            <button class="btn-action btn-action-outline" disabled
+                                                    title="Awaiting customer details">
+                                                💳 Make Payment
+                                            </button>
+                                        }
+
+                                    </div>
+                                </td>
+                            </tr>
+                        }
+                    </tbody>
+                </table>
+            </div>
+        </div>
+    }
+
+</div>

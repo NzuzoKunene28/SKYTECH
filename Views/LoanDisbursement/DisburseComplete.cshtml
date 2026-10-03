@@ -1,0 +1,162 @@
+﻿@model SkyTech.Models.SkytechWorkers.LoanApplication
+
+@{
+    ViewData["Title"] = "Payment Disbursed";
+    Layout = "~/Views/Shared/_MinimalLayout.cshtml";
+    var disbursement = ViewBag.Disbursement as SkyTech.Models.SkytechWorkers.LoanDisbursement;
+}
+
+<style>
+    :root {
+        --blue: #5f9ea0;
+        --blue-dark: #2d6b6d;
+        --blue-deep: #1f4f50;
+        --bg: #f0f4fc;
+        --border: #dde6f5;
+        --text: #0e1b35;
+        --text-2: #4a5878;
+        --text-m: #8a96b0;
+    }
+
+    .confirmation-page {
+        min-height: 80vh;
+        background: var(--bg);
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        padding: 40px 20px;
+    }
+
+    .confirmation-card {
+        width: 100%;
+        max-width: 700px;
+        background: white;
+        border: 1px solid var(--border);
+        border-radius: 24px;
+        padding: 45px;
+        text-align: center;
+        box-shadow: 0 20px 50px rgba(31, 79, 80, 0.08);
+    }
+
+    .success-icon {
+        width: 80px;
+        height: 80px;
+        margin: 0 auto 25px;
+        border-radius: 50%;
+        background: #e2f4ec;
+        color: #198754;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        font-size: 38px;
+        font-weight: 800;
+    }
+
+    .confirmation-title {
+        color: var(--text);
+        font-size: 30px;
+        font-weight: 750;
+        margin-bottom: 12px;
+    }
+
+    .confirmation-text {
+        color: var(--text-2);
+        line-height: 1.7;
+        margin-bottom: 30px;
+    }
+
+    .summary {
+        border-top: 1px solid var(--border);
+        border-bottom: 1px solid var(--border);
+        padding: 20px 0;
+        margin-bottom: 25px;
+        text-align: left;
+    }
+
+    .summary-row {
+        display: flex;
+        justify-content: space-between;
+        padding: 9px 0;
+        color: var(--text-2);
+    }
+
+        .summary-row strong {
+            color: var(--text);
+        }
+
+    .home-button {
+        display: inline-block;
+        background: var(--blue-dark);
+        color: white;
+        padding: 13px 24px;
+        border-radius: 10px;
+        text-decoration: none;
+        font-weight: 650;
+    }
+
+        .home-button:hover {
+            background: var(--blue-deep);
+            color: white;
+        }
+</style>
+
+<div class="confirmation-page">
+
+    <div class="confirmation-card">
+
+        <div class="success-icon">
+            ✓
+        </div>
+
+        <h1 class="confirmation-title">
+            Payment Disbursed
+        </h1>
+
+        <p class="confirmation-text">
+            The loan amount has been transferred to the customer's bank account.
+        </p>
+
+        <div class="summary">
+
+            <div class="summary-row">
+                <span>Application</span>
+                <strong>#@Model.LoanApplicationId</strong>
+            </div>
+
+            <div class="summary-row">
+                <span>Amount Disbursed</span>
+                <strong>@Model.RequestedAmount.ToString("C")</strong>
+            </div>
+
+            @if (disbursement != null)
+            {
+                <div class="summary-row">
+                    <span>Account Holder</span>
+                    <strong>@disbursement.AccountHolderName</strong>
+                </div>
+
+                <div class="summary-row">
+                    <span>Transfer Reference</span>
+                    <strong>@disbursement.TransferCode</strong>
+                </div>
+
+                <div class="summary-row">
+                    <span>Transfer Status</span>
+                    <strong>@disbursement.TransferStatus</strong>
+                </div>
+            }
+
+            <div class="summary-row">
+                <span>Application Status</span>
+                <strong>@Model.Status</strong>
+            </div>
+
+        </div>
+
+        <a asp-action="Queue" asp-controller="LoanAssessment" class="home-button">
+            Back to Queue
+        </a>
+
+    </div>
+
+</div>

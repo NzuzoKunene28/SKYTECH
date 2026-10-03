@@ -1,0 +1,83 @@
+@model SkyTech.Models.LeasePaymentRequest
+@{
+    ViewBag.Title = "Pay renewal fee";
+    Layout = "~/Views/Shared/_MinimalLayout.cshtml";
+}
+
+@* I don't have your actual LeasePaymentPage.cshtml, so this is a best-effort
+   match to the conf-card/conf-wrap pattern from LeaseConfirmation.cshtml,
+   with a client-side Paystack Pop.js checkout (same approach implied by
+   LeasePaymentPage's controller action, which never calls
+   InitializeTransaction server-side — unlike ProcessPayment/PaymentPage for
+   orders, which does). If your real LeasePaymentPage.cshtml does something
+   different (e.g. server-initialized access code), swap the script block
+   below to match it and this page will still work with VerifyRenewalPayment. *@
+
+@section Styles {
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+    <link href="https://api.fontshare.com/v2/css?f[]=clash-display@400,500,600,700&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="~/CSS/ShoppingPageStyle.css">
+    <style>
+        .conf-wrap { max-width: 560px; margin: 0 auto; padding: 2rem 1rem 100px; text-align: center; }
+        .conf-icon { width: 64px; height: 64px; border-radius: 50%; background: #e3f6ec; color: #17845a; display: flex; align-items: center; justify-content: center; font-size: 1.6rem; margin: 0 auto 1rem; }
+        .conf-title { font-family: 'Clash Display', 'Plus Jakarta Sans', sans-serif; font-size: 1.4rem; font-weight: 600; color: #16344a; margin: 0 0 .4rem; }
+        .conf-sub { color: #667085; font-size: .9rem; margin: 0 0 1.6rem; }
+        .conf-card { background: #fff; border: 1px solid #e6ebf0; border-radius: 14px; padding: 1.2rem 1.3rem; text-align: left; margin-bottom: 1.2rem; }
+        .conf-row { display: flex; justify-content: space-between; font-size: .88rem; padding: .4rem 0; color: #445; }
+        .conf-row.total { border-top: 1px solid #e6ebf0; margin-top: .5rem; padding-top: .8rem; font-weight: 700; color: #16344a; }
+        .conf-pay-btn.active { background: #17845a; color: #fff; border: none; border-radius: 10px; padding: .9rem; font-weight: 600; font-size: .95rem; width: 100%; cursor: pointer; }
+        .conf-pay-btn.active:disabled { background: #cfd6dd; color: #667085; cursor: not-allowed; }
+        .conf-cancel { display: inline-block; margin-top: .8rem; font-size: .82rem; color: #8a94a6; text-decoration: none; }
+    </style>
+}
+
+<div class="page-wrap">
+    <header class="header">
+        <a href="@Url.Action("ShoppingPage", "Customer")" class="logo"><span class="logo-l">S</span>kyTech</a>
+    </header>
+
+    <div class="conf-wrap">
+        <div class="conf-icon"><i class="fas fa-credit-card"></i></div>
+        <div class="conf-title">Pay renewal fee</div>
+        <div class="conf-sub">One last step — complete payment to confirm the renewal on agreement #@Model.LeaseAgreementId.</div>
+
+        <div class="conf-card">
+            <div class="conf-row total"><span>Amount due</span><span>R @Model.Amount.ToString("N2")</span></div>
+        </div>
+
+        <button id="payBtn" class="conf-pay-btn active"><i class="fas fa-lock"></i> Pay with Paystack</button>
+        <a href="@Url.Action("ViewLeaseAgreement", "Customer", new { id = Model.LeaseAgreementId })" class="conf-cancel">Cancel</a>
+    </div>
+</div>
+
+<script src="https://js.paystack.co/v1/inline.js"></script>
+<script>
+    document.getElementById('payBtn').addEventListener('click', function (e) {
+        e.target.disabled = true;
+
+        var reference = 'RENEWAL-@Model.LeasePaymentId-' + Date.now();
+
+        var handler = PaystackPop.setup({
+            key: '@ViewBag.PublicKey',
+            email: '@Model.CustomerEmail',
+            amount: @((int)(Model.Amount * 100)),
+            currency: 'ZAR',
+            ref: reference,
+            callback: function (response) {
+                // VerifyAction is set by whichever controller action rendered
+                // this page — RenewLeasePaymentPage or PayMonthlyInstallmentPage
+                // — so this one view works for both flows.
+                window.location.href = '@Url.Action((string)(ViewBag.VerifyAction ?? "VerifyRenewalPayment"), "Payment")'
+                    + '?reference=' + encodeURIComponent(response.reference)
+                    + '&leasePaymentId=@Model.LeasePaymentId';
+            },
+            onClose: function () {
+                document.getElementById('payBtn').disabled = false;
+            }
+        });
+
+        handler.openIframe();
+    });
+</script>

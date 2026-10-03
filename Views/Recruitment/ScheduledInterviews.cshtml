@@ -1,0 +1,62 @@
+﻿@model List<SkyTech.Models.Interviews.Interview>
+@{
+    ViewData["Title"] = "Scheduled interviews";
+}
+
+<link rel="stylesheet" href="~/CSS/HRCSS/ScheduledInterviews.css" />
+
+<div class="si-page">
+
+    <p class="si-eyebrow">Recruitment / Interviews</p>
+    <div class="si-header-row">
+        <h2 class="si-title">Scheduled Interviews</h2>
+        <a class="si-link" href="@Url.Action("ShortlistedCandidates", "Recruitment")">
+            Shortlisted Candidates
+        </a>
+    </div>
+
+    <div class="si-card">
+        @if (!Model.Any())
+        {
+            <p class="si-empty">No interviews currently scheduled.</p>
+        }
+        else
+        {
+            <table class="si-table">
+                <thead>
+                    <tr>
+                        <th>Candidate</th>
+                        <th>Scheduled date</th>
+                        <th>Meeting link</th>
+                        <th></th>
+                    </tr>
+                </thead>
+                <tbody>
+                    @foreach (var interview in Model)
+                    {
+                        <tr>
+                            <td class="si-candidate">@interview.Customer.FirstName @interview.Customer.LastName</td>
+                            <td>@interview.ScheduledDate.ToString("dd MMM yyyy, HH:mm")</td>
+                            <td>
+                                @if (!string.IsNullOrEmpty(interview.JitsiMeetingLink))
+                                {
+                                    <a asp-action="JoinMeeting" asp-route-id="@interview.InterviewId" class="si-join-link">Join meeting</a>
+                                }
+                                else
+                                {
+                                    <span class="si-muted">Not generated</span>
+                                }
+                            </td>
+                            <td>
+                                <a asp-action="Evaluate" asp-route-id="@interview.InterviewId" class="si-btn">
+                                    Evaluate
+                                </a>
+                            </td>
+                        </tr>
+                    }
+                </tbody>
+            </table>
+        }
+    </div>
+
+</div>

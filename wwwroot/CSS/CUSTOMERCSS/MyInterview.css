@@ -1,0 +1,208 @@
+﻿/* ==========================================================
+   My Interview — SkyTech candidate design system
+   ========================================================== */
+
+.cust-page-wrap {
+    max-width: 620px;
+    margin: 2.5rem auto 4rem;
+    padding: 0 1.5rem;
+    font-family: 'Plus Jakarta Sans', sans-serif;
+}
+
+/* Top nav row — title + secondary contract link */
+
+.cust-topnav {
+    display: flex;
+    align-items: flex-start;
+    justify-content: space-between;
+    gap: 1rem;
+    margin-bottom: 1.8rem;
+}
+
+.cust-eyebrow {
+    font-size: 0.78rem;
+    font-weight: 700;
+    text-transform: uppercase;
+    letter-spacing: 0.06em;
+    color: #2c7a7b;
+    margin: 0 0 0.3rem;
+}
+
+.cust-title {
+    font-family: 'Clash Display', sans-serif;
+    font-size: 1.6rem;
+    color: #1f3d3d;
+    margin: 0;
+}
+
+.mi-contract-link {
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+    padding: 0.6rem 1rem;
+    border-radius: 10px;
+    background: #ffffff;
+    border: 1.5px solid #dceeed;
+    color: #2c7a7b;
+    font-weight: 700;
+    font-size: 0.85rem;
+    text-decoration: none;
+    white-space: nowrap;
+    transition: background 0.15s ease, border-color 0.15s ease;
+    margin-top: 0.15rem;
+}
+
+    .mi-contract-link:hover {
+        background: #eaf6f6;
+        border-color: #2c7a7b;
+        color: #2c7a7b;
+    }
+
+/* Hero — the "appointment card" */
+
+.mi-hero {
+    display: flex;
+    align-items: center;
+    gap: 1.4rem;
+    background: linear-gradient(135deg, #1f3d3d, #2c7a7b);
+    border-radius: 20px;
+    padding: 1.8rem 2rem;
+    margin-bottom: 1.3rem;
+    box-shadow: 0 6px 20px rgba(31, 61, 61, 0.2);
+}
+
+.mi-hero-icon {
+    flex-shrink: 0;
+    width: 62px;
+    height: 62px;
+    border-radius: 16px;
+    background: rgba(255, 255, 255, 0.15);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    color: #ffffff;
+    font-size: 1.5rem;
+}
+
+.mi-hero-body {
+    flex: 1;
+    min-width: 0;
+}
+
+.mi-status-badge {
+    display: inline-block;
+    padding: 0.25rem 0.75rem;
+    border-radius: 999px;
+    font-size: 0.72rem;
+    font-weight: 700;
+    text-transform: uppercase;
+    letter-spacing: 0.04em;
+    margin-bottom: 0.6rem;
+}
+
+.mi-status-upcoming {
+    background: rgba(255, 255, 255, 0.18);
+    color: #ffffff;
+}
+
+.mi-status-done {
+    background: rgba(255, 255, 255, 0.18);
+    color: #d7ecd7;
+}
+
+.mi-status-cancelled {
+    background: rgba(255, 255, 255, 0.18);
+    color: #f3c8c8;
+}
+
+.mi-status-default {
+    background: rgba(255, 255, 255, 0.18);
+    color: #ffffff;
+}
+
+.mi-hero-date {
+    font-family: 'Clash Display', sans-serif;
+    font-size: 1.3rem;
+    color: #ffffff;
+    margin: 0 0 0.35rem;
+}
+
+.mi-hero-time {
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+    color: rgba(255, 255, 255, 0.85);
+    font-size: 0.95rem;
+    font-weight: 600;
+    margin: 0;
+}
+
+/* Info card */
+
+.mi-info-card {
+    background: #ffffff;
+    border: 1px solid #dceeed;
+    border-radius: 18px;
+    padding: 1.6rem 1.8rem;
+    box-shadow: 0 2px 10px rgba(44, 122, 123, 0.07);
+}
+
+.mi-info-row {
+    display: flex;
+    gap: 0.8rem;
+    align-items: flex-start;
+    margin-bottom: 1.4rem;
+}
+
+    .mi-info-row i {
+        color: #2c7a7b;
+        font-size: 1.05rem;
+        margin-top: 0.15rem;
+        flex-shrink: 0;
+    }
+
+    .mi-info-row p {
+        margin: 0;
+        color: #4a6363;
+        font-size: 0.92rem;
+        line-height: 1.55;
+    }
+
+/* Join button */
+
+.mi-join-btn {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 0.6rem;
+    width: 100%;
+    padding: 0.95rem;
+    border-radius: 12px;
+    background: linear-gradient(135deg, #2c7a7b, #5f9ea0);
+    color: #ffffff;
+    font-weight: 700;
+    font-size: 1rem;
+    text-decoration: none;
+    box-shadow: 0 4px 12px rgba(44, 122, 123, 0.28);
+    transition: transform 0.12s ease, box-shadow 0.12s ease;
+}
+
+    .mi-join-btn:hover {
+        transform: translateY(-2px);
+        box-shadow: 0 6px 16px rgba(44, 122, 123, 0.35);
+        color: #ffffff;
+    }
+
+.mi-no-link {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 0.6rem;
+    padding: 0.9rem;
+    border-radius: 12px;
+    background: #f7fbfb;
+    border: 1.5px dashed #dceeed;
+    color: #9ab8b8;
+    font-weight: 600;
+    font-size: 0.92rem;
+}

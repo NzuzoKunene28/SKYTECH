@@ -1,0 +1,191 @@
+/* StaffDirectory.css — belongs to Views/Staff/StaffDirectory.cshtml
+   Path: ~/CSS/HRCSS/StaffDirectory.css
+   Standalone — this page loads ONLY this file (plus fonts/icons), nothing else.
+   Shares the design tokens used by HRDash.css / RosterGenerate.css / RosterDetails.css / RosterList.css. */
+
+:root {
+    --blue: #5f9ea0;
+    --blue-dark: #2d6b6d;
+    --blue-deep: #1f4f50;
+    --bg: #f0f4fc;
+    --border: #dde6f5;
+    --text: #0e1b35;
+    --text-2: #4a5878;
+    --text-m: #8a96b0;
+    --ok-bg: #e6f6ee;
+    --ok-text: #15803d;
+    --no-bg: #fdecea;
+    --no-text: #b91c1c;
+}
+
+*, *::before, *::after {
+    box-sizing: border-box;
+}
+
+body {
+    margin: 0;
+    font-family: 'Plus Jakarta Sans', sans-serif;
+    background-color: var(--bg);
+    color: var(--text);
+}
+
+.sd-wrap {
+    max-width: 1180px;
+    margin: 0 auto;
+    padding: 2.5rem 1.5rem 4rem;
+}
+
+/* ══ HEADER ══ */
+.sd-eyebrow {
+    font-size: .72rem;
+    font-weight: 700;
+    color: var(--text-m);
+    text-transform: uppercase;
+    letter-spacing: 1.2px;
+    margin: 0 0 .4rem;
+}
+
+.sd-title {
+    font-family: 'Clash Display', 'Plus Jakarta Sans', sans-serif;
+    font-weight: 700;
+    font-size: 1.9rem;
+    letter-spacing: -.5px;
+    color: var(--text);
+    margin: 0 0 .5rem;
+}
+
+.sd-note {
+    display: flex;
+    align-items: center;
+    gap: .55rem;
+    font-size: .82rem;
+    color: var(--text-m);
+    background: #fff;
+    border: 1.5px solid var(--border);
+    border-radius: 12px;
+    padding: .7rem 1rem;
+    margin: 0 0 1.8rem;
+}
+
+    .sd-note i {
+        color: var(--blue);
+        flex: none;
+    }
+
+/* ══ TABLE CARD ══ */
+.sd-table-wrap {
+    background: #fff;
+    border: 1.5px solid var(--border);
+    border-radius: 16px;
+    overflow: hidden;
+    overflow-x: auto;
+    box-shadow: 0 8px 24px -18px rgba(15, 40, 60, .35);
+}
+
+.sd-table {
+    width: 100%;
+    border-collapse: collapse;
+    font-size: .87rem;
+    min-width: 780px;
+}
+
+    .sd-table thead th {
+        text-align: left;
+        background: var(--bg);
+        color: var(--text-2);
+        font-size: .72rem;
+        font-weight: 700;
+        text-transform: uppercase;
+        letter-spacing: .6px;
+        padding: .85rem 1.2rem;
+        border-bottom: 1.5px solid var(--border);
+        white-space: nowrap;
+    }
+
+    .sd-table tbody td {
+        padding: .7rem 1.2rem;
+        border-bottom: 1px solid var(--border);
+        color: var(--text);
+        font-weight: 500;
+        vertical-align: middle;
+    }
+
+    .sd-table tbody tr:last-child td {
+        border-bottom: none;
+    }
+
+    .sd-table tbody tr:hover {
+        background: rgba(95, 158, 160, .05);
+    }
+
+/* ══ PHOTO ══ */
+.sd-photo {
+    width: 44px;
+    height: 44px;
+    border-radius: 10px;
+    object-fit: cover;
+    border: 1.5px solid var(--border);
+    display: block;
+}
+
+.sd-no-photo {
+    width: 44px;
+    height: 44px;
+    border-radius: 10px;
+    background: var(--bg);
+    border: 1.5px dashed var(--border);
+    color: var(--text-m);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: .8rem;
+}
+
+/* ══ NAME ══ */
+.sd-name {
+    font-weight: 700;
+    color: var(--text);
+}
+
+/* ══ EMAIL ══ */
+.sd-email {
+    color: var(--text-2);
+}
+
+/* ══ ENROLLMENT BADGE ══ */
+.sd-badge {
+    display: inline-flex;
+    align-items: center;
+    gap: .35rem;
+    font-size: .72rem;
+    font-weight: 700;
+    text-transform: uppercase;
+    letter-spacing: .5px;
+    padding: .32rem .7rem;
+    border-radius: 999px;
+}
+
+    .sd-badge.enrolled {
+        background: var(--ok-bg);
+        color: var(--ok-text);
+    }
+
+    .sd-badge.not-enrolled {
+        background: var(--no-bg);
+        color: var(--no-text);
+    }
+
+/* ══ EMPTY STATE ══ */
+.sd-empty {
+    text-align: center;
+    padding: 3rem 1.5rem;
+    color: var(--text-m);
+    font-size: .9rem;
+}
+
+    .sd-empty i {
+        display: block;
+        font-size: 1.8rem;
+        color: var(--border);
+        margin-bottom: .8rem;
+    }

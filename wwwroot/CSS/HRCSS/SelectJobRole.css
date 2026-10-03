@@ -1,0 +1,235 @@
+/* ============================================================
+   Select Job Role styles
+   Place at: CSS/HRCSS/SelectJobRole.css
+   Shares the same palette/components as the other HR pages
+   ============================================================ */
+
+@import url('https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&display=swap');
+
+:root {
+    --blue: #5f9ea0;
+    --blue-dark: #2d6b6d;
+    --blue-deep: #1f4f50;
+    --bg: #f0f4fc;
+    --border: #dde6f5;
+    --text: #0e1b35;
+    --text-2: #4a5878;
+    --text-m: #8a96b0;
+    --red: #dc2626;
+    --accent: #7c3aed;
+    --accent-dark: #5b21b6;
+}
+
+*, *::before, *::after {
+    box-sizing: border-box;
+}
+
+.hr-page {
+    font-family: 'Plus Jakarta Sans', sans-serif;
+    background-color: var(--bg);
+    min-height: 100vh;
+    padding: 2.5rem 2rem;
+    color: var(--text);
+    position: relative;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+}
+
+.hr-page::before {
+    content: '';
+    position: fixed;
+    inset: 0;
+    pointer-events: none;
+    z-index: 0;
+    background-image: linear-gradient(rgba(31,79,80,.03) 1px, transparent 1px),
+                       linear-gradient(90deg, rgba(31,79,80,.03) 1px, transparent 1px);
+    background-size: 40px 40px;
+}
+
+.hr-container-narrow {
+    position: relative;
+    z-index: 1;
+    max-width: 520px;
+    width: 100%;
+}
+
+/* ---------- Header banner ---------- */
+.hr-header-sm {
+    background: linear-gradient(135deg, var(--accent), var(--accent-dark));
+    border-radius: 22px;
+    padding: 1.75rem 2rem;
+    box-shadow: 0 18px 50px rgba(124,58,237,.25);
+    margin-bottom: 1.5rem;
+    position: relative;
+    overflow: hidden;
+}
+
+    .hr-header-sm::before {
+        content: '';
+        position: absolute;
+        inset: 0;
+        pointer-events: none;
+        background-image: linear-gradient(rgba(255,255,255,.05) 1px, transparent 1px),
+                           linear-gradient(90deg, rgba(255,255,255,.05) 1px, transparent 1px);
+        background-size: 30px 30px;
+    }
+
+.hr-header-sm .hr-eyebrow {
+    position: relative;
+    z-index: 1;
+    display: inline-flex;
+    align-items: center;
+    gap: .4rem;
+    font-size: .72rem;
+    font-weight: 700;
+    letter-spacing: .8px;
+    text-transform: uppercase;
+    color: rgba(255,255,255,.7);
+    margin-bottom: .4rem;
+}
+
+.hr-header-sm h2 {
+    position: relative;
+    z-index: 1;
+    font-size: 1.4rem;
+    font-weight: 800;
+    color: #fff;
+    letter-spacing: -.4px;
+    margin-bottom: .3rem;
+}
+
+.hr-header-sm p {
+    position: relative;
+    z-index: 1;
+    font-size: .82rem;
+    color: rgba(255,255,255,.75);
+}
+
+/* ---------- Form card ---------- */
+.form-container {
+    background: #fff;
+    border-radius: 22px;
+    box-shadow: 0 18px 50px rgba(31,79,80,.1);
+    border: 1px solid var(--border);
+    padding: 2.25rem;
+}
+
+.form-group {
+    margin-bottom: 1.3rem;
+}
+
+    .form-group label {
+        font-size: .8rem;
+        font-weight: 700;
+        color: var(--text-2);
+        display: block;
+        margin-bottom: .45rem;
+    }
+
+    .form-group select {
+        width: 100%;
+        padding: .82rem 1.1rem;
+        background: var(--bg);
+        border: 1.5px solid var(--border);
+        border-radius: 14px;
+        font-family: 'Plus Jakarta Sans', sans-serif;
+        font-size: .9rem;
+        color: var(--text);
+        outline: none;
+        transition: border-color .2s, box-shadow .2s, background-color .2s;
+        appearance: none;
+        cursor: pointer;
+        background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='12' height='8' viewBox='0 0 12 8'%3E%3Cpath fill='%238a96b0' d='M6 8 0 0h12z'/%3E%3C/svg%3E");
+        background-repeat: no-repeat;
+        background-position: right 1.1rem center;
+        padding-right: 2.6rem;
+    }
+
+        .form-group select:focus {
+            border-color: var(--accent);
+            background-color: #fff;
+            box-shadow: 0 0 0 3px rgba(124,58,237,.12);
+        }
+
+/* ---------- Actions ---------- */
+.btn-submit {
+    display: flex;
+    flex-direction: column;
+    gap: .8rem;
+    margin-top: .5rem;
+}
+
+    .btn-submit button {
+        width: 100%;
+        padding: .9rem;
+        border: none;
+        border-radius: 50px;
+        background: linear-gradient(135deg, var(--accent), var(--accent-dark));
+        color: #fff;
+        font-family: 'Plus Jakarta Sans', sans-serif;
+        font-size: .95rem;
+        font-weight: 700;
+        cursor: pointer;
+        box-shadow: 0 4px 18px rgba(124,58,237,.3);
+        transition: all .2s;
+        display: inline-flex;
+        align-items: center;
+        justify-content: center;
+        gap: .5rem;
+    }
+
+        .btn-submit button:hover {
+            box-shadow: 0 6px 24px rgba(124,58,237,.42);
+            transform: translateY(-1px);
+        }
+
+    .btn-submit a {
+        width: 100%;
+        padding: .9rem;
+        border: 1.5px solid var(--border);
+        border-radius: 50px;
+        background: transparent;
+        color: var(--text-2);
+        font-family: 'Plus Jakarta Sans', sans-serif;
+        font-size: .9rem;
+        font-weight: 600;
+        text-decoration: none;
+        text-align: center;
+        transition: all .2s;
+    }
+
+        .btn-submit a:hover {
+            border-color: var(--blue);
+            color: var(--blue-dark);
+        }
+
+.form-divider {
+    display: flex;
+    align-items: center;
+    gap: .75rem;
+    margin: 0 0 .8rem;
+}
+
+    .form-divider::before, .form-divider::after {
+        content: '';
+        flex: 1;
+        height: 1px;
+        background: var(--border);
+    }
+
+    .form-divider span {
+        font-size: .72rem;
+        color: var(--text-m);
+        white-space: nowrap;
+    }
+
+@media (max-width: 560px) {
+    .hr-page {
+        padding: 1.5rem 1rem;
+    }
+
+    .form-container {
+        padding: 1.5rem;
+    }
+}

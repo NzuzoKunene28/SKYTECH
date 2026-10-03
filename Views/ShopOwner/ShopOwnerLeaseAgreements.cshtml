@@ -1,0 +1,113 @@
+@model IEnumerable<SkyTech.Models.LeaseAgreement>
+@{
+    ViewData["Title"] = "Store Lease Agreements";
+
+    string BadgeClass(SkyTech.Models.LeaseAgreementStatus s) => s switch
+    {
+        SkyTech.Models.LeaseAgreementStatus.PendingApproval => "sla-badge-pending",
+        SkyTech.Models.LeaseAgreementStatus.PendingPayment => "sla-badge-payment",
+        SkyTech.Models.LeaseAgreementStatus.Active => "sla-badge-active",
+        SkyTech.Models.LeaseAgreementStatus.Completed => "sla-badge-completed",
+        SkyTech.Models.LeaseAgreementStatus.Overdue => "sla-badge-danger",
+        SkyTech.Models.LeaseAgreementStatus.Defaulted => "sla-badge-danger",
+        _ => "sla-badge-muted"
+    };
+}
+
+<style>
+    .sla-page { padding: 32px 20px 60px; font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif; max-width: 1080px; margin: 0 auto; color: #1b2a2f; }
+    .sla-title { font-weight: 800; font-size: 1.4rem; margin: 0 0 4px; }
+    .sla-subtitle { color: #6b8481; font-size: 0.9rem; margin: 0 0 22px; }
+
+    .sla-filters { display: flex; gap: 8px; margin-bottom: 18px; flex-wrap: wrap; }
+    .sla-filter-btn { padding: 7px 16px; border-radius: 999px; border: 1px solid #e1eeec; background: #fff; font-size: 0.82rem; font-weight: 600; cursor: pointer; color: #6b8481; transition: all .15s ease; }
+    .sla-filter-btn.active, .sla-filter-btn:hover { background: #4a8f8c; color: #fff; border-color: #4a8f8c; }
+
+    .sla-card {
+        background: #fff; border-radius: 14px; padding: 16px 18px; margin-bottom: 12px; display: grid;
+        grid-template-columns: 60px 1fr auto; gap: 16px; align-items: center;
+        box-shadow: 0 6px 18px rgba(0,0,0,0.06); transition: box-shadow .15s ease, transform .15s ease;
+        opacity: 0; transform: translateY(10px); animation: sla-fade-up .4s ease forwards;
+    }
+    .sla-card:hover { box-shadow: 0 10px 26px rgba(61,120,115,0.16); transform: translateY(-2px); }
+    .sla-cover { width: 60px; height: 60px; border-radius: 10px; overflow: hidden; background: #eaf5f4; display: flex; align-items: center; justify-content: center; color: #4a8f8c; flex-shrink: 0; }
+    .sla-cover img { width: 100%; height: 100%; object-fit: cover; }
+
+    .sla-main-title { font-weight: 700; font-size: 0.96rem; }
+    .sla-meta { color: #6b8481; font-size: 0.82rem; margin-top: 2px; }
+
+    .sla-badge { display: inline-flex; padding: 5px 12px; border-radius: 999px; font-size: 0.74rem; font-weight: 700; }
+    .sla-badge-pending { background: #fdf0dc; color: #a35c00; }
+    .sla-badge-payment { background: #dcf0ef; color: #3d7873; }
+    .sla-badge-active { background: #4a8f8c; color: #fff; }
+    .sla-badge-completed { background: #dff3e6; color: #1e7a44; }
+    .sla-badge-danger { background: #fbe1e0; color: #b3261e; }
+    .sla-badge-muted { background: #eef1f0; color: #6b8481; }
+
+    .sla-empty { text-align: center; padding: 50px; color: #6b8481; background: #fff; border-radius: 16px; box-shadow: 0 6px 20px rgba(0,0,0,0.06); }
+
+    @@keyframes sla-fade-up { to { opacity: 1; transform: translateY(0); } }
+    @@media (max-width: 600px) { .sla-card { grid-template-columns: 48px 1fr; } .sla-badge { grid-column: 1 / -1; justify-self: start; } }
+</style>
+
+<div class="sla-page">
+    <div class="sla-title">Store Lease Agreements</div>
+    <div class="sla-subtitle">Every lease agreement involving a product from your store.</div>
+
+    @if (!Model.Any())
+    {
+        <div class="sla-empty">No lease agreements involve your products yet.</div>
+    }
+    else
+    {
+        <div class="sla-filters">
+            <button class="sla-filter-btn active" data-filter="all">All (@Model.Count())</button>
+            @foreach (var group in Model.GroupBy(a => a.Status))
+            {
+                <button class="sla-filter-btn" data-filter="@group.Key">@group.Key (@group.Count())</button>
+            }
+        </div>
+
+        int delay = 0;
+        @foreach (var agreement in Model)
+        {
+            var coverPhoto = agreement.Items
+                .Select(i => i.LeaseUnit?.LeaseProduct?.LeaseProductPictures?.FirstOrDefault())
+                .FirstOrDefault(p => p != null);
+            var itemNames = string.Join(", ", agreement.Items.Select(i => i.LeaseUnit?.LeaseProduct?.LeaseProdName).Distinct());
+
+            <div class="sla-card" data-status="@agreement.Status" style="animation-delay:@(delay)ms;">
+                <div class="sla-cover">
+                    @if (coverPhoto != null)
+                    {
+                        <img src="@coverPhoto.FilePath" alt="@itemNames" />
+                    }
+                    else
+                    {
+                        <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="4" width="18" height="18" rx="2" /></svg>
+                    }
+                </div>
+                <div>
+                    <div class="sla-main-title">#@agreement.LeaseAgreementId &mdash; @itemNames</div>
+                    <div class="sla-meta">@agreement.Customer?.FirstName @agreement.Customer?.LastName &middot; @agreement.StartDate.ToString("dd MMM yyyy") &ndash; @agreement.EndDate.ToString("dd MMM yyyy") &middot; @agreement.Items.Count item(s)</div>
+                </div>
+                <span class="sla-badge @BadgeClass(agreement.Status)">@agreement.Status</span>
+            </div>
+            delay += 40;
+        }
+    }
+</div>
+
+<script>
+    // Client-side status filter — no round trip needed for a simple show/hide.
+    document.querySelectorAll('.sla-filter-btn').forEach(btn => {
+        btn.addEventListener('click', () => {
+            document.querySelectorAll('.sla-filter-btn').forEach(b => b.classList.remove('active'));
+            btn.classList.add('active');
+            const filter = btn.dataset.filter;
+            document.querySelectorAll('.sla-card').forEach(card => {
+                card.style.display = (filter === 'all' || card.dataset.status === filter) ? '' : 'none';
+            });
+        });
+    });
+</script>

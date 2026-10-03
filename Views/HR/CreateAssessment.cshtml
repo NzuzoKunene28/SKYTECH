@@ -1,0 +1,81 @@
+﻿@model SkyTech.ViewModels.CreateAssessmentViewModel
+
+@{
+    ViewData["Title"] = "Create Assessment";
+    Layout = "~/Views/Shared/_MinimalLayout.cshtml";
+}
+
+<link rel="stylesheet" href="~/CSS/HRCSS/CreateAssessment.css" />
+
+<div class="hr-page">
+    <div class="hr-container-narrow">
+
+        <div class="hr-header-sm">
+            <h2>Create Assessment</h2>
+            <p>Set up a quiz for a vacancy, define the pass mark and time limit</p>
+        </div>
+
+        <div class="hr-form-card">
+            <form asp-action="CreateAssessment" method="post">
+
+                <div class="hr-f-group">
+                    <label asp-for="PostId" class="hr-f-label">Select Vacancy</label>
+
+                    <select asp-for="PostId"
+                            asp-items="Model.JobPosts"
+                            class="hr-f-control">
+                        <option value="">-- Select Vacancy --</option>
+                    </select>
+
+                    <span asp-validation-for="PostId" class="hr-f-error"></span>
+                </div>
+
+                <div class="hr-f-group">
+                    <label asp-for="JobTitle" class="hr-f-label">Assessment Title</label>
+
+                    <input asp-for="JobTitle"
+                           class="hr-f-control"
+                           placeholder="Example: Software Developer Assessment" />
+
+                    <span asp-validation-for="JobTitle" class="hr-f-error"></span>
+                </div>
+
+                <div class="hr-f-group">
+                    <label asp-for="PassMark" class="hr-f-label"></label>
+
+                    <input asp-for="PassMark"
+                           class="hr-f-control"
+                           type="number"
+                           min="1"
+                           max="100" />
+
+                    <span asp-validation-for="PassMark" class="hr-f-error"></span>
+                </div>
+
+                <div class="hr-f-group">
+                    <label asp-for="TimeLimit" class="hr-f-label">
+                        Time Limit (Minutes)
+                    </label>
+
+                    <input asp-for="TimeLimit"
+                           class="hr-f-control"
+                           type="number"
+                           min="1"
+                           max="180" />
+
+                    <span asp-validation-for="TimeLimit" class="hr-f-error"></span>
+                </div>
+
+                <button type="submit" class="btn-hr-submit">
+                    Create Quiz
+                </button>
+
+            </form>
+        </div>
+
+    </div>
+</div>
+
+@section Scripts {
+    <partial name="_ValidationScriptsPartial" />
+}

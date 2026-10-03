@@ -1,0 +1,239 @@
+﻿@model SkyTech.Models.ViewModels.DisburseViewModel
+
+@{
+    ViewData["Title"] = "Disburse Payment";
+    Layout = "~/Views/Shared/_MinimalLayout.cshtml";
+}
+
+<style>
+    :root {
+        --blue: #5f9ea0;
+        --blue-dark: #2d6b6d;
+        --blue-deep: #1f4f50;
+        --bg: #f0f4fc;
+        --border: #dde6f5;
+        --text: #0e1b35;
+        --text-2: #4a5878;
+        --text-m: #8a96b0;
+        --red: #dc2626;
+    }
+
+    .loan-page {
+        min-height: 80vh;
+        background: var(--bg);
+        padding: 45px 20px;
+    }
+
+    .loan-container {
+        max-width: 700px;
+        margin: auto;
+    }
+
+    .step-label {
+        color: var(--blue-dark);
+        font-size: 13px;
+        font-weight: 700;
+        text-transform: uppercase;
+        letter-spacing: 1px;
+    }
+
+    .page-title {
+        color: var(--text);
+        font-size: 35px;
+        font-weight: 750;
+        margin: 7px 0;
+    }
+
+    .page-subtitle {
+        color: var(--text-2);
+        margin-bottom: 30px;
+    }
+
+    .amount-banner {
+        background: white;
+        border: 1px solid var(--border);
+        border-radius: 18px;
+        padding: 22px 28px;
+        margin-bottom: 25px;
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        box-shadow: 0 8px 25px rgba(31, 79, 80, 0.06);
+    }
+
+    .amount-label {
+        color: var(--text-m);
+        font-size: 13px;
+    }
+
+    .amount-value {
+        color: var(--text);
+        font-size: 28px;
+        font-weight: 750;
+    }
+
+    .form-card {
+        background: white;
+        border: 1px solid var(--border);
+        border-radius: 22px;
+        padding: 35px;
+        box-shadow: 0 12px 35px rgba(31, 79, 80, 0.07);
+    }
+
+    .field {
+        margin-bottom: 22px;
+    }
+
+    .field-label {
+        display: block;
+        color: var(--text);
+        font-weight: 650;
+        margin-bottom: 8px;
+    }
+
+    .field-input,
+    .field-select {
+        width: 100%;
+        border: 1px solid var(--border);
+        border-radius: 10px;
+        padding: 12px 14px;
+        background: #fbfcff;
+        color: var(--text);
+        outline: none;
+        box-sizing: border-box;
+    }
+
+        .field-input:focus,
+        .field-select:focus {
+            border-color: var(--blue);
+            box-shadow: 0 0 0 3px rgba(95, 158, 160, 0.14);
+        }
+
+    .validation-summary,
+    .validation-message {
+        color: var(--red);
+        font-size: 14px;
+    }
+
+    .error-banner {
+        background: #fde8e8;
+        border: 1px solid #f0b7b7;
+        color: var(--red);
+        border-radius: 12px;
+        padding: 15px 18px;
+        margin-bottom: 20px;
+        font-size: 14px;
+    }
+
+    .submit-button {
+        width: 100%;
+        background: var(--blue-dark);
+        color: white;
+        border: none;
+        padding: 14px;
+        border-radius: 11px;
+        font-size: 16px;
+        font-weight: 700;
+        cursor: pointer;
+        margin-top: 10px;
+    }
+
+        .submit-button:hover {
+            background: var(--blue-deep);
+        }
+</style>
+
+<div class="loan-page">
+
+    <div class="loan-container">
+
+        <div class="step-label">
+            Disbursement
+        </div>
+
+        <h1 class="page-title">
+            Disburse Payment
+        </h1>
+
+        <p class="page-subtitle">
+            Enter the customer's bank details to transfer the approved loan amount.
+        </p>
+
+        <div class="amount-banner">
+            <div>
+                <div class="amount-label">Application</div>
+                <div style="color: var(--text-2); font-weight: 600;">#@Model.LoanApplicationId</div>
+            </div>
+            <div style="text-align: right;">
+                <div class="amount-label">Amount to Disburse</div>
+                <div class="amount-value">@Model.RequestedAmount.ToString("C")</div>
+            </div>
+        </div>
+
+        @if (TempData["Error"] != null)
+        {
+            <div class="error-banner">
+                @TempData["Error"]
+            </div>
+        }
+
+        <div class="form-card">
+
+            <div asp-validation-summary="ModelOnly" class="validation-summary"></div>
+
+            <form asp-action="Disburse" asp-controller="LoanDisbursement" method="post">
+
+                @Html.AntiForgeryToken()
+
+                <input type="hidden" asp-for="LoanApplicationId" />
+                <input type="hidden" asp-for="RequestedAmount" />
+
+                <div class="field">
+
+                    <label asp-for="AccountHolderName" class="field-label"></label>
+
+                    <input asp-for="AccountHolderName" class="field-input" placeholder="Full name on the account" />
+
+                    <span asp-validation-for="AccountHolderName" class="validation-message"></span>
+
+                </div>
+
+                <div class="field">
+
+                    <label asp-for="AccountNumber" class="field-label"></label>
+
+                    <input asp-for="AccountNumber" class="field-input" placeholder="e.g. 1234567890" />
+
+                    <span asp-validation-for="AccountNumber" class="validation-message"></span>
+
+                </div>
+
+                <div class="field">
+
+                    <label asp-for="BankCode" class="field-label"></label>
+
+                    <select asp-for="BankCode" class="field-select" asp-items="Model.AvailableBanks">
+                        <option value="">-- Select a bank --</option>
+                    </select>
+
+                    <span asp-validation-for="BankCode" class="validation-message"></span>
+
+                </div>
+
+                <button type="submit" class="submit-button">
+                    Confirm &amp; Transfer Payment
+                </button>
+
+            </form>
+
+        </div>
+
+    </div>
+
+</div>
+
+@section Scripts {
+    @{
+        await Html.RenderPartialAsync("_ValidationScriptsPartial");
+    }
+}

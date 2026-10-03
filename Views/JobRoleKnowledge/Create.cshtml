@@ -1,0 +1,94 @@
+﻿@model SkyTech.Models.JobPostServices.JobRoleKnowledge
+@{
+    ViewData["Title"] = "Add Job Role";
+    Layout = "~/Views/Shared/_MinimalLayout.cshtml";
+}
+
+<link rel="stylesheet" href="~/CSS/HRCSS/JobRoleKnowledgeCreate.css" />
+
+<div class="hr-page">
+    <div class="hr-container-narrow">
+
+        <div class="hr-header-sm">
+            <h2>Add Job Role</h2>
+            <p>Add reference information used when generating job posts for this role</p>
+        </div>
+
+        <div class="form-container">
+            <form asp-controller="JobRoleKnowledge" asp-action="Create" method="post">
+
+                <div class="form-section-label">Role Details</div>
+
+                <div class="form-row">
+                    <div class="form-group">
+                        <label>Job Title</label>
+                        <select asp-for="PositionId" asp-items="ViewBag.JobTitles">
+                            <option value="">--Select Job Title--</option>
+                        </select>
+                        <span asp-validation-for="PositionId"></span>
+                    </div>
+
+                    <div class="form-group">
+                        <label>Department</label>
+                        <select asp-for="DepartmentId" asp-items="ViewBag.Departments" required>
+                            <option value="">-- Select Department --</option>
+                        </select>
+                        <span asp-validation-for="DepartmentId"></span>
+                    </div>
+                </div>
+
+                <div class="form-group">
+                    <label>Max Headcount <span class="required-mark">*</span></label>
+                    <input asp-for="MaxHeadcount" type="number" min="1" required />
+                    <span class="form-hint">Maximum number of employees needed for this position</span>
+                    <span asp-validation-for="MaxHeadcount"></span>
+                </div>
+
+                <div class="hr-toggle-row">
+                    <div>
+                        <div class="hr-toggle-label">Active</div>
+                        <div class="hr-toggle-sub">Available for use when generating job posts</div>
+                    </div>
+                    <label class="hr-switch">
+                        <input asp-for="IsActive" type="checkbox" checked="checked" />
+                        <span class="hr-switch-slider"></span>
+                    </label>
+                </div>
+
+                <div class="form-section-label">Role Requirements</div>
+
+                <div class="form-group">
+                    <label asp-for="CompanyResponsibilities"></label>
+                    <textarea asp-for="CompanyResponsibilities" rows="5" placeholder="One responsibility per line"></textarea>
+                    <span asp-validation-for="CompanyResponsibilities"></span>
+                </div>
+
+                <div class="form-group">
+                    <label asp-for="RequiredSkills"></label>
+                    <textarea asp-for="RequiredSkills" rows="4" placeholder="One skill per line"></textarea>
+                </div>
+
+                <div class="form-group">
+                    <label asp-for="RequiredExperience"></label>
+                    <textarea asp-for="RequiredExperience" rows="3" placeholder="One item per line"></textarea>
+                </div>
+
+                <div class="form-group">
+                    <label asp-for="RequiredQualifications"></label>
+                    <textarea asp-for="RequiredQualifications" rows="3" placeholder="One item per line"></textarea>
+                </div>
+
+                <div class="form-group">
+                    <label asp-for="OtherCompanyInformation"></label>
+                    <textarea asp-for="OtherCompanyInformation" rows="3"></textarea>
+                </div>
+
+                <div class="btn-submit">
+                    <button type="submit">Save Role</button>
+                </div>
+
+            </form>
+        </div>
+
+    </div>
+</div>

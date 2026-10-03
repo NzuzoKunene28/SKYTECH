@@ -1,0 +1,399 @@
+@model IEnumerable<SkyTech.Models.LeaseAgreement>
+@{
+    ViewData["Title"] = "My Lease Requests";
+
+    string StatusBadgeClass(SkyTech.Models.LeaseAgreementStatus status) => status switch
+    {
+        SkyTech.Models.LeaseAgreementStatus.PendingApproval => "badge-pending",
+        SkyTech.Models.LeaseAgreementStatus.PendingPayment => "badge-payment",
+        SkyTech.Models.LeaseAgreementStatus.Active => "badge-active",
+        SkyTech.Models.LeaseAgreementStatus.Completed => "badge-completed",
+        SkyTech.Models.LeaseAgreementStatus.Overdue => "badge-danger",
+        SkyTech.Models.LeaseAgreementStatus.Defaulted => "badge-danger",
+        SkyTech.Models.LeaseAgreementStatus.Rejected => "badge-muted",
+        SkyTech.Models.LeaseAgreementStatus.Cancelled => "badge-muted",
+        _ => "badge-muted"
+    };
+}
+
+<style>
+    :root {
+        --st-teal-dark: #3d7873;
+        --st-teal: #4a8f8c;
+        --st-teal-light: #eaf5f4;
+        --st-teal-pale: #d7ece9;
+        --st-orange: #f5820d;
+        --st-ink: #1b2a2f;
+        --st-muted: #6b8481;
+        --st-border: #e1eeec;
+        --st-white: #ffffff;
+    }
+
+    .lr-page {
+        background: linear-gradient(160deg, var(--st-teal) 0%, var(--st-teal-dark) 100%);
+        min-height: 100%;
+        padding: 32px 20px 60px;
+    }
+
+    .lr-wrap {
+        max-width: 1080px;
+        margin: 0 auto;
+        font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
+        color: var(--st-ink);
+    }
+
+    .lr-header {
+        display: flex;
+        align-items: center;
+        gap: 14px;
+        margin-bottom: 22px;
+        padding: 0 4px;
+    }
+
+        .lr-header .lr-icon {
+            width: 48px;
+            height: 48px;
+            border-radius: 12px;
+            background: var(--st-white);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            color: var(--st-teal-dark);
+            flex-shrink: 0;
+            box-shadow: 0 4px 12px rgba(0, 0, 0, 0.12);
+        }
+
+        .lr-header h2 {
+            margin: 0;
+            font-weight: 800;
+            font-size: 1.55rem;
+            color: var(--st-white);
+        }
+
+    .lr-alert {
+        background: var(--st-white);
+        border: 1px solid var(--st-teal-pale);
+        color: var(--st-teal-dark);
+        border-radius: 14px;
+        padding: 15px 18px;
+        margin-bottom: 20px;
+        font-weight: 500;
+        display: flex;
+        align-items: center;
+        gap: 10px;
+        box-shadow: 0 4px 14px rgba(0, 0, 0, 0.08);
+    }
+
+        .lr-alert svg {
+            flex-shrink: 0;
+        }
+
+    .lr-empty {
+        text-align: center;
+        padding: 70px 20px;
+        background: var(--st-white);
+        border-radius: 20px;
+        box-shadow: 0 12px 32px rgba(0, 0, 0, 0.14);
+    }
+
+        .lr-empty .lr-empty-icon {
+            width: 76px;
+            height: 76px;
+            margin: 0 auto 18px;
+            border-radius: 50%;
+            background: var(--st-teal-light);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            color: var(--st-teal);
+        }
+
+        .lr-empty p {
+            color: var(--st-muted);
+            font-size: 1.05rem;
+            margin: 0;
+            font-weight: 500;
+        }
+
+    .lr-list {
+        display: flex;
+        flex-direction: column;
+        gap: 14px;
+    }
+
+    .lr-card {
+        background: var(--st-white);
+        border-radius: 18px;
+        padding: 14px;
+        display: grid;
+        grid-template-columns: 84px 1fr auto;
+        gap: 16px;
+        align-items: center;
+        box-shadow: 0 8px 22px rgba(0, 0, 0, 0.08);
+        transition: box-shadow 0.15s ease, transform 0.15s ease;
+        opacity: 0;
+        transform: translateY(12px);
+        animation: lr-fade-up .4s ease forwards;
+    }
+
+        .lr-card:hover {
+            box-shadow: 0 12px 30px rgba(61, 120, 115, 0.22);
+            transform: translateY(-2px);
+        }
+
+    .lr-cover {
+        width: 84px;
+        height: 84px;
+        border-radius: 12px;
+        overflow: hidden;
+        flex-shrink: 0;
+        background: var(--st-teal-light);
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        color: var(--st-teal);
+    }
+        .lr-cover img { width: 100%; height: 100%; object-fit: cover; transition: transform .25s ease; }
+        .lr-card:hover .lr-cover img { transform: scale(1.06); }
+
+    @@keyframes lr-fade-up { to { opacity: 1; transform: translateY(0); } }
+
+    .lr-card-main {
+        display: flex;
+        flex-direction: column;
+        gap: 6px;
+        min-width: 0;
+    }
+
+    .lr-items {
+        font-weight: 700;
+        font-size: 1.02rem;
+        color: var(--st-ink);
+        overflow-wrap: anywhere;
+    }
+
+    .lr-meta {
+        display: flex;
+        flex-wrap: wrap;
+        gap: 14px;
+        font-size: 0.86rem;
+        color: var(--st-muted);
+    }
+
+        .lr-meta span {
+            display: inline-flex;
+            align-items: center;
+            gap: 6px;
+        }
+
+    .lr-card-side {
+        display: flex;
+        align-items: center;
+        gap: 12px;
+        justify-self: end;
+    }
+
+    .lr-badge {
+        display: inline-flex;
+        align-items: center;
+        padding: 6px 14px;
+        border-radius: 999px;
+        font-size: 0.78rem;
+        font-weight: 700;
+        letter-spacing: 0.2px;
+        white-space: nowrap;
+    }
+
+    .badge-pending {
+        background: #fdf0dc;
+        color: #a35c00;
+    }
+
+    .badge-payment {
+        background: #dcf0ef;
+        color: var(--st-teal-dark);
+    }
+
+    .badge-active {
+        background: var(--st-teal);
+        color: var(--st-white);
+    }
+
+    .badge-completed {
+        background: #dff3e6;
+        color: #1e7a44;
+    }
+
+    .badge-danger {
+        background: #fbe1e0;
+        color: #b3261e;
+    }
+
+    .badge-muted {
+        background: #eef1f0;
+        color: var(--st-muted);
+    }
+
+    .lr-btn {
+        display: inline-flex;
+        align-items: center;
+        gap: 6px;
+        padding: 10px 20px;
+        border-radius: 999px;
+        border: none;
+        color: var(--st-white);
+        background: linear-gradient(135deg, var(--st-teal) 0%, var(--st-teal-dark) 100%);
+        font-weight: 700;
+        font-size: 0.85rem;
+        text-decoration: none;
+        transition: filter 0.15s ease;
+        white-space: nowrap;
+        box-shadow: 0 4px 12px rgba(61, 120, 115, 0.3);
+    }
+
+        .lr-btn:hover {
+            filter: brightness(1.08);
+            color: var(--st-white);
+        }
+
+    /* Distinct color for the pay-now action so it doesn't blend into "View" */
+    .lr-btn-pay {
+        background: linear-gradient(135deg, var(--st-orange) 0%, #d96c00 100%);
+        box-shadow: 0 4px 12px rgba(245, 130, 13, 0.35);
+    }
+
+        .lr-btn-pay:hover {
+            filter: brightness(1.08);
+            color: var(--st-white);
+        }
+
+    @@media (max-width: 640px) {
+        .lr-card {
+            grid-template-columns: 64px 1fr;
+        }
+        .lr-cover { width: 64px; height: 64px; }
+        .lr-card-side {
+            grid-column: 1 / -1;
+            justify-self: start;
+            width: 100%;
+            justify-content: space-between;
+            flex-wrap: wrap;
+        }
+    }
+</style>
+
+<div class="lr-page">
+    <div class="lr-wrap">
+        <div class="lr-header">
+            <div class="lr-icon">
+                <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M9 12h6M9 16h6M9 8h6M5 4h14a1 1 0 0 1 1 1v14a1 1 0 0 1-1 1H5a1 1 0 0 1-1-1V5a1 1 0 0 1 1-1z" /></svg>
+            </div>
+            <h2>My Lease Requests</h2>
+        </div>
+
+        @if (TempData["Message"] != null)
+        {
+            <div class="lr-alert">
+                <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M22 11.08V12a10 10 0 1 1-5.93-9.14" /><polyline points="22 4 12 14.01 9 11.01" /></svg>
+                <span>@TempData["Message"]</span>
+            </div>
+        }
+
+        @if (!Model.Any())
+        {
+            <div class="lr-empty">
+                <div class="lr-empty-icon">
+                    <svg width="30" height="30" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="11" cy="11" r="7" /><line x1="21" y1="21" x2="16.65" y2="16.65" /></svg>
+                </div>
+                <p>You haven't requested to lease any equipment yet.</p>
+            </div>
+        }
+        else
+        {
+            <div class="lr-list">
+                @{ int lrDelay = 0; }
+                @foreach (var agreement in Model)
+                {
+                    @await Html.PartialAsync("_RenewalBanner", agreement)
+
+                    
+                        // Only Active leases carry an ongoing payment schedule —
+                        // PendingPayment/PendingApproval leases route through the
+                        // "View" card into their own dedicated flows instead.
+                        var pendingPayment = agreement.Status == SkyTech.Models.LeaseAgreementStatus.Active
+                            ? agreement.Payments?
+                                .Where(p => p.Status == SkyTech.Models.LeasePaymentStatus.Pending)
+                                .OrderBy(p => p.DueDate)
+                                .FirstOrDefault()
+                            : null;
+                        var isRenewalFee = pendingPayment?.Type == SkyTech.Models.LeasePaymentType.RenewalFee;
+                        var coverPhoto = agreement.Items
+                            .Select(i => i.LeaseUnit?.LeaseProduct?.LeaseProductPictures?.FirstOrDefault())
+                            .FirstOrDefault(p => p != null);
+                    
+
+                    <div class="lr-card" style="animation-delay:@(lrDelay)ms;">
+                        <div class="lr-cover">
+                            @if (coverPhoto != null)
+                            {
+                                <img src="@coverPhoto.FilePath" alt="@agreement.Items.First().LeaseUnit?.LeaseProduct?.LeaseProdName" />
+                            }
+                            else
+                            {
+                                <svg width="28" height="28" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="4" width="18" height="18" rx="2" /><line x1="16" y1="2" x2="16" y2="6" /><line x1="8" y1="2" x2="8" y2="6" /><line x1="3" y1="10" x2="21" y2="10" /></svg>
+                            }
+                        </div>
+                        <div class="lr-card-main">
+                            <div class="lr-items">
+                                @{
+                                    var itemNames = string.Join(", ", agreement.Items
+                                        .Select(i => i.LeaseUnit?.LeaseProduct?.LeaseProdName)
+                                        .Distinct());
+                                    var itemCount = agreement.Items.Count;
+                                }
+                                @itemNames (x@(itemCount))
+                            </div>
+                            <div class="lr-meta">
+                                <span>
+                                    <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="4" width="18" height="18" rx="2" /><line x1="16" y1="2" x2="16" y2="6" /><line x1="8" y1="2" x2="8" y2="6" /><line x1="3" y1="10" x2="21" y2="10" /></svg>
+                                    Submitted @(agreement.StartDate.ToString("dd MMM yyyy"))
+                                </span>
+                                <span>
+                                    <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10" /><polyline points="12 6 12 12 16 14" /></svg>
+                                    @agreement.TermMonths month(s)
+                                </span>
+                                @if (pendingPayment != null)
+                                {
+                                    <span style="color:#a35c00;font-weight:700;">
+                                        <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="1" y="4" width="22" height="16" rx="2" /><line x1="1" y1="10" x2="23" y2="10" /></svg>
+                                        @(isRenewalFee ? "Renewal fee" : "Payment") due @(pendingPayment.DueDate.ToString("dd MMM yyyy")) — R@(pendingPayment.AmountDue.ToString("N2"))
+                                    </span>
+                                }
+                            </div>
+                        </div>
+                        <div class="lr-card-side">
+                            <span class="lr-badge @StatusBadgeClass(agreement.Status)">@agreement.Status</span>
+
+                            @if (pendingPayment != null)
+                            {
+                                <a asp-controller="Payment"
+                                   asp-action="@(isRenewalFee ? "RenewLeasePaymentPage" : "PayMonthlyInstallmentPage")"
+                                   asp-route-leasePaymentId="@(pendingPayment.LeasePaymentId)"
+                                   class="lr-btn lr-btn-pay">
+                                    Pay Now
+                                    <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><line x1="5" y1="12" x2="19" y2="12" /><polyline points="12 5 19 12 12 19" /></svg>
+                                </a>
+                            }
+
+                            <a asp-action="ViewLeaseAgreement" asp-route-id="@agreement.LeaseAgreementId" class="lr-btn">
+                                View
+                                <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><line x1="5" y1="12" x2="19" y2="12" /><polyline points="12 5 19 12 12 19" /></svg>
+                            </a>
+                        </div>
+                    </div>
+                    lrDelay += 50;
+                }
+            </div>
+        }
+    </div>
+</div>

@@ -1,0 +1,84 @@
+﻿:root {
+    --blue: #5f9ea0;
+    --blue-dark: #2d6b6d;
+    --blue-deep: #1f4f50;
+    --bg: #f0f4fc;
+    --border: #dde6f5;
+    --text: #0e1b35;
+    --text-2: #4a5878;
+    --text-m: #8a96b0;
+    --red: #dc2626;
+}
+
+body {
+    font-family: 'Plus Jakarta Sans', sans-serif;
+    background-color: var(--bg);
+    color: var(--text);
+}
+
+h1 {
+    font-family: 'Clash Display', 'Plus Jakarta Sans', sans-serif;
+    font-weight: 700;
+    color: var(--blue-deep);
+    margin-bottom: 18px;
+}
+
+table {
+    width: 100%;
+    max-width: 1000px;
+    border-collapse: collapse;
+    background: #fff;
+    border: 1.5px solid var(--border) !important;
+    border-radius: 16px;
+    overflow: hidden;
+    box-shadow: 0 10px 30px rgba(31, 79, 80, .06);
+    font-size: .86rem;
+}
+
+th, td {
+    border: 1px solid var(--border) !important;
+    padding: 10px 12px !important;
+    text-align: left;
+}
+
+thead th {
+    background: var(--bg);
+    font-size: .72rem;
+    font-weight: 700;
+    text-transform: uppercase;
+    letter-spacing: .04em;
+    color: var(--text-m);
+}
+
+tbody td {
+    color: var(--text-2);
+}
+
+tbody tr:hover {
+    background: rgba(95, 158, 160, .05);
+}
+
+.status-ontime {
+    color: #15803d;
+    font-weight: 700;
+}
+
+.status-late {
+    color: #b45309;
+    font-weight: 700;
+}
+
+.status-absent {
+    color: var(--red);
+    font-weight: 700;
+}
+
+.status-pending {
+    color: var(--text-m);
+    font-weight: 600;
+}
+
+p {
+    color: var(--text-2);
+    font-size: .92rem;
+}

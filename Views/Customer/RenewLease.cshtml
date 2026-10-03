@@ -1,0 +1,88 @@
+﻿@model SkyTech.Models.LeaseAgreement
+@{
+    ViewBag.Title = "Renew lease";
+    Layout = "~/Views/Shared/_MinimalLayout.cshtml";
+    int minMonths = ViewBag.MinLeaseMonths;
+    int maxMonths = ViewBag.MaxLeaseMonths;
+    double monthlyRate = ViewBag.MonthlyRate;
+    int daysRemaining = ViewBag.DaysRemaining;
+    var product = Model.Items.FirstOrDefault()?.LeaseUnit?.LeaseProduct;
+}
+
+@section Styles {
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+    <link href="https://api.fontshare.com/v2/css?f[]=clash-display@400,500,600,700&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="~/CSS/ShoppingPageStyle.css">
+    <style>
+        /* Same pattern as LeaseConfirmation.cshtml's scoped block, amber
+           instead of green since this is a "action needed" page, not a
+           success page. */
+        .conf-wrap { max-width: 560px; margin: 0 auto; padding: 2rem 1rem 100px; text-align: center; }
+        .conf-icon { width: 64px; height: 64px; border-radius: 50%; background: #fff7e6; color: #b7791f; display: flex; align-items: center; justify-content: center; font-size: 1.6rem; margin: 0 auto 1rem; }
+        .conf-title { font-family: 'Clash Display', 'Plus Jakarta Sans', sans-serif; font-size: 1.4rem; font-weight: 600; color: #16344a; margin: 0 0 .4rem; }
+        .conf-sub { color: #667085; font-size: .9rem; margin: 0 0 1.6rem; }
+        .conf-card { background: #fff; border: 1px solid #e6ebf0; border-radius: 14px; padding: 1.2rem 1.3rem; text-align: left; margin-bottom: 1.2rem; }
+        .conf-row { display: flex; justify-content: space-between; font-size: .88rem; padding: .4rem 0; color: #445; }
+        .conf-row.total { border-top: 1px solid #e6ebf0; margin-top: .5rem; padding-top: .8rem; font-weight: 700; color: #16344a; }
+
+        .term-select { width: 100%; padding: .7rem .8rem; border: 1px solid #e6ebf0; border-radius: 10px; font-family: 'Plus Jakarta Sans', sans-serif; font-size: .9rem; color: #16344a; background: #fff; margin-bottom: 1.2rem; }
+        .conf-pay-btn.active { background: #17845a; color: #fff; border: none; border-radius: 10px; padding: .9rem; font-weight: 600; font-size: .95rem; width: 100%; cursor: pointer; }
+        .conf-cancel { display: inline-block; margin-top: .8rem; font-size: .82rem; color: #8a94a6; text-decoration: none; }
+        .conf-error { background: #fdeaea; color: #c0392b; border-radius: 10px; padding: .7rem 1rem; font-size: .85rem; margin-bottom: 1.2rem; text-align: left; }
+    </style>
+}
+
+<div class="page-wrap">
+    <header class="header">
+        <a href="@Url.Action("ShoppingPage", "Customer")" class="logo"><span class="logo-l">S</span>kyTech</a>
+    </header>
+
+    <div class="conf-wrap">
+        <div class="conf-icon"><i class="fas fa-rotate"></i></div>
+        <div class="conf-title">Renew your lease</div>
+        <div class="conf-sub">
+            Agreement #@Model.LeaseAgreementId ends in @daysRemaining day(s), on @Model.EndDate.ToString("d MMM yyyy").
+            Pick a new term to keep it going.
+        </div>
+
+        @if (TempData["Error"] != null)
+        {
+            <div class="conf-error"><i class="fas fa-circle-exclamation"></i> @TempData["Error"]</div>
+        }
+
+        <form method="post" action="@Url.Action("RenewLease", "Customer", new { id = Model.LeaseAgreementId })">
+            @Html.AntiForgeryToken()
+
+            <div class="conf-card">
+                <div class="conf-row"><span>Item</span><span>@(product?.LeaseProdName ?? "—")</span></div>
+                <div class="conf-row"><span>Units on lease</span><span>@Model.Items.Count</span></div>
+                <div class="conf-row"><span>Monthly rate</span><span>R @monthlyRate.ToString("N2")</span></div>
+            </div>
+
+            <select class="term-select" id="newTermMonths" name="newTermMonths" onchange="updateTotal()">
+                @for (int m = minMonths; m <= maxMonths; m++)
+                {
+                    <option value="@m">@m month(s)</option>
+                }
+            </select>
+
+            <div class="conf-card">
+                <div class="conf-row total"><span>Renewal fee due</span><span>R <span id="totalFee">@((minMonths * monthlyRate).ToString("N2"))</span></span></div>
+            </div>
+
+            <button type="submit" class="conf-pay-btn active"><i class="fas fa-rotate"></i> Confirm renewal &amp; pay</button>
+        </form>
+
+        <a href="@Url.Action("ViewLeaseAgreement", "Customer", new { id = Model.LeaseAgreementId })" class="conf-cancel">Not now, take me back</a>
+    </div>
+</div>
+
+<script>
+    const monthlyRate = @monthlyRate;
+    function updateTotal() {
+        const months = parseInt(document.getElementById('newTermMonths').value, 10);
+        document.getElementById('totalFee').innerText = (months * monthlyRate).toFixed(2);
+    }
+</script>

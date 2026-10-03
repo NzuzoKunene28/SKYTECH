@@ -1,0 +1,487 @@
+﻿@using SkyTech.Models
+@model SkyTech.Models.ProposeItem
+@{
+    Layout = "~/Views/Shared/_MinimalLayout.cshtml";
+    ViewData["Title"] = "Confirm Payment";
+    var checkout = Model.Checkout;
+}
+
+@section Styles {
+    <link rel="stylesheet" href="~/CSS/MakePaymentStyle.css">
+}
+
+<!-- ── Payment Overlay ── -->
+<div class="pay-overlay" id="payOverlay">
+    <div class="pay-modal phase-loading" id="payModal">
+
+        <!-- Loading spinner -->
+        <div class="modal-icon" id="spinnerIcon"></div>
+
+        <!-- Success tick (hidden initially) -->
+        <div class="modal-success" id="successIcon">
+            <i class="fas fa-check"></i>
+        </div>
+
+        <div class="modal-title" id="modalTitle">Processing Payment…</div>
+        <div class="modal-sub"   id="modalSub">
+            Please wait while we process the transfer.
+        </div>
+
+        <div class="modal-amount" id="modalAmount" style="display:none">
+            R @Model.AmountProposed.ToString("N2")
+        </div>
+        <div class="modal-to" id="modalTo" style="display:none">
+            Paid to @(checkout?.AccountHolderName ?? "Customer")
+        </div>
+
+        <button class="modal-close-btn" id="modalCloseBtn" onclick="goBack()">
+            ✓ Done — Back to Proposals
+        </button>
+    </div>
+</div>
+
+<!-- ── Page card ── -->
+<div class="pay-wrapper">
+
+    @if (TempData["Error"] != null)
+    {
+        <div class="alert alert-danger mb-3">⚠️ @TempData["Error"]</div>
+    }
+
+    <div class="pay-card">
+
+        <div class="pay-header">
+            <h4><i class="fas fa-money-bill-transfer me-2"></i>Confirm Payout</h4>
+            <p>Review the details below before sending the payment.</p>
+        </div>
+
+        <div class="pay-body">
+
+            <div class="section-title">Proposal Details</div>
+            <div class="info-row">
+                <span class="info-label">Item</span>
+                <span class="info-value">@Model.ProdName</span>
+            </div>
+            <div class="info-row">
+                <span class="info-label">Category</span>
+                <span class="info-value">@Model.ProdCategory</span>
+            </div>
+            <div class="info-row">
+                <span class="info-label">Customer</span>
+                <span class="info-value">
+                    @(Model.Customer != null
+                        ? Model.Customer.FirstName + " " + Model.Customer.LastName
+                        : "—")
+                </span>
+            </div>
+
+            <div class="amount-highlight">
+                <span class="lbl">Payout Amount</span>
+                <span class="val">R @Model.AmountProposed.ToString("N2")</span>
+            </div>
+
+            @if (checkout != null)
+            {
+                <div class="section-title">Banking Details</div>
+                <div class="info-row">
+                    <span class="info-label">Account Holder</span>
+                    <span class="info-value">@checkout.AccountHolderName</span>
+                </div>
+                <div class="info-row">
+                    <span class="info-label">Bank</span>
+                    <span class="info-value">@checkout.BankName</span>
+                </div>
+                <div class="info-row">
+                    <span class="info-label">Account Number</span>
+                    <span class="info-value">@checkout.AccountNumber</span>
+                </div>
+                <div class="info-row">
+                    <span class="info-label">Branch Code</span>
+                    <span class="info-value">@checkout.BranchCode</span>
+                </div>
+                <div class="info-row">
+                    <span class="info-label">Account Type</span>
+                    <span class="info-value">@checkout.AccountType</span>
+                </div>
+                <div class="info-row">
+                    <span class="info-label">Phone</span>
+                    <span class="info-value">@checkout.PhoneNumber</span>
+                </div>
+            }
+
+            <div class="warning-box mt-3">
+                <i class="fas fa-triangle-exclamation mt-1"></i>
+                <span>
+                    <strong>This action cannot be undone.</strong>
+                    Once confirmed, R @Model.AmountProposed.ToString("N2") will be transferred
+                    to the customer's bank account. Verify all details before proceeding.
+                </span>
+            </div>
+
+            <!-- Clicking the button triggers the popup + submits the form after the animation -->
+            <button type="button" class="btn-pay" id="payBtn" onclick="startPayment()">
+                <i class="fas fa-paper-plane"></i>
+                Send R @Model.AmountProposed.ToString("N2") to @(checkout?.AccountHolderName ?? "Customer")
+            </button>
+
+            <!-- Hidden form — submitted programmatically after the animation -->
+            <form id="payForm"
+                  method="post"
+                  asp-action="MakePayment"
+                  asp-controller="ShopOwner"
+                  style="display:none">
+                @Html.AntiForgeryToken()
+                <input type="hidden" name="propItemId" value="@Model.PropItemId" />
+            </form>
+
+            <a asp-action="AcceptedProposals" asp-controller="ShopOwner" class="btn-back">
+                ← Cancel &amp; Go Back
+            </a>
+
+        </div>
+    </div>
+</div>
+
+@section Scripts {
+    <script>
+        function startPayment() {
+            // Disable the button immediately to prevent double-clicks
+            const btn = document.getElementById('payBtn');
+            btn.disabled = true;
+
+            // Show the overlay in loading phase
+            document.getElementById('payOverlay').classList.add('show');
+
+            // After 2.5 s — switch to success
+            setTimeout(() => {
+                switchToSuccess();
+
+                // After the success animation settle (0.5 s) — submit the real form
+                setTimeout(() => {
+                    document.getElementById('payForm').submit();
+                }, 500);
+
+            }, 2500);
+        }
+
+        function switchToSuccess() {
+            const modal = document.getElementById('payModal');
+            modal.classList.remove('phase-loading');
+            modal.classList.add('phase-success');
+
+            document.getElementById('modalTitle').textContent  = 'Payment Successful!';
+            document.getElementById('modalSub').textContent    = 'The transfer has been processed successfully.';
+            document.getElementById('modalAmount').style.display = 'block';
+            document.getElementById('modalTo').style.display    = 'block';
+        }
+
+        // Fallback — if the form submission causes a redirect back here
+        // and TempData signals success, show the modal in success state immediately
+        window.addEventListener('DOMContentLoaded', () => {
+            // nothing needed here since we redirect to AcceptedProposals on success
+        });
+
+        function goBack() {
+            window.location.href = '@Url.Action("AcceptedProposals", "ShopOwner")';
+        }
+    </script>
+}
+
+
+
+
+@* @using SkyTech.Models
+@model SkyTech.Models.ProposeItem
+@{
+    Layout = "~/Views/Shared/_MinimalLayout.cshtml";
+    ViewData["Title"] = "Confirm Payment";
+
+    var checkout = Model.Checkout;
+}
+
+<style>
+    .pay-wrapper {
+        max-width: 620px;
+        margin: 2.5rem auto;
+        font-family: 'Plus Jakarta Sans', sans-serif;
+    }
+
+    .pay-card {
+        background: #fff;
+        border: 1px solid #e2e8f0;
+        border-radius: 16px;
+        overflow: hidden;
+        box-shadow: 0 4px 24px rgba(0,0,0,.07);
+    }
+
+    .pay-header {
+        background: linear-gradient(135deg, #1a73e8, #0d47a1);
+        color: #fff;
+        padding: 1.5rem 1.75rem;
+    }
+
+        .pay-header h4 {
+            margin: 0 0 .25rem;
+            font-size: 1.2rem;
+            font-weight: 700;
+        }
+
+        .pay-header p {
+            margin: 0;
+            opacity: .85;
+            font-size: .85rem;
+        }
+
+    .pay-body {
+        padding: 1.75rem;
+    }
+
+    .info-row {
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        padding: .55rem 0;
+        border-bottom: 1px solid #f1f5f9;
+        font-size: .9rem;
+    }
+
+        .info-row:last-child {
+            border-bottom: none;
+        }
+
+    .info-label {
+        color: #64748b;
+        font-weight: 600;
+        text-transform: uppercase;
+        font-size: .75rem;
+        letter-spacing: .04em;
+    }
+
+    .info-value {
+        color: #1e293b;
+        font-weight: 500;
+        text-align: right;
+        max-width: 60%;
+        word-break: break-word;
+    }
+
+    .amount-highlight {
+        background: #f0fdf4;
+        border: 1.5px solid #bbf7d0;
+        border-radius: 10px;
+        padding: 1rem 1.25rem;
+        margin: 1.25rem 0;
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+    }
+
+        .amount-highlight .lbl {
+            font-size: .8rem;
+            font-weight: 700;
+            color: #16a34a;
+            text-transform: uppercase;
+            letter-spacing: .05em;
+        }
+
+        .amount-highlight .val {
+            font-size: 1.6rem;
+            font-weight: 800;
+            color: #15803d;
+        }
+
+    .warning-box {
+        background: #fffbeb;
+        border: 1px solid #fde68a;
+        border-radius: 8px;
+        padding: .85rem 1rem;
+        font-size: .82rem;
+        color: #92400e;
+        margin-bottom: 1.25rem;
+        display: flex;
+        gap: .5rem;
+        align-items: flex-start;
+    }
+
+    .btn-pay {
+        width: 100%;
+        background: linear-gradient(135deg, #16a34a, #15803d);
+        color: #fff;
+        border: none;
+        border-radius: 10px;
+        padding: .85rem 1.5rem;
+        font-size: 1rem;
+        font-weight: 700;
+        cursor: pointer;
+        transition: opacity .2s, transform .1s;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        gap: .5rem;
+    }
+
+        .btn-pay:hover {
+            opacity: .9;
+            transform: translateY(-1px);
+        }
+
+        .btn-pay:active {
+            transform: translateY(0);
+        }
+
+        .btn-pay:disabled {
+            opacity: .55;
+            cursor: not-allowed;
+            transform: none;
+        }
+
+    .btn-back {
+        display: block;
+        width: 100%;
+        text-align: center;
+        margin-top: .75rem;
+        padding: .7rem;
+        border: 1.5px solid #cbd5e1;
+        border-radius: 10px;
+        color: #475569;
+        font-weight: 600;
+        font-size: .9rem;
+        text-decoration: none;
+        transition: background .15s;
+    }
+
+        .btn-back:hover {
+            background: #f8fafc;
+            color: #1e293b;
+            text-decoration: none;
+        }
+
+    .section-title {
+        font-size: .78rem;
+        font-weight: 700;
+        color: #94a3b8;
+        text-transform: uppercase;
+        letter-spacing: .08em;
+        margin: 1.25rem 0 .5rem;
+    }
+</style>
+
+<div class="pay-wrapper">
+
+    @if (TempData["Error"] != null)
+    {
+        <div class="alert alert-danger mb-3">⚠️ @TempData["Error"]</div>
+    }
+
+    <div class="pay-card">
+
+        <!-- Header -->
+        <div class="pay-header">
+            <h4><i class="fas fa-money-bill-transfer me-2"></i>Confirm Payout</h4>
+            <p>Review the details below before sending the payment.</p>
+        </div>
+
+        <!-- Body -->
+        <div class="pay-body">
+
+            <!-- Item info -->
+            <div class="section-title">Proposal Details</div>
+            <div class="info-row">
+                <span class="info-label">Item</span>
+                <span class="info-value">@Model.ProdName</span>
+            </div>
+            <div class="info-row">
+                <span class="info-label">Category</span>
+                <span class="info-value">@Model.ProdCategory</span>
+            </div>
+            <div class="info-row">
+                <span class="info-label">Customer</span>
+                <span class="info-value">
+                    @(Model.Customer != null
+                                        ? Model.Customer.FirstName + " " + Model.Customer.LastName
+                                        : "—")
+                </span>
+            </div>
+
+            <!-- Amount -->
+            <div class="amount-highlight">
+                <span class="lbl">Payout Amount</span>
+                <span class="val">R @Model.AmountProposed.ToString("N2")</span>
+            </div>
+
+            <!-- Banking details -->
+            @if (checkout != null)
+            {
+                <div class="section-title">Banking Details</div>
+                <div class="info-row">
+                    <span class="info-label">Account Holder</span>
+                    <span class="info-value">@checkout.AccountHolderName</span>
+                </div>
+                <div class="info-row">
+                    <span class="info-label">Bank</span>
+                    <span class="info-value">@checkout.BankName</span>
+                </div>
+                <div class="info-row">
+                    <span class="info-label">Account Number</span>
+                    <span class="info-value">@checkout.AccountNumber</span>
+                </div>
+                <div class="info-row">
+                    <span class="info-label">Branch Code</span>
+                    <span class="info-value">@checkout.BranchCode</span>
+                </div>
+                <div class="info-row">
+                    <span class="info-label">Account Type</span>
+                    <span class="info-value">@checkout.AccountType</span>
+                </div>
+                <div class="info-row">
+                    <span class="info-label">Phone</span>
+                    <span class="info-value">@checkout.PhoneNumber</span>
+                </div>
+            }
+
+            <!-- Warning -->
+            <div class="warning-box mt-3">
+                <i class="fas fa-triangle-exclamation mt-1"></i>
+                <span>
+                    <strong>This action cannot be undone.</strong>
+                    Once confirmed, R @Model.AmountProposed.ToString("N2") will be transferred
+                    from your PayStack balance directly to the customer's bank account.
+                    Verify all details before proceeding.
+                </span>
+            </div>
+
+            <!-- POST form — propItemId is sent as hidden field so the controller receives it -->
+            <form method="post"
+                  asp-action="MakePayment"
+                  asp-controller="ShopOwner"
+                  onsubmit="disableBtn(this)">
+
+                @Html.AntiForgeryToken()
+
+                @* propItemId must match the parameter name in MakeTranferPayment(int propItemId) *@
+                @* <input type="hidden" name="propItemId" value="@Model.PropItemId" /> *@
+
+@*                 <button type="submit" class="btn-pay" id="payBtn">
+                    <i class="fas fa-paper-plane"></i>
+                    Send R @Model.AmountProposed.ToString("N2") to @(checkout?.AccountHolderName ?? "Customer")
+                </button>
+            </form>
+
+            <a asp-action="AcceptedProposals" asp-controller="ShopOwner" class="btn-back">
+                ← Cancel &amp; Go Back
+            </a>
+
+        </div>
+    </div>
+</div> *@
+
+@* @section Scripts {
+    <script>
+        function disableBtn(form) {
+            const btn = document.getElementById('payBtn');
+            btn.disabled = true;
+            btn.innerHTML = '<i class="fas fa-spinner fa-spin"></i> Processing…';
+            return true; // allow form to submit
+        }
+    </script> *@
+ @* } *@ 

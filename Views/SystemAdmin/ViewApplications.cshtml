@@ -1,0 +1,221 @@
+﻿@using SkyTech.Models
+@model IEnumerable<SkyTech.Models.ShopOwner>
+@{
+    ViewBag.Title = "Shop Applications";
+    Layout = "~/Views/Shared/_MinimalLayout.cshtml";
+
+    int total = Model.Count();
+    int pending = Model.Count(o => o.ApplicationStatus == ApplicationStat.Pending);
+    int approved = Model.Count(o => o.ApplicationStatus == ApplicationStat.Approved);
+    int rejected = Model.Count(o => o.ApplicationStatus == ApplicationStat.Rejected);
+}
+
+@section Styles {
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+    <link href="https://api.fontshare.com/v2/css?f[]=clash-display@400,500,600,700&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="~/CSS/ShopOwnerStyle.css">
+    <link rel="stylesheet" href="~/CSS/ViewApplicationStyle.css">
+
+   
+}
+
+<div class="admin-page">
+
+    <!-- Topbar -->
+    <div class="admin-topbar">
+        <div>
+            <div class="admin-title">Shop Owner Applications</div>
+            <div class="admin-sub">Review and approve or reject shop registration requests.</div>
+        </div>
+    </div>
+
+    <!-- Summary chips -->
+    <div class="chip-row">
+        <div class="chip blue">  <span class="ch-num">@total</span>   <span class="ch-lbl">Total</span></div>
+        <div class="chip yellow"><span class="ch-num">@pending</span>  <span class="ch-lbl">Pending</span></div>
+        <div class="chip green"> <span class="ch-num">@approved</span> <span class="ch-lbl">Approved</span></div>
+        <div class="chip red">   <span class="ch-num">@rejected</span> <span class="ch-lbl">Rejected</span></div>
+    </div>
+
+    <!-- Search + filter toolbar -->
+    <div class="toolbar">
+        <div class="so-search">
+            <i class="fas fa-magnifying-glass"></i>
+            <input type="text" id="appSearch" placeholder="Search by name, shop, email…" oninput="filterCards(this.value)">
+        </div>
+        <div class="filter-btns">
+            <button class="flt active" onclick="setFilter('all',this)">All</button>
+            <button class="flt" onclick="setFilter('pending',this)">Pending</button>
+            <button class="flt" onclick="setFilter('approved',this)">Approved</button>
+            <button class="flt" onclick="setFilter('rejected',this)">Rejected</button>
+        </div>
+    </div>
+
+    @if (!Model.Any())
+    {
+        <div class="admin-empty">
+            <i class="fas fa-store"></i>
+            <p>No shop owner applications found.</p>
+        </div>
+    }
+    else
+    {
+        <div class="appl-grid" id="applGrid">
+            @foreach (var item in Model)
+            {
+                string statusClass = item.ApplicationStatus == ApplicationStat.Approved ? "badge-approved"
+                                   : item.ApplicationStatus == ApplicationStat.Rejected ? "badge-rejected"
+                                                                                        : "badge-pending";
+                string initials = ((item.Names?.Length > 0 ? item.Names[0].ToString() : "")
+                                 + (item.Surname?.Length > 0 ? item.Surname[0].ToString() : "")).ToUpper();
+                string filterTag = item.ApplicationStatus.ToString().ToLower();
+                string searchTag = $"{item.Names} {item.Surname} {item.Email} {item.ApplicationStatus}".ToLower();
+                bool isPending = item.ApplicationStatus == ApplicationStat.Pending;
+
+                <div class="appl-card" data-filter="@filterTag" data-search="@searchTag">
+
+                    <!-- Header -->
+                    <div class="ac-head">
+                        <div class="ac-avatar">@initials</div>
+                        <div>
+                            <div class="ac-name">@item.Names @item.Surname</div>
+                            <div class="ac-email">@item.Email</div>
+                        </div>
+                        <span class="badge @statusClass">@item.ApplicationStatus</span>
+                    </div>
+
+                    <!-- Details -->
+                    <div class="ac-body">
+                        <div class="ac-row">
+                            <span class="ak"><i class="fas fa-store"></i> Shop Name</span>
+                        </div>
+                        <div class="ac-row">
+                            <span class="ak"><i class="fas fa-id-card"></i> ID Number</span>
+                            <span class="av mono">@item.IdBookNumber</span>
+                        </div>
+                        <div class="ac-row">
+                            <span class="ak"><i class="fas fa-location-dot"></i> Shop Address</span>
+                            <span class="av">@(item.ShopAddress ?? "—")</span>
+                        </div>
+                        <div class="ac-row">
+                            <span class="ak"><i class="fas fa-location-pin"></i> Residential</span>
+                            <span class="av">@item.ResidentialAddress</span>
+                        </div>
+                        <div class="ac-row">
+                            <span class="ak"><i class="fas fa-building-columns"></i> Bank</span>
+                            <span class="av">@item.BankType</span>
+                        </div>
+                        <div class="ac-row">
+                            <span class="ak"><i class="fas fa-hashtag"></i> Account No.</span>
+                            <span class="av mono">
+                                @{
+                                    var acct = item.AccountNumber ?? "";
+                                    var masked = acct.Length > 4 ? new string('•', acct.Length - 4) + acct.Substring(acct.Length - 4) : acct;
+                                }
+                                @masked
+                            </span>
+                        </div>
+                        @* <div class="ac-row">
+                            <span class="ak"><i class="fas fa-shop"></i> Shop Type</span>
+                            <span class="av">@(item.Shoptype ?? "—")</span>
+                        </div> *@
+                        <div class="ac-row">
+                            <span class="ak"><i class="fas fa-calendar"></i> Registered</span>
+                            <span class="av">@item.RegisteredOn.ToString("dd MMM yyyy · HH:mm")</span>
+                        </div>
+                    </div>
+
+                    <!-- Documents -->
+                    <div class="ac-docs">
+                        <div class="doc-label"><i class="fas fa-paperclip" style="color:#1a73e8;margin-right:.3rem"></i>DOCUMENTS</div>
+
+                        @if (item.BussRegCertificates != null && item.BussRegCertificates.Any())
+                        {
+                            foreach (var doc in item.BussRegCertificates)
+                            {
+                                @Html.ActionLink("Business Reg Cert", "DownloadBusRegCert", "SystemAdmin",
+                                              new { id = doc.CertId }, new { @class = "doc-link", target = "_blank" })
+                            }
+                        }
+                        else
+                        { <span class="doc-none">No business cert</span>}
+
+                        @if (item.OwnerIdentityBooks != null && item.OwnerIdentityBooks.Any())
+                        {
+                            foreach (var doc in item.OwnerIdentityBooks)
+                            {
+                                @Html.ActionLink("Identity Book", "DownloadOwnerID", "SystemAdmin",
+                                              new { id = doc.OwnerIdentityBookId }, new { @class = "doc-link", target = "_blank" })
+                            }
+                        }
+                        else
+                        { <span class="doc-none">No ID book</span>}
+                    </div>
+
+                    <!-- Action buttons -->
+                    <div class="ac-actions">
+                       @if (isPending)
+                        {
+                            using (Html.BeginForm("ApproveAppl", "SystemAdmin", FormMethod.Post, new { style = "flex:1" }))
+                            {
+                                @Html.Hidden("id", item.OwnerId)
+                                <button type="submit" class="btn-approve">
+                                    <i class="fas fa-circle-check"></i> Approve
+                                </button>
+                            }
+
+                            using (Html.BeginForm("RejectAppl", "SystemAdmin", FormMethod.Post, new { style = "flex:1" }))
+                            {
+                                @Html.Hidden("id", item.OwnerId)
+                                <button type="submit" class="btn-reject"
+                                        onclick="return confirm('Reject this application?')">
+                                    <i class="fas fa-circle-xmark"></i> Reject
+                                </button>
+                            }
+                        }
+                        else
+                        {
+                            <div style="flex:1;text-align:center;font-size:.82rem;color:#8a96b0;font-weight:600;padding:.4rem 0">
+                                @if (item.ApplicationStatus == ApplicationStat.Approved)
+                                {
+                                    <span style="color:#16a34a"><i class="fas fa-circle-check"></i> Approved</span>
+                                }
+                                else
+                                {
+                                    <span style="color:#dc2626"><i class="fas fa-circle-xmark"></i> Rejected</span>
+                                }
+                            </div>
+                        }
+                    </div>
+
+                </div>
+            }
+        </div>
+    }
+
+</div>
+
+<script>
+    var currentFilter = 'all';
+    var currentSearch = '';
+
+    function setFilter(val, btn) {
+        currentFilter = val;
+        document.querySelectorAll('.flt').forEach(b => b.classList.remove('active'));
+        btn.classList.add('active');
+        applyFilters();
+    }
+    function filterCards(q) {
+        currentSearch = q.toLowerCase();
+        applyFilters();
+    }
+    function applyFilters() {
+        document.querySelectorAll('#applGrid .appl-card').forEach(function (c) {
+            var matchFilter = currentFilter === 'all' || c.dataset.filter === currentFilter;
+            var matchSearch = !currentSearch || (c.dataset.search || '').includes(currentSearch);
+            c.style.display = matchFilter && matchSearch ? '' : 'none';
+        });
+    }
+</script>

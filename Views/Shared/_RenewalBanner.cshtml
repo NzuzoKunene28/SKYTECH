@@ -1,0 +1,59 @@
+@* _RenewalBanner.cshtml — the "system detects/notifies" step from the flow,
+   done as a plain server-side check (no background job yet for the banner
+   itself — LeaseReturnService.RunReturnReminderCheckAsync sends the actual
+   email reminder on the same 14-day window). Renders nothing unless the
+   lease is Active, within 14 days of EndDate, and no return has already
+   been scheduled (renew/return are mutually exclusive choices at this point).
+
+   Usage, inside any view whose Model (or a variable) is a LeaseAgreement
+   with .Items loaded:
+     @await Html.PartialAsync("_RenewalBanner", agreement)
+*@
+@model SkyTech.Models.LeaseAgreement
+@{
+    bool returnAlreadyScheduled = Model.Items?.Any(i => i.ReturnStatus != SkyTech.Models.LeaseReturnStatus.Not_Due) ?? false;
+    bool eligible = Model.Status == SkyTech.Models.LeaseAgreementStatus.Active
+                    && (Model.EndDate - DateTime.Now).TotalDays <= 14
+                    && !returnAlreadyScheduled;
+}
+
+@if (eligible)
+{
+    int daysLeft = Math.Max(0, (int)Math.Ceiling((Model.EndDate - DateTime.Now).TotalDays));
+    <div class="renewal-banner">
+        <div class="renewal-banner-text">
+            <i class="fas fa-triangle-exclamation"></i>
+            This lease ends in @daysLeft day(s) (@Model.EndDate.ToString("d MMM yyyy")). Renew, or schedule a return of the equipment.
+        </div>
+        <div class="renewal-banner-actions">
+            <a href="@Url.Action("RenewLease", "Customer", new { id = Model.LeaseAgreementId })" class="renewal-banner-btn">
+                Renew Lease
+            </a>
+            <a href="@Url.Action("ScheduleReturn", "Customer", new { id = Model.LeaseAgreementId })" class="renewal-banner-btn renewal-banner-btn-outline">
+                Schedule Return
+            </a>
+        </div>
+    </div>
+}
+
+<style>
+    /* Scoped, harmless to include more than once per page since the class
+       names are specific — but fine to hoist into ShoppingPageStyle.css
+       later if this partial ends up used on several pages. */
+    .renewal-banner {
+        display: flex; align-items: center; justify-content: space-between; gap: 1rem;
+        background: #fff7e6; border: 1px solid #f3d98b; color: #8a5a00;
+        border-radius: 12px; padding: .9rem 1.1rem; margin: 1rem 0;
+        font-family: 'Plus Jakarta Sans', sans-serif; font-size: .88rem;
+    }
+    .renewal-banner-actions {
+        display: flex; gap: .6rem; flex-shrink: 0;
+    }
+    .renewal-banner-btn {
+        background: #b7791f; color: #fff; border-radius: 8px; padding: .5rem 1rem;
+        font-weight: 600; font-size: .82rem; text-decoration: none; white-space: nowrap;
+    }
+    .renewal-banner-btn-outline {
+        background: transparent; color: #8a5a00; border: 1.5px solid #b7791f;
+    }
+</style>

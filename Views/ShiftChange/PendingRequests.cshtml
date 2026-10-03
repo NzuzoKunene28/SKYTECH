@@ -1,0 +1,97 @@
+﻿@model IEnumerable<SkyTech.Models.SkytechWorkers.ShiftChangeRequest>
+
+@{
+    ViewBag.Title = "Pending Shift Change Requests";
+    Layout = "~/Views/Shared/_MinimalLayout.cshtml";
+    ViewBag.ActivePage = "ShiftChangeRequests";
+}
+
+<link rel="stylesheet" href="~/CSS/HRCSS/ShiftChangeRequests.css" />
+
+<div class="scr-page">
+
+    <p class="scr-eyebrow">HR / Shift Changes</p>
+    <h2 class="scr-title">Pending Shift Change Requests</h2>
+    <p class="scr-sub">Review and action time-change or swap requests submitted by staff.</p>
+
+    @if (TempData["successful"] != null)
+    {
+        <div class="scr-alert">@TempData["successful"]</div>
+    }
+
+    <div class="scr-card">
+        @if (!Model.Any())
+        {
+            <p class="scr-empty">No pending requests.</p>
+        }
+        else
+        {
+            <table class="scr-table">
+                <thead>
+                    <tr>
+                        <th>Staff</th>
+                        <th>Shift</th>
+                        <th>Type</th>
+                        <th>Reason</th>
+                        <th>Details</th>
+                        <th>Submitted</th>
+                        <th>Action</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    @foreach (var r in Model)
+                    {
+                        <tr>
+                            <td class="scr-staff">@r.RequestedBy.FirstName @r.RequestedBy.LastName</td>
+                            <td>
+                                @r.RosterShift.WorkDate.ToShortDateString()
+                                (@r.RosterShift.StartTime - @r.RosterShift.EndTime)
+                                <span class="scr-shift-meta">@r.RosterShift.Position?.PositionName @r.RosterShift.Branch?.BranchName</span>
+                            </td>
+                            <td>
+                                @if (r.Type == SkyTech.Models.SkytechWorkers.RequestType.ShiftSwap)
+                                {
+                                    <span class="scr-badge scr-badge-swap">Swap</span>
+                                }
+                                else
+                                {
+                                    <span class="scr-badge scr-badge-time">Time Change</span>
+                                }
+                            </td>
+                            <td class="scr-detail">@r.Reason</td>
+                            <td class="scr-detail">
+                                @if (r.Type == SkyTech.Models.SkytechWorkers.RequestType.TimeChange)
+                                {
+                                    <span class="scr-detail-label">New</span>
+                                    @:@r.RequestedWorkDate?.ToShortDateString() @r.RequestedStartTime - @r.RequestedEndTime
+                                }
+                                else if (r.Type == SkyTech.Models.SkytechWorkers.RequestType.ShiftSwap)
+                                {
+                                    <span class="scr-detail-label">Swap with</span>
+                                    @:@r.SwapWithStaff?.FirstName @r.SwapWithStaff?.LastName
+                                }
+                            </td>
+                            <td class="scr-detail">@r.SubmittedAt.ToShortDateString()</td>
+                            <td>
+                                <div class="scr-actions">
+                                    <form asp-action="Approve" asp-controller="ShiftChange" method="post" class="scr-action-form">
+                                        @Html.AntiForgeryToken()
+                                        <input type="hidden" name="id" value="@r.ShiftChangeRequestId" />
+                                        <input type="text" name="reviewNote" placeholder="Note (optional)" class="scr-note-input" />
+                                        <button type="submit" class="scr-btn scr-btn-approve">Approve</button>
+                                    </form>
+                                    <form asp-action="Reject" asp-controller="ShiftChange" method="post" class="scr-action-form">
+                                        @Html.AntiForgeryToken()
+                                        <input type="hidden" name="id" value="@r.ShiftChangeRequestId" />
+                                        <button type="submit" class="scr-btn scr-btn-reject">Reject</button>
+                                    </form>
+                                </div>
+                            </td>
+                        </tr>
+                    }
+                </tbody>
+            </table>
+        }
+    </div>
+
+</div>

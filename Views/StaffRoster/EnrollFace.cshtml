@@ -1,0 +1,27 @@
+﻿@{
+    ViewData["Title"] = "Enroll Reference Photo";
+    Layout = "~/Views/Shared/_MinimalLayout.cshtml";
+}
+
+@section Styles {
+    <link rel="stylesheet" href="~/CSS/STAFFCSS/EnrollFace.css" />
+}
+
+<h1>Enroll Reference Photo</h1>
+<p>Upload a clear, well-lit photo of your face. This is used to verify it's really you every time you check in.</p>
+
+@if (TempData["Error"] != null)
+{
+    <p style="color:#b91c1c">@TempData["Error"]</p>
+}
+@if (TempData["Success"] != null)
+{
+    <p style="color:#15803d">@TempData["Success"]</p>
+}
+
+<form asp-action="EnrollFace" method="post" enctype="multipart/form-data">
+    @Html.AntiForgeryToken()
+    <input type="file" name="photo" accept="image/*" required />
+    <br /><br />
+    <button type="submit">Save Reference Photo</button>
+</form>

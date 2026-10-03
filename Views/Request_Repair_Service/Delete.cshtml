@@ -1,0 +1,145 @@
+﻿@model SkyTech.Models.Repair_Item_Services.Repair_Request
+
+@{
+    ViewData["Title"] = "Delete Repair Request";
+    Layout = "~/Views/Shared/_MinimalLayout.cshtml";
+    ViewBag.ActivePage = "MyRepairs";
+}
+
+@section Styles {
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+    <link href="https://api.fontshare.com/v2/css?f[]=clash-display@400,500,600,700&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="~/CSS/DashboardStyle.css">
+}
+
+<div class="dash-wrap">
+    <aside class="dash-sidebar">
+        {{-- paste your sidebar here --}}
+    </aside>
+
+    <main class="dash-main">
+
+        <div class="dash-topbar">
+            <div>
+                <div class="dash-page-title">Delete Repair Request</div>
+                <div class="dash-page-sub">This action cannot be undone.</div>
+            </div>
+        </div>
+
+        <!-- Warning Alert -->
+        <div class="dash-alert dash-alert-danger" style="margin-bottom:2rem">
+            <i class="fas fa-triangle-exclamation" style="font-size:1.2rem;margin-top:2px"></i>
+            <div>
+                <strong>Are you sure you want to delete this repair request?</strong>
+                <div style="font-size:0.9rem;margin-top:0.2rem">
+                    This will permanently remove the request and cannot be recovered.
+                </div>
+            </div>
+        </div>
+
+        <!-- Request Summary Card -->
+        <div class="dash-card" style="max-width:680px;margin-bottom:2rem">
+            <div class="dash-card-head">
+                <div class="dash-card-title">
+                    <i class="fas fa-tools" style="color:var(--orange);margin-right:0.5rem"></i>
+                    Request Summary
+                </div>
+            </div>
+
+            <div style="display:grid;grid-template-columns:1fr 1fr;gap:1.4rem">
+
+                <div>
+                    <div style="font-size:0.85rem;color:var(--text-muted);font-weight:600;margin-bottom:0.3rem">
+                        <i class="fas fa-user" style="color:var(--blue);margin-right:0.4rem"></i>Customer
+                    </div>
+                    <div style="font-size:1rem;color:var(--text);font-weight:500">
+                        @Html.DisplayFor(model => model.Customers.FirstName)
+                    </div>
+                </div>
+
+                <div>
+                    <div style="font-size:0.85rem;color:var(--text-muted);font-weight:600;margin-bottom:0.3rem">
+                        <i class="fas fa-box" style="color:var(--blue);margin-right:0.4rem"></i>Item Name
+                    </div>
+                    <div style="font-size:1rem;color:var(--text);font-weight:500">
+                        @Html.DisplayFor(model => model.ItemName)
+                    </div>
+                </div>
+
+                <div>
+                    <div style="font-size:0.85rem;color:var(--text-muted);font-weight:600;margin-bottom:0.3rem">
+                        <i class="fas fa-align-left" style="color:var(--blue);margin-right:0.4rem"></i>Item Description
+                    </div>
+                    <div style="font-size:1rem;color:var(--text);font-weight:500">
+                        @Html.DisplayFor(model => model.ItemDescription)
+                    </div>
+                </div>
+
+                <div>
+                    <div style="font-size:0.85rem;color:var(--text-muted);font-weight:600;margin-bottom:0.3rem">
+                        <i class="fas fa-tag" style="color:var(--blue);margin-right:0.4rem"></i>Category
+                    </div>
+                    <div style="font-size:1rem;color:var(--text);font-weight:500">
+                        @Html.DisplayFor(model => model.Category.CategoryName)
+                    </div>
+                </div>
+
+                <div style="grid-column:1/-1">
+                    <div style="font-size:0.85rem;color:var(--text-muted);font-weight:600;margin-bottom:0.3rem">
+                        <i class="fas fa-exclamation-circle" style="color:var(--orange);margin-right:0.4rem"></i>Issue Description
+                    </div>
+                    <div style="font-size:1rem;color:var(--text);font-weight:500">
+                        @Html.DisplayFor(model => model.IssueDescription)
+                    </div>
+                </div>
+
+                <div>
+                    <div style="font-size:0.85rem;color:var(--text-muted);font-weight:600;margin-bottom:0.3rem">
+                        <i class="fas fa-calendar" style="color:var(--blue);margin-right:0.4rem"></i>Date Created
+                    </div>
+                    <div style="font-size:1rem;color:var(--text);font-weight:500">
+                        @Model.DateCreated.ToString("dd MMM yyyy HH:mm")
+                    </div>
+                </div>
+
+                <div>
+                    <div style="font-size:0.85rem;color:var(--text-muted);font-weight:600;margin-bottom:0.3rem">
+                        <i class="fas fa-circle-dot" style="color:var(--blue);margin-right:0.4rem"></i>Status
+                    </div>
+                    <div>
+                        @{
+                            var (statusColor, statusBg) = Model.Status switch
+                            {
+                                SkyTech.Models.Repair_Item_Services.RepairStatus.Pending => ("var(--yellow)", "rgba(217,119,6,.1)"),
+                                SkyTech.Models.Repair_Item_Services.RepairStatus.Assigned => ("#3b82f6", "rgba(59,130,246,.1)"),
+                                SkyTech.Models.Repair_Item_Services.RepairStatus.Qouted => ("var(--text-3)", "rgba(74,88,120,.1)"),
+                                SkyTech.Models.Repair_Item_Services.RepairStatus.InProgress => ("var(--blue)", "rgba(95,158,160,.1)"),
+                                SkyTech.Models.Repair_Item_Services.RepairStatus.Completed => ("var(--green)", "rgba(22,163,74,.1)"),
+                                SkyTech.Models.Repair_Item_Services.RepairStatus.Cancelled => ("var(--red)", "rgba(220,38,38,.1)"),
+                                _ => ("var(--text-muted)", "rgba(138,150,176,.1)")
+                            };
+                        }
+                        <span class="dash-badge" style="color:@statusColor;background:@statusBg">
+                            @Html.DisplayFor(model => model.Status)
+                        </span>
+                    </div>
+                </div>
+
+            </div>
+        </div>
+
+        <!-- Action Buttons -->
+        <form asp-action="Delete" style="display:flex;gap:0.8rem">
+            <input type="hidden" asp-for="RequestId" />
+            <button type="submit" class="dash-btn dash-btn-danger">
+                <i class="fas fa-trash"></i> Yes, Delete Request
+            </button>
+            <a asp-action="Index" class="dash-btn dash-btn-secondary">
+                <i class="fas fa-arrow-left"></i> Cancel
+            </a>
+        </form>
+
+    </main>
+</div>

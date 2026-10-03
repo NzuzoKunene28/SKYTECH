@@ -1,0 +1,118 @@
+﻿@model SkyTech.Models.SkytechWorkers.Roster
+@{
+    ViewData["Title"] = "Roster Details";
+    Layout = "~/Views/Shared/_MinimalLayout.cshtml";
+}
+
+<link rel="stylesheet" href="~/CSS/HRCSS/RosterDetails.css" />
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
+
+<div class="rd-wrap">
+
+    @if (TempData["successful"] != null)
+    {
+        <div class="rd-toast">
+            <i class="fa-solid fa-circle-check"></i>
+            @TempData["successful"]
+        </div>
+    }
+
+    <div class="rd-header">
+        <div>
+            <p class="rd-eyebrow">Roster</p>
+            <h1 class="rd-title">@Model.Branch.BranchName — Week of @Model.WeekStartDate.ToShortDateString()</h1>
+            <div class="rd-status-row">
+                <span class="rd-status-label">Status:</span>
+                @if (Model.Status == SkyTech.Models.SkytechWorkers.RosterStatus.Draft)
+                {
+                    <span class="rd-badge draft"><i class="fa-solid fa-pen"></i> Draft</span>
+                }
+                else
+                {
+                    <span class="rd-badge published"><i class="fa-solid fa-check"></i> @Model.Status</span>
+                }
+            </div>
+        </div>
+
+        @if (Model.Status == SkyTech.Models.SkytechWorkers.RosterStatus.Draft)
+        {
+            <form asp-controller="Roster" asp-action="PublishRoster" method="post">
+                <input type="hidden" name="rosterId" value="@Model.RosterId" />
+                <button type="submit" class="rd-publish-btn">
+                    <i class="fa-solid fa-paper-plane"></i>
+                    Publish Roster
+                </button>
+            </form>
+        }
+    </div>
+
+    @{
+        // Build the 7 dates for this week, Monday through Sunday, once
+        var weekDates = Enumerable.Range(0, 7)
+            .Select(i => Model.WeekStartDate.AddDays(i))
+            .ToList();
+
+        // Group all shifts by Position, then within each position, by Staff member
+        var byPosition = Model.RosterShifts
+            .GroupBy(s => s.Position)
+            .OrderBy(g => g.Key.PositionName);
+    }
+
+    @foreach (var positionGroup in byPosition)
+    {
+        var byStaff = positionGroup
+            .GroupBy(s => s.Staff)
+            .OrderBy(g => g.Key.FirstName);
+
+        <div class="rd-position">
+
+            <h2 class="rd-position-title">
+                <i class="fa-solid fa-id-badge"></i>
+                @positionGroup.Key.PositionName
+            </h2>
+
+            <div class="rd-table-wrap">
+                <table class="rd-table">
+                    <thead>
+                        <tr>
+                            <th>Employee Name</th>
+                            @foreach (var date in weekDates)
+                            {
+                                <th>
+                                    <span class="rd-day-name">@date.ToString("dddd")</span>
+                                    <span class="rd-day-date">@date.ToString("dd MMM")</span>
+                                </th>
+                            }
+                        </tr>
+                    </thead>
+                    <tbody>
+                        @foreach (var staffGroup in byStaff)
+                        {
+                            <tr>
+                                <td>@staffGroup.Key.FirstName @staffGroup.Key.LastName</td>
+                                @foreach (var date in weekDates)
+                                {
+                                    var shiftThatDay = staffGroup.FirstOrDefault(s => s.WorkDate.Date == date.Date);
+                                    <td>
+                                        @if (shiftThatDay != null)
+                                        {
+                                            <span class="rd-shift">@shiftThatDay.StartTime - @shiftThatDay.EndTime</span>
+                                        }
+                                        else
+                                        {
+                                            <span class="rd-off">—</span>
+                                        }
+                                    </td>
+                                }
+                            </tr>
+                        }
+                    </tbody>
+                </table>
+            </div>
+
+        </div>
+    }
+
+</div>

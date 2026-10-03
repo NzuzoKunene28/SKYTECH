@@ -1,0 +1,221 @@
+﻿@using SkyTech.Models
+@using SkyTech.ViewModels
+@model SkyTech.ViewModels.ProposalCheckoutViewModel
+
+@{
+    ViewData["Title"] = "Complete Your Details";
+    Layout = "~/Views/Shared/_MinimalLayout.cshtml";
+}
+
+
+@section Styles {
+    <link rel="stylesheet" href="~/CSS/ProposalCheckout.css">
+
+    }
+
+<div class="orb orb-1"></div>
+<div class="orb orb-2"></div>
+
+<div class="checkout-wrapper">
+
+    <!-- Page header -->
+    <div class="page-header">
+        <div class="page-header-icon">🏦</div>
+        <div class="page-header-text">
+            <h1>Complete Your Details</h1>
+            <p>Provide your contact and banking info to receive your payout</p>
+        </div>
+    </div>
+
+    <!-- Offer summary banner -->
+    <div class="offer-banner">
+        <div class="offer-banner-item">
+            <span class="label">Item</span>
+            <span>📦 @Model.ProdName</span>
+        </div>
+        <div class="offer-banner-item">
+            <span class="label">Offered</span>
+            <span class="offer-amount">R @Model.AmountProposed.ToString("F2")</span>
+        </div>
+    </div>
+
+    <!-- Card -->
+    <div class="checkout-card">
+
+        <form asp-action="ProposalCheckout" asp-controller="Customer" method="post">
+
+            <input type="hidden" asp-for="PropItemId" />
+            <input type="hidden" asp-for="ProdName" />
+            <input type="hidden" asp-for="AmountProposed" />
+
+            <!-- Contact -->
+            <div class="card-section">
+                <div class="section-title">📞 Contact</div>
+                <div class="f-group">
+                    <label asp-for="PhoneNumber" class="f-label">Phone Number</label>
+                    <div class="f-wrap">
+                        <i class="bi bi-telephone"></i>
+                        <input asp-for="PhoneNumber" class="f-input" placeholder="e.g. 0821234567" />
+                    </div>
+                    <span asp-validation-for="PhoneNumber" class="text-danger"></span>
+                </div>
+            </div>
+
+            <!-- Delivery Option -->
+            <div class="card-section">
+                <div class="section-title">🚚 Delivery Option</div>
+                <div class="f-group">
+                    <label class="f-label">How will the item be handed over?</label>
+                    <div class="delivery-options">
+                        <label class="delivery-option">
+                            <input type="radio" name="SelectDelivery" id="customerWillBring" value="1"
+                                   @(Model.SelectDelivery == Delivery.Customer_Will_Bring ? "checked" : "") />
+                            <div class="delivery-label-wrap">
+                                <span class="delivery-label-main">🚶 I will bring the item to the shop</span>
+                                <span class="delivery-label-sub">Drop it off at our store at your convenience</span>
+                            </div>
+                        </label>
+                        <label class="delivery-option">
+                            <input type="radio" name="SelectDelivery" id="shopWillCollect" value="0"
+                                   @(Model.SelectDelivery == Delivery.Shop_Will_Collect ? "checked" : "") />
+                            <div class="delivery-label-wrap">
+                                <span class="delivery-label-main">🚚 Shop must collect from me</span>
+                                <span class="delivery-label-sub">We'll schedule a pickup from your address</span>
+                            </div>
+                        </label>
+                    </div>
+                    <span asp-validation-for="SelectDelivery" class="text-danger"></span>
+                </div>
+            </div>
+
+            <!-- Address -->
+            <div class="card-section">
+                <div class="section-title">📍 Address</div>
+                <div class="f-group">
+                    <label asp-for="Address" class="f-label">Street Address</label>
+                    <div class="f-wrap">
+                        <i class="bi bi-geo-alt"></i>
+                        <input asp-for="Address" class="f-input" placeholder="e.g. 12 Main Road, Durban" />
+                    </div>
+                    <span asp-validation-for="Address" class="text-danger"></span>
+                </div>
+            </div>
+
+            <!-- Banking Details -->
+            <div class="card-section">
+                <div class="section-title">💳 Banking Details</div>
+
+                <div class="f-group">
+                    <label class="f-label">Bank Name</label>
+                    <div class="f-wrap">
+                        <i class="bi bi-bank"></i>
+                        <select id="bankSelect" class="f-input">
+                            <option value="">-- Loading banks… --</option>
+                        </select>
+                    </div>
+                    <small id="bankError">Failed to load banks. Please refresh the page.</small>
+                    <input type="hidden" asp-for="BankName" id="bankNameHidden" />
+                    <input type="hidden" asp-for="BankCode" id="bankCodeHidden" />
+                    <span asp-validation-for="BankName" class="text-danger"></span>
+                </div>
+
+                <div class="f-group">
+                    <label asp-for="AccountHolderName" class="f-label">Account Holder Name</label>
+                    <div class="f-wrap">
+                        <i class="bi bi-person"></i>
+                        <input asp-for="AccountHolderName" class="f-input"
+                               placeholder="Full name as on bank account" />
+                    </div>
+                    <span asp-validation-for="AccountHolderName" class="text-danger"></span>
+                </div>
+
+                <div class="f-grid-2">
+                    <div class="f-group">
+                        <label asp-for="AccountNumber" class="f-label">Account Number</label>
+                        <div class="f-wrap">
+                            <i class="bi bi-hash"></i>
+                            <input asp-for="AccountNumber" class="f-input" placeholder="e.g. 1234567890" />
+                        </div>
+                        <span asp-validation-for="AccountNumber" class="text-danger"></span>
+                    </div>
+                    <div class="f-group">
+                        <label asp-for="BranchCode" class="f-label">Branch Code</label>
+                        <div class="f-wrap">
+                            <i class="bi bi-diagram-3"></i>
+                            <input asp-for="BranchCode" class="f-input" placeholder="e.g. 051001" />
+                        </div>
+                        <span asp-validation-for="BranchCode" class="text-danger"></span>
+                    </div>
+                </div>
+
+                <div class="f-group">
+                    <label asp-for="AccountType" class="f-label">Account Type</label>
+                    <div class="f-wrap">
+                        <i class="bi bi-credit-card"></i>
+                        <select asp-for="AccountType" class="f-input"
+                                asp-items="Html.GetEnumSelectList<AccountType>()">
+                        </select>
+                    </div>
+                    <span asp-validation-for="AccountType" class="text-danger"></span>
+                </div>
+
+            </div>
+
+            <!-- Footer actions -->
+            <div class="card-footer-actions">
+                <a asp-action="MyProposals" asp-controller="Customer" class="btn-back">
+                    ← My Proposals
+                </a>
+                <button type="submit" class="btn-submit">
+                    Submit Details ✓
+                </button>
+            </div>
+
+        </form>
+    </div>
+
+</div>
+
+@section Scripts {
+    @{
+        await Html.RenderPartialAsync("_ValidationScriptsPartial");
+    }
+
+    <script>
+        const sel        = document.getElementById('bankSelect');
+        const nameHidden = document.getElementById('bankNameHidden');
+        const codeHidden = document.getElementById('bankCodeHidden');
+        const bankError  = document.getElementById('bankError');
+        const savedName  = '@Model.BankName';
+
+        fetch('/Customer/GetZaBanks')
+            .then(r => {
+                if (!r.ok) throw new Error('Network error');
+                return r.json();
+            })
+            .then(banks => {
+                sel.innerHTML = '<option value="">-- Select Bank --</option>';
+                banks.forEach(b => {
+                    const opt = document.createElement('option');
+                    opt.value        = b.code;
+                    opt.dataset.name = b.name;
+                    opt.textContent  = b.name;
+                    if (b.name === savedName) opt.selected = true;
+                    sel.appendChild(opt);
+                });
+                updateHiddens();
+            })
+            .catch(() => {
+                sel.innerHTML = '<option value="">-- Failed to load --</option>';
+                bankError.style.display = 'block';
+            });
+
+        sel.addEventListener('change', updateHiddens);
+
+        function updateHiddens() {
+            const opt = sel.options[sel.selectedIndex];
+            codeHidden.value = opt ? opt.value             : '';
+            nameHidden.value = opt ? (opt.dataset.name || '') : '';
+        }
+    </script>
+}

@@ -1,0 +1,19 @@
+﻿@{
+    ViewBag.Title = "Payment Failed";
+    Layout = "~/Views/Shared/_MinimalLayout.cshtml";
+}
+
+<div style="display:flex;justify-content:center;align-items:center;min-height:60vh">
+    <div style="text-align:center;padding:2rem">
+        <i class="fas fa-circle-xmark" style="font-size:4rem;color:#ef4444;margin-bottom:1rem"></i>
+        <h2 style="font-size:1.8rem;font-weight:700;color:#111">Payment Failed</h2>
+        <p style="color:#6b7280;margin:1rem 0">
+            Your payment could not be completed. No charges have been made.
+        </p>
+        <a href="@Url.Action("ViewCart", "Customer")"
+           style="display:inline-block;margin-top:1rem;padding:.75rem 1.5rem;
+                  background:#1a73e8;color:#fff;border-radius:8px;text-decoration:none;font-weight:600">
+            <i class="fas fa-arrow-left"></i> Return to Cart
+        </a>
+    </div>
+</div>

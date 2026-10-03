@@ -1,0 +1,556 @@
+﻿@using SkyTech.Models
+@model IEnumerable<SkyTech.Models.InterBranchTransfer>
+@{
+    ViewBag.Title = "Branch Transfers";
+    Layout = "~/Views/Shared/_MinimalLayout.cshtml";
+    ViewBag.ActivePage = "BranchTransfers";
+}
+
+@section Styles {
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+    <link href="https://api.fontshare.com/v2/css?f[]=clash-display@400,500,600,700&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="~/CSS/DriverStyle.css">
+    <style>
+        .transfer-card {
+            background: var(--white);
+            border: 1.5px solid var(--border);
+            border-radius: var(--radius);
+            padding: 1.2rem 1.5rem;
+            margin-bottom: 1rem;
+            box-shadow: var(--shadow-sm)
+        }
+
+        .transfer-card-head {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            margin-bottom: .9rem;
+            flex-wrap: wrap;
+            gap: .5rem
+        }
+
+        .code-box {
+            font-family: monospace;
+            font-size: 1.1rem;
+            font-weight: 800;
+            color: #7e22ce;
+            background: #f3e8ff;
+            border: 1.5px dashed #c084fc;
+            border-radius: var(--radius-sm);
+            padding: .35rem .9rem;
+            letter-spacing: .1em
+        }
+
+        .meta-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit,minmax(160px,1fr));
+            gap: .6rem;
+            margin-bottom: .9rem
+        }
+
+        .meta-item {
+            font-size: .8rem;
+            color: var(--text-3)
+        }
+
+            .meta-item strong {
+                display: block;
+                font-size: .7rem;
+                color: var(--text-muted);
+                text-transform: uppercase;
+                letter-spacing: .04em;
+                margin-bottom: .12rem
+            }
+
+        .chip-row {
+            display: flex;
+            flex-wrap: wrap;
+            gap: .7rem;
+            margin-bottom: 1.5rem
+        }
+
+        .chip {
+            background: var(--white);
+            border: 1.5px solid var(--border);
+            border-radius: var(--radius-sm);
+            padding: .6rem 1rem;
+            font-size: .8rem;
+            font-weight: 700;
+            color: var(--text-3);
+            box-shadow: var(--shadow-sm);
+            display: flex;
+            align-items: center;
+            gap: .45rem
+        }
+
+            .chip .num {
+                font-family: var(--font-display);
+                font-size: 1.25rem;
+                font-weight: 700;
+                color: var(--text);
+                margin-right: .2rem
+            }
+
+            .chip.purple {
+                border-color: rgba(147,51,234,.28)
+            }
+
+                .chip.purple .num {
+                    color: #9333ea
+                }
+
+            .chip.green {
+                border-color: rgba(22,163,74,.28)
+            }
+
+                .chip.green .num {
+                    color: var(--green)
+                }
+
+            .chip.yellow {
+                border-color: rgba(217,119,6,.28)
+            }
+
+                .chip.yellow .num {
+                    color: var(--yellow)
+                }
+    </style>
+}
+
+<div class="d-wrap">
+    <aside class="d-sidebar">
+        <div class="d-brand">
+            <div class="d-brand-icon"><i class="fas fa-truck-fast"></i></div>
+            <div><div class="d-brand-name">SkyTech</div><div class="d-brand-sub">Driver Portal</div></div>
+        </div>
+        <nav class="d-nav">
+            <div class="d-nav-label">NAVIGATION</div>
+            <a href="@Url.Action("DriverDash", "DeliveryDriver")" class="d-link @(ViewBag.ActivePage == "Dashboard" ? "active" : "")">
+                <i class="fas fa-grid-2"></i><span>Dashboard</span>
+            </a>
+            <div class="nav-item-dropdown">
+                <a href="#" class="d-link d-dropdown-toggle open" id="deliveriesDropdown">
+                    <i class="fas fa-bag-shopping"></i>
+                    <span>My Deliveries</span>
+                    <i class="fas fa-chevron-down dropdown-icon"></i>
+                </a>
+                <div class="d-dropdown-menu" style="display: block;">
+                    <a href="@Url.Action("HomeDeliveries", "DeliveryDriver")" class="d-link d-sub-link">
+                        <i class="fas fa-truck"></i> Home Deliveries
+                    </a>
+                    <a href="@Url.Action("BranchTransfers", "DeliveryDriver")" class="d-link d-sub-link active">
+                        <i class="fas fa-arrow-right-arrow-left"></i> Branch Transfers
+                    </a>
+                </div>
+            </div>
+            <div class="d-nav-label" style="margin-top:1rem">ACCOUNT</div>
+            <a href="@Url.Action("DriverProfile", "DeliveryDriver")" class="d-link"><i class="fas fa-circle-user"></i><span>Profile</span></a>
+        </nav>
+        <div class="d-sidebar-foot">
+            <div class="d-foot-avatar"><i class="fas fa-user-tie"></i></div>
+            <div>
+                <div class="d-foot-name">@(ViewBag.DriverName ?? "Driver")</div>
+                <div class="d-foot-role">Delivery Driver</div>
+            </div>
+        </div>
+    </aside>
+
+    <main class="d-main">
+        <div class="d-topbar">
+            <div>
+                <div class="d-page-title">Branch Transfers</div>
+                <div class="d-page-sub">Inter-branch transfers assigned to you.</div>
+            </div>
+        </div>
+
+        @if (TempData["Success"] != null)
+        {
+            <div style="background:#dcfce7;border:1px solid #86efac;color:#166534;padding:.8rem 1.2rem;border-radius:var(--radius-sm);margin-bottom:1rem;font-size:.88rem;font-weight:600">
+                <i class="fas fa-circle-check"></i> @TempData["Success"]
+            </div>
+        }
+
+        <div class="chip-row">
+            <div class="chip purple"><span class="num">@Model.Count()</span> Total</div>
+            <div class="chip yellow"><span class="num">@Model.Count(t => !t.IsDelivered)</span> Pending</div>
+            <div class="chip green"><span class="num">@Model.Count(t => t.IsDelivered)</span> Completed</div>
+        </div>
+
+        @if (!Model.Any())
+        {
+            <div style="text-align:center;padding:4rem 2rem;color:var(--text-muted)">
+                <i class="fas fa-arrow-right-arrow-left" style="font-size:3rem;opacity:.18;display:block;margin-bottom:.9rem"></i>
+                <p style="font-weight:600">No transfers assigned to you yet.</p>
+            </div>
+        }
+
+        @foreach (var t in Model)
+        {
+            string statusColor = t.IsDelivered ? "#22c55e" : t.TransferStatus == ItemTransferStatus.InTransit ? "#9333ea" : "#f59e0b";
+            <div class="transfer-card" style="border-left:3px solid @statusColor">
+                <div class="transfer-card-head">
+                    <div style="display:flex;align-items:center;gap:.8rem">
+                        <span style="font-family:var(--font-display);font-weight:800;color:var(--blue);font-size:1rem">Transfer #@t.TransferId</span>
+                        <span class="badge" style="background:@(t.IsDelivered ? "#dcfce7" : t.TransferStatus == ItemTransferStatus.InTransit ? "#f3e8ff" : "#fef3c7");color:@(t.IsDelivered ? "#166534" : t.TransferStatus == ItemTransferStatus.InTransit ? "#7e22ce" : "#92400e")">
+                            @(t.IsDelivered ? "Delivered" : t.TransferStatus.ToString())
+                        </span>
+                    </div>
+                    <div class="code-box">@t.TransferCode</div>
+                </div>
+                <div class="meta-grid">
+                    <div class="meta-item"><strong>Item</strong>@t.OrderItem?.ProdName × @t.OrderItem?.Quantity</div>
+                    <div class="meta-item"><strong>Pick Up From</strong>@t.SourceBranch?.ShopAddress</div>
+                    <div class="meta-item"><strong>Deliver To</strong>@t.TargetBranch?.ShopAddress</div>
+                    <div class="meta-item"><strong>Transfer Date</strong>@t.ScheduledTransferDate.ToString("dd MMM yyyy")</div>
+                    <div class="meta-item"><strong>Order</strong>#@t.OrderItem?.OrderId</div>
+                </div>
+                <div style="background:#fefce8;border:1px solid #fde68a;border-radius:var(--radius-sm);padding:.65rem 1rem;font-size:.82rem;color:#92400e;margin-bottom:.8rem">
+                    <i class="fas fa-circle-info"></i>
+                    <strong>Instructions:</strong> Pick up item from <strong>@t.SourceBranch?.ShopAddress</strong>,
+                    then deliver to <strong>@t.TargetBranch?.ShopAddress</strong>.
+                    Give the staff at the destination your transfer code: <strong style="font-family:monospace">@t.TransferCode</strong>
+                </div>
+                @if (!t.IsDelivered && t.TransferStatus == ItemTransferStatus.AssignedToDriver)
+                {
+                    <form method="post" action="@Url.Action("MarkTransferInTransit","DeliveryDriver")">
+                        @Html.AntiForgeryToken()
+                        <input type="hidden" name="transferId" value="@t.TransferId" />
+                        <button type="submit" class="btn btn-primary btn-sm"><i class="fas fa-truck-moving"></i> Mark as In Transit</button>
+                    </form>
+                }
+                else if (!t.IsDelivered && t.TransferStatus == ItemTransferStatus.InTransit)
+                {
+                    <form method="post" action="@Url.Action("MarkTransferDelivered","DeliveryDriver")" onsubmit="return confirm('Confirm you have delivered this item to the pickup branch?')">
+                        @Html.AntiForgeryToken()
+                        <input type="hidden" name="transferId" value="@t.TransferId" />
+                        <button type="submit" class="btn btn-success btn-sm"><i class="fas fa-check-circle"></i> Mark Delivered to Branch</button>
+                    </form>
+                }
+                else if (t.IsDelivered)
+                {
+                    <div style="font-size:.82rem;color:#166534;font-weight:600">
+                        <i class="fas fa-circle-check"></i> Delivered on @t.DeliveredToTargetOn?.ToString("dd MMM yyyy HH:mm")
+                    </div>
+                }
+            </div>
+        }
+    </main>
+</div>
+
+<script>
+    document.addEventListener('DOMContentLoaded', function() {
+        const dropdownToggle = document.getElementById('deliveriesDropdown');
+        const dropdownMenu = document.querySelector('.d-dropdown-menu');
+
+        if (dropdownToggle && dropdownMenu) {
+            dropdownToggle.addEventListener('click', function(e) {
+                e.preventDefault();
+                e.stopPropagation();
+                this.classList.toggle('open');
+                if (dropdownMenu.style.display === 'none') {
+                    dropdownMenu.style.display = 'block';
+                } else {
+                    dropdownMenu.style.display = 'none';
+                }
+            });
+        }
+    });
+</script>
+
+
+
+
+
+
+
+@* @using SkyTech.Models
+@using SkyTech.Models
+@model IEnumerable<SkyTech.Models.InterBranchTransfer>
+@{
+    ViewBag.Title = "Branch Transfers";
+    Layout = "~/Views/Shared/_MinimalLayout.cshtml";
+    ViewBag.ActivePage = "BranchTransfers";
+}
+
+@section Styles {
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+    <link href="https://api.fontshare.com/v2/css?f[]=clash-display@400,500,600,700&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="~/CSS/DriverStyle.css">
+    <style>
+        .transfer-card {
+            background: var(--white);
+            border: 1.5px solid var(--border);
+            border-radius: var(--radius);
+            padding: 1.2rem 1.5rem;
+            margin-bottom: 1rem;
+            box-shadow: var(--shadow-sm)
+        }
+
+        .transfer-card-head {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            margin-bottom: .9rem;
+            flex-wrap: wrap;
+            gap: .5rem
+        }
+
+        .code-box {
+            font-family: monospace;
+            font-size: 1.1rem;
+            font-weight: 800;
+            color: #7e22ce;
+            background: #f3e8ff;
+            border: 1.5px dashed #c084fc;
+            border-radius: var(--radius-sm);
+            padding: .35rem .9rem;
+            letter-spacing: .1em
+        }
+
+        .meta-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit,minmax(160px,1fr));
+            gap: .6rem;
+            margin-bottom: .9rem
+        }
+
+        .meta-item {
+            font-size: .8rem;
+            color: var(--text-3)
+        }
+
+            .meta-item strong {
+                display: block;
+                font-size: .7rem;
+                color: var(--text-muted);
+                text-transform: uppercase;
+                letter-spacing: .04em;
+                margin-bottom: .12rem
+            }
+
+        .chip-row {
+            display: flex;
+            flex-wrap: wrap;
+            gap: .7rem;
+            margin-bottom: 1.5rem
+        }
+
+        .chip {
+            background: var(--white);
+            border: 1.5px solid var(--border);
+            border-radius: var(--radius-sm);
+            padding: .6rem 1rem;
+            font-size: .8rem;
+            font-weight: 700;
+            color: var(--text-3);
+            box-shadow: var(--shadow-sm);
+            display: flex;
+            align-items: center;
+            gap: .45rem
+        }
+
+            .chip .num {
+                font-family: var(--font-display);
+                font-size: 1.25rem;
+                font-weight: 700;
+                color: var(--text);
+                margin-right: .2rem
+            }
+
+            .chip.purple {
+                border-color: rgba(147,51,234,.28)
+            }
+
+                .chip.purple .num {
+                    color: #9333ea
+                }
+
+            .chip.green {
+                border-color: rgba(22,163,74,.28)
+            }
+
+                .chip.green .num {
+                    color: var(--green)
+                }
+
+            .chip.yellow {
+                border-color: rgba(217,119,6,.28)
+            }
+
+                .chip.yellow .num {
+                    color: var(--yellow)
+                }
+    </style>
+}
+
+<!-- ══ SIDEBAR ══ -->
+<<aside class="d-sidebar">
+    <div class="d-brand">
+        <div class="d-brand-icon"><i class="fas fa-truck-fast"></i></div>
+        <div>
+            <div class="d-brand-name">SkyTech</div>
+            <div class="d-brand-sub">Driver Portal</div>
+        </div>
+    </div>
+    <nav class="d-nav">
+        <div class="d-nav-label">NAVIGATION</div>
+        <a href="@Url.Action("DriverDash", "DeliveryDriver")" class="d-link @(ViewBag.ActivePage == "Dashboard" ? "active" : "")">
+            <i class="fas fa-grid-2"></i><span>Dashboard</span>
+        </a>
+
+        <!-- My Deliveries with dropdown -->
+        <div class="nav-item-dropdown">
+            <a href="#" class="d-link d-dropdown-toggle @(ViewBag.ActivePage == "HomeDeliveries" || ViewBag.ActivePage == "BranchTransfers" ? "open" : "")" id="deliveriesDropdown">
+                <i class="fas fa-bag-shopping"></i>
+                <span>My Deliveries</span>
+                <i class="fas fa-chevron-down dropdown-icon"></i>
+            </a>
+            <div class="d-dropdown-menu" id="deliveriesSubmenu" style="display: @(ViewBag.ActivePage == "HomeDeliveries" || ViewBag.ActivePage == "BranchTransfers" ? "block" : "none")">
+                <a href="@Url.Action("HomeDeliveries", "DeliveryDriver")" class="d-link d-sub-link @(ViewBag.ActivePage == "HomeDeliveries" ? "active" : "")">
+                    <i class="fas fa-truck"></i> Home Deliveries
+                </a>
+                <a href="@Url.Action("BranchTransfers", "DeliveryDriver")" class="d-link d-sub-link @(ViewBag.ActivePage == "BranchTransfers" ? "active" : "")">
+                    <i class="fas fa-arrow-right-arrow-left"></i> Branch Transfers
+                </a>
+            </div>
+        </div>
+        <a href="@Url.Action("MyDeliveries", "DeliveryDriver")" class="d-link">
+            <i class="fas fa-bag-shopping"></i><span>My Deliveries</span>
+        </a>
+        <a href="@Url.Action("MyTasks", "DeliveryDriver")" class="d-link">
+            <i class="fas fa-bag-shopping"></i><span>Returned Order Items</span>
+        </a>
+
+        <div class="d-nav-label" style="margin-top:1rem">ACCOUNT</div>
+        <a href="@Url.Action("DriverProfile", "DeliveryDriver")" class="d-link @(ViewBag.ActivePage == "Profile" ? "active" : "")">
+            <i class="fas fa-circle-user"></i><span>Profile</span>
+        </a>
+    </nav>
+    <div class="d-sidebar-foot">
+        <div class="d-foot-avatar"><i class="fas fa-user-tie"></i></div>
+        <div>
+            <div class="d-foot-name">@(ViewBag.DriverName ?? "Delivery Driver")</div>
+            <div class="d-foot-role">Delivery Driver</div>
+        </div>
+    </div>
+    <div style="padding:.8rem 1.2rem">
+        @using (Html.BeginForm("Logout", "Authentication", FormMethod.Post))
+        {
+            @Html.AntiForgeryToken()
+            <button type="submit" style="width:100%;background:rgba(239,68,68,.08);
+                border:1.5px solid rgba(239,68,68,.25);border-radius:8px;
+                padding:.6rem 1rem;cursor:pointer;color:#ef4444;
+                font-weight:600;font-size:.85rem;display:flex;
+                align-items:center;gap:.5rem;justify-content:center">
+                <i class="fas fa-right-from-bracket"></i> Log Out
+            </button>
+        }
+    </div>
+</aside>
+
+
+    <main class="d-main">
+        <div class="d-topbar">
+            <div>
+                <div class="d-page-title">Branch Transfers</div>
+                <div class="d-page-sub">Inter-branch transfers assigned to you.</div>
+            </div>
+        </div>
+
+        @if (TempData["Success"] != null)
+        {
+            <div style="background:#dcfce7;border:1px solid #86efac;color:#166534;padding:.8rem 1.2rem;border-radius:var(--radius-sm);margin-bottom:1rem;font-size:.88rem;font-weight:600">
+                <i class="fas fa-circle-check"></i> @TempData["Success"]
+            </div>
+        }
+
+        <div class="chip-row">
+            <div class="chip purple"><span class="num">@Model.Count()</span> Total</div>
+            <div class="chip yellow"><span class="num">@Model.Count(t => !t.IsDelivered)</span> Pending</div>
+            <div class="chip green"><span class="num">@Model.Count(t => t.IsDelivered)</span> Completed</div>
+        </div>
+
+        @if (!Model.Any())
+        {
+            <div style="text-align:center;padding:4rem 2rem;color:var(--text-muted)">
+                <i class="fas fa-arrow-right-arrow-left" style="font-size:3rem;opacity:.18;display:block;margin-bottom:.9rem"></i>
+                <p style="font-weight:600">No transfers assigned to you yet.</p>
+            </div>
+        }
+
+        @foreach (var t in Model)
+        {
+            string statusColor = t.IsDelivered ? "#22c55e" : t.TransferStatus == ItemTransferStatus.InTransit ? "#9333ea" : "#f59e0b";
+            <div class="transfer-card" style="border-left:3px solid @statusColor">
+                <div class="transfer-card-head">
+                    <div style="display:flex;align-items:center;gap:.8rem">
+                        <span style="font-family:var(--font-display);font-weight:800;color:var(--blue);font-size:1rem">Transfer #@t.TransferId</span>
+                        <span class="badge" style="background:@(t.IsDelivered ? "#dcfce7" : t.TransferStatus == ItemTransferStatus.InTransit ? "#f3e8ff" : "#fef3c7");color:@(t.IsDelivered ? "#166534" : t.TransferStatus == ItemTransferStatus.InTransit ? "#7e22ce" : "#92400e")">
+                            @(t.IsDelivered ? "Delivered" : t.TransferStatus.ToString())
+                        </span>
+                    </div>
+                    <div class="code-box">@t.TransferCode</div>
+                </div>
+                <div class="meta-grid">
+                    <div class="meta-item"><strong>Item</strong>@t.OrderItem?.ProdName × @t.OrderItem?.Quantity</div>
+                    <div class="meta-item"><strong>Pick Up From</strong>@t.SourceBranch?.ShopAddress</div>
+                    <div class="meta-item"><strong>Deliver To</strong>@t.TargetBranch?.ShopAddress</div>
+                    <div class="meta-item"><strong>Transfer Date</strong>@t.ScheduledTransferDate.ToString("dd MMM yyyy")</div>
+                    <div class="meta-item"><strong>Order</strong>#@t.OrderItem?.OrderId</div>
+                </div>
+                <div style="background:#fefce8;border:1px solid #fde68a;border-radius:var(--radius-sm);padding:.65rem 1rem;font-size:.82rem;color:#92400e;margin-bottom:.8rem">
+                    <i class="fas fa-circle-info"></i>
+                    <strong>Instructions:</strong> Pick up item from <strong>@t.SourceBranch?.ShopAddress</strong>,
+                    then deliver to <strong>@t.TargetBranch?.ShopAddress</strong>.
+                    Give the staff at the destination your transfer code: <strong style="font-family:monospace">@t.TransferCode</strong>
+                </div>
+                @if (!t.IsDelivered && t.TransferStatus == ItemTransferStatus.AssignedToDriver)
+                {
+                    <form method="post" action="@Url.Action("MarkTransferInTransit","DeliveryDriver")">
+                        @Html.AntiForgeryToken()
+                        <input type="hidden" name="transferId" value="@t.TransferId" />
+                        <button type="submit" class="btn btn-primary btn-sm"><i class="fas fa-truck-moving"></i> Mark as In Transit</button>
+                    </form>
+                }
+                else if (!t.IsDelivered && t.TransferStatus == ItemTransferStatus.InTransit)
+                {
+                    <form method="post" action="@Url.Action("MarkTransferDelivered","DeliveryDriver")" onsubmit="return confirm('Confirm you have delivered this item to the pickup branch?')">
+                        @Html.AntiForgeryToken()
+                        <input type="hidden" name="transferId" value="@t.TransferId" />
+                        <button type="submit" class="btn btn-success btn-sm"><i class="fas fa-check-circle"></i> Mark Delivered to Branch</button>
+                    </form>
+                }
+                else if (t.IsDelivered)
+                {
+                    <div style="font-size:.82rem;color:#166534;font-weight:600">
+                        <i class="fas fa-circle-check"></i> Delivered on @t.DeliveredToTargetOn?.ToString("dd MMM yyyy HH:mm")
+                    </div>
+                }
+            </div>
+        }
+    </main>
+</div>
+
+<script>
+    document.addEventListener('DOMContentLoaded', function() {
+        const dropdownToggle = document.getElementById('deliveriesDropdown');
+        const dropdownMenu = document.querySelector('.d-dropdown-menu');
+
+        if (dropdownToggle && dropdownMenu) {
+            dropdownToggle.addEventListener('click', function(e) {
+                e.preventDefault();
+                e.stopPropagation();
+                this.classList.toggle('open');
+                if (dropdownMenu.style.display === 'none') {
+                    dropdownMenu.style.display = 'block';
+                } else {
+                    dropdownMenu.style.display = 'none';
+                }
+            });
+        }
+    });
+</script> *@

@@ -1,0 +1,99 @@
+﻿@model IEnumerable<SkyTech.Models.JobPost>
+
+@{
+    ViewData["Title"] = "Careers";
+    Layout = "~/Views/Shared/_MinimalLayout.cshtml";
+}
+
+@section Styles {
+    <link rel="stylesheet" href="~/CSS/CUSTOMERCSS/Careers.css" />
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
+}
+
+<div class="cust-page-wrap careers-wrap">
+
+    <div class="careers-header">
+        <p class="cust-eyebrow">Join Us</p>
+        <h1 class="cust-title">Careers at SkyTech</h1>
+        <p class="cust-sub">Explore our current openings and find where you fit.</p>
+    </div>
+
+    @if (!Model.Any())
+    {
+        <div class="careers-empty">
+            <i class="fa-regular fa-folder-open"></i>
+            <p>There are no open positions right now. Check back soon.</p>
+        </div>
+    }
+    else
+    {
+        <div class="careers-grid">
+            @foreach (var job in Model)
+            {
+                var daysLeft = job.ClosingDate.HasValue
+    ? (job.ClosingDate.Value.Date - DateTime.Now.Date).Days
+    : int.MaxValue;
+                var urgency = daysLeft <= 3 ? "job-urgent" : daysLeft <= 7 ? "job-soon" : "job-open";
+                var salaryText = job.SalaryMin > 0 && job.SalaryMax > 0
+                    ? $"R{job.SalaryMin:N0} - R{job.SalaryMax:N0}"
+                    : "Salary not disclosed";
+
+                <div class="job-card">
+
+                    <div class="job-card-header">
+                        <div>
+                            <h2 class="job-title">@job.JobTitle</h2>
+                            <div class="job-meta">
+                                <span><i class="fa-solid fa-building"></i> @job.Department</span>
+                                <span><i class="fa-solid fa-location-dot"></i> @job.Location</span>
+                            </div>
+                        </div>
+                        <span class="job-type-badge">@job.EmploymentType</span>
+                    </div>
+
+                    <div class="job-tags">
+                        <span class="job-tag job-tag-salary"><i class="fa-solid fa-sack-dollar"></i> @salaryText</span>
+                        <span class="job-tag @urgency">
+                            <i class="fa-regular fa-clock"></i>
+                            @(daysLeft > 0 ? $"Closes in {daysLeft} day{(daysLeft == 1 ? "" : "s")}" : "Closing today")
+                        </span>
+                    </div>
+
+                    <details class="job-details">
+                        <summary>View full details <i class="fa-solid fa-chevron-down"></i></summary>
+
+                        <div class="job-detail-block">
+                            <h4>Responsibilities</h4>
+                            <p>@job.Responsibilities</p>
+                        </div>
+
+                        <div class="job-detail-block">
+                            <h4>Required certifications</h4>
+                            <p>@job.RequiredCerts</p>
+                        </div>
+
+                        <div class="job-detail-block">
+                            <h4>Required skills &amp; experience</h4>
+                            <p>@job.RequiredSkillsAndXP</p>
+                        </div>
+
+                        <div class="job-detail-footer">
+                            Posted @job.CreatedAt.ToString("dd MMM yyyy")
+                        </div>
+                    </details>
+
+                    <a asp-controller="CustomerApplications"
+                       asp-action="StartApplication"
+                       asp-route-postId="@job.PostId"
+                       class="job-apply-btn">
+                        Apply now <i class="fa-solid fa-arrow-right"></i>
+                    </a>
+
+                </div>
+            }
+        </div>
+    }
+
+</div>

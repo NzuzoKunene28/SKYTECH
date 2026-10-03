@@ -1,0 +1,254 @@
+﻿@using SkyTech.Models
+@model List<SkyTech.Models.OrderItem>
+@{
+    ViewBag.Title = "Return an Item";
+    Layout = "~/Views/Shared/_MinimalLayout.cshtml";
+}
+
+@section Styles {
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+    <link href="https://api.fontshare.com/v2/css?f[]=clash-display@400,500,600,700&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="~/CSS/SharedLayout.css">
+    <link rel="stylesheet" href="~/CSS/ReturnPolicy.css">
+}
+
+<div class="po-wrap">
+
+    <!-- Top bar -->
+    <div class="po-top">
+        <div>
+            <div class="po-title">Return an Item</div>
+            <div class="po-sub">
+                @if (Model != null && Model.Any())
+                {
+                    <span>@Model.Count item@(Model.Count != 1 ? "s" : "") eligible for return</span>
+                }
+                else
+                {
+
+                    <span>Items delivered within the last 7 days</span>
+                }
+            </div>
+        </div>
+        <a href="@Url.Action("MyOrders", "Customer")" class="po-back">
+            <i class="fas fa-arrow-left"></i> Back to Orders
+        </a>
+    </div>
+
+    @if (TempData["Message"] != null)
+    {
+        <div class="po-alert">
+            <i class="fas fa-circle-check"></i> @TempData["Message"]
+        </div>
+    }
+
+    <div class="po-info">
+        <i class="fas fa-circle-info"></i>
+        Items delivered within the last <strong>7 days</strong> are shown. State your reason,
+        set the quantity, choose <strong>Exchange</strong>, then click Submit Return. Refunds are only done in-store.
+    </div>
+
+    @if (Model == null || !Model.Any())
+    {
+        <div class="po-empty">
+            <i class="fas fa-rotate-left"></i>
+            <h3>No returnable items</h3>
+            <p>No recently delivered orders within the 7-day return window, or all eligible items have already been returned.</p>
+            <a href="@Url.Action("MyOrders", "Customer")" class="btn-pri">
+                <i class="fas fa-bag-shopping"></i> View My Orders
+            </a>
+        </div>
+    }
+    else
+    {
+        int cardIdx = 0;
+        foreach (var item in Model)
+        {
+            int daysLeft = item.Order?.DeliveredOn.HasValue == true
+                ? Math.Max(0, 7 - (int)(DateTime.Now - item.Order.DeliveredOn.Value).TotalDays)
+                : 0;
+            string dlClass = daysLeft <= 2 ? "dl-warn" : "dl-ok";
+            string uid = $"item_{item.OrderItemId}"; // unique prefix per card
+
+            @using (Html.BeginForm("SubmitItemReturn", "Customer", FormMethod.Post))
+            {
+                @Html.AntiForgeryToken()
+                <input type="hidden" name="orderItemId" value="@item.OrderItemId" />
+
+                <div class="item-card">
+
+                    <!-- Product info -->
+                    <div class="ic-top">
+                        <div class="ic-thumb">
+                            @if (item.Products?.ProductPictures != null && item.Products.ProductPictures.Any())
+                            {
+                                var pic = item.Products.ProductPictures.First();
+                                <img src="@pic.FilePath" alt="@pic.FileName" />
+                            }
+                            else
+                            {
+
+                                <i class="fas fa-image"></i>
+                            }
+                        </div>
+                        <div class="ic-info">
+                            <div class="ic-name">@item.ProdName</div>
+                            <div class="ic-meta">
+                                <span><i class="fas fa-hashtag"></i> Order #@item.OrderId</span>
+                                <span><i class="fas fa-box"></i> Qty bought: @item.Quantity</span>
+                                <span>
+                                    <i class="fas fa-calendar-check"></i>
+                                    Delivered: @(item.Order?.DeliveredOn?.ToString("dd MMM yyyy") ?? "—")
+                                </span>
+                                <span class="dl-pill @dlClass">@daysLeft day@(daysLeft != 1 ? "s" : "") left</span>
+                            </div>
+                        </div>
+                        <div class="ic-price">R @item.PriceAtTimeOfPurchase.ToString("N2")</div>
+                    </div>
+
+                    <!-- Form -->
+                    <div class="ic-form">
+
+                        <!-- Reason + Qty -->
+                        <div class="ic-row2">
+                            <div class="ic-field">
+                                <label class="ic-label">
+                                    <i class="fas fa-comment-dots"></i> Reason for return
+                                </label>
+                                <textarea name="returnReason"
+                                          class="ic-textarea"
+                                          placeholder="e.g. Arrived damaged, wrong item, not working…"
+                                          required></textarea>
+                            </div>
+                            <div class="ic-field">
+                                <label class="ic-label">
+                                    <i class="fas fa-hashtag"></i> Qty to return
+                                </label>
+                                <div class="ic-qty-wrap">
+                                    <button type="button" class="ic-qty-btn" onclick="stepQty(this,-1)">−</button>
+                                    <input type="number"
+                                           name="quantityReturned"
+                                           class="ic-qty-input"
+                                           value="@item.Quantity"
+                                           min="1"
+                                           max="@item.Quantity"
+                                           data-max="@item.Quantity"
+                                           required />
+                                    <button type="button" class="ic-qty-btn" onclick="stepQty(this,1)">+</button>
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- ══ REFUND OR EXCHANGE TOGGLE ══ -->
+                        <div>
+                            <div class="re-label">
+                                <i class="fas fa-rotate"></i> Select below option
+                            </div>
+                            <div class="re-toggle">
+
+                                @* <!-- Refund option -->
+                                <label class="re-option" id="opt-refund-@item.OrderItemId"
+                                       onclick="selectOption(@item.OrderItemId, 'Refund')">
+                                    <input type="radio"
+                                           name="refundOrExchange"
+                                           value="Refund"
+                                           id="radio-refund-@item.OrderItemId"
+                                           required />
+                                    <div class="re-icon green">
+                                        <i class="fas fa-money-bill-wave"></i>
+                                    </div>
+                                    <div class="re-text">
+                                        <div class="rt">Get a Refund</div>
+                                        <div class="rs">Money returned to you</div>
+                                    </div>
+                                    <div class="re-check"><i class="fas fa-check"></i></div>
+                                </label> *@
+
+                                <!-- Exchange option -->
+                                <label class="re-option" id="opt-exchange-@item.OrderItemId"
+                                       onclick="selectOption(@item.OrderItemId, 'Exchange_item')">
+                                    <input type="radio"
+                                           name="refundOrExchange"
+                                           value="Exchange_item"
+                                           id="radio-exchange-@item.OrderItemId"
+                                           required />
+                                    <div class="re-icon blue">
+                                        <i class="fas fa-arrow-right-arrow-left"></i>
+                                    </div>
+                                    <div class="re-text">
+                                        <div class="rt">Exchange Item</div>
+                                        <div class="rs">Replace with same product</div>
+                                    </div>
+                                    <div class="re-check"><i class="fas fa-check"></i></div>
+                                </label>
+
+                            </div>
+                        </div>
+
+                    </div>
+
+                    <!-- Submit row -->
+                    <div class="ic-submit-row">
+                        <span class="ic-note">
+                            <i class="fas fa-shield-halved" style="color:var(--blue)"></i>
+                            Reviewed by the store within 3–5 business days.
+                        </span>
+                        <button type="submit" class="btn-submit"
+                                onclick="return validateAndConfirm(this, @item.OrderItemId, '@item.ProdName.Replace("'", "\\'")')">
+                            <i class="fas fa-rotate-left"></i> Submit Return
+                        </button>
+                    </div>
+
+                </div>
+            }
+
+            cardIdx++;
+        }
+    }
+
+</div>
+
+<script>
+    // Qty stepper
+    function stepQty(btn, dir) {
+        var wrap  = btn.closest('.ic-qty-wrap');
+        var input = wrap.querySelector('.ic-qty-input');
+        var max   = parseInt(input.dataset.max) || 99;
+        input.value = Math.max(1, Math.min(max, (parseInt(input.value) || 1) + dir));
+    }
+
+    // Highlight the selected refund/exchange option
+    function selectOption(itemId, value) {
+        var refundOpt   = document.getElementById('opt-refund-'   + itemId);
+        var exchangeOpt = document.getElementById('opt-exchange-' + itemId);
+        var refundRadio = document.getElementById('radio-refund-' + itemId);
+        var exchRadio   = document.getElementById('radio-exchange-' + itemId);
+
+        refundOpt.classList.remove('selected-refund','selected-exchange');
+        exchangeOpt.classList.remove('selected-refund','selected-exchange');
+
+        if (value === 'Refund') {
+            refundOpt.classList.add('selected-refund');
+            refundRadio.checked = true;
+        } else {
+            exchangeOpt.classList.add('selected-exchange');
+            exchRadio.checked = true;
+        }
+    }
+
+    // Validate a choice was made before submitting
+    function validateAndConfirm(btn, itemId, prodName) {
+        var refundRadio = document.getElementById('radio-refund-'   + itemId);
+        var exchRadio   = document.getElementById('radio-exchange-' + itemId);
+
+        if (!refundRadio.checked && !exchRadio.checked) {
+            alert('Please select whether you want a Refund or an Exchange before submitting.');
+            return false;
+        }
+
+        var choice = refundRadio.checked ? 'refund' : 'exchange';
+        return confirm('Submit return request for \'' + prodName + '\' with a ' + choice + '?');
+    }
+</script>

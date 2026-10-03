@@ -1,0 +1,532 @@
+﻿
+
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="utf-8" />
+
+    <meta name="viewport"
+          content="width=device-width, initial-scale=1.0" />
+
+    <title>@ViewData["Title"] - Spaza Connect</title>
+
+    <link rel="preconnect"
+          href="https://fonts.googleapis.com">
+
+    <link rel="preconnect"
+          href="https://fonts.gstatic.com"
+          crossorigin>
+
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap"
+          rel="stylesheet">
+
+    <link rel="stylesheet"
+          href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.2/css/all.min.css">
+
+    <style>
+        :root {
+            --primary: #16888b;
+            --primary-dark: #106c70;
+            --primary-darker: #0b575a;
+            --primary-light: #e9f8f8;
+            --navy: #15233d;
+            --text: #354158;
+            --muted: #748199;
+            --border: #dfe7ef;
+            --background: #f4f7fa;
+            --white: #ffffff;
+            --danger: #dc4052;
+            --shadow: 0 14px 40px rgba(25, 50, 80, .08);
+        }
+
+        * {
+            box-sizing: border-box;
+        }
+
+        html {
+            min-height: 100%;
+            scroll-behavior: smooth;
+        }
+
+        body {
+            display: flex;
+            min-height: 100vh;
+            margin: 0;
+            flex-direction: column;
+            color: var(--text);
+            font-family: "Inter", sans-serif;
+            background: radial-gradient( circle at top left, rgba(22, 136, 139, .08), transparent 28rem ), var(--background);
+        }
+
+        button,
+        input,
+        select,
+        textarea {
+            font-family: inherit;
+        }
+
+        /* Header */
+        .main-header {
+            position: sticky;
+            z-index: 1000;
+            top: 0;
+            color: white;
+            background: linear-gradient( 135deg, var(--primary-dark), var(--primary) );
+            border-bottom: 1px solid rgba(255, 255, 255, .12);
+            box-shadow: 0 8px 28px rgba(14, 75, 78, .18);
+        }
+
+        .navbar {
+            display: flex;
+            width: min(1180px, calc(100% - 32px));
+            min-height: 73px;
+            margin: 0 auto;
+            align-items: center;
+            justify-content: space-between;
+            gap: 25px;
+        }
+
+        /* Brand */
+        .brand {
+            display: inline-flex;
+            align-items: center;
+            gap: 11px;
+            color: white;
+            text-decoration: none;
+        }
+
+            .brand:hover {
+                color: white;
+                text-decoration: none;
+            }
+
+        .brand-icon {
+            display: grid;
+            width: 42px;
+            min-width: 42px;
+            height: 42px;
+            color: var(--primary);
+            background: white;
+            border: 1px solid rgba(255, 255, 255, .5);
+            border-radius: 12px;
+            box-shadow: 0 7px 18px rgba(0, 0, 0, .1);
+            place-items: center;
+        }
+
+        .brand-text {
+            display: flex;
+            flex-direction: column;
+        }
+
+        .brand-name {
+            color: white;
+            font-size: 17px;
+            font-weight: 800;
+            letter-spacing: -.02em;
+        }
+
+        .brand-subtitle {
+            margin-top: 2px;
+            color: rgba(255, 255, 255, .68);
+            font-size: 9px;
+            font-weight: 700;
+            letter-spacing: .08em;
+            text-transform: uppercase;
+        }
+
+        /* Navigation */
+        .navigation {
+            display: flex;
+            align-items: center;
+            gap: 6px;
+        }
+
+        .nav-link {
+            position: relative;
+            display: inline-flex;
+            min-height: 42px;
+            padding: 0 14px;
+            align-items: center;
+            gap: 8px;
+            color: rgba(255, 255, 255, .79);
+            border: 1px solid transparent;
+            border-radius: 10px;
+            font-size: 12px;
+            font-weight: 700;
+            text-decoration: none;
+            transition: .2s ease;
+        }
+
+            .nav-link i {
+                font-size: 13px;
+            }
+
+            .nav-link:hover {
+                color: white;
+                background: rgba(255, 255, 255, .12);
+                border-color: rgba(255, 255, 255, .12);
+                text-decoration: none;
+            }
+
+            .nav-link.active {
+                color: var(--primary-dark);
+                background: white;
+                border-color: white;
+                box-shadow: 0 8px 20px rgba(4, 54, 56, .13);
+            }
+
+        /* Logout */
+        .logout-form {
+            display: inline-block;
+            margin: 0 0 0 6px;
+        }
+
+        .logout-button {
+            display: inline-flex;
+            min-height: 42px;
+            padding: 0 15px;
+            align-items: center;
+            justify-content: center;
+            gap: 8px;
+            color: white;
+            background: rgba(132, 20, 31, .35);
+            border: 1px solid rgba(255, 255, 255, .18);
+            border-radius: 10px;
+            cursor: pointer;
+            font-size: 12px;
+            font-weight: 800;
+            transition: .2s ease;
+        }
+
+            .logout-button:hover {
+                color: white;
+                background: var(--danger);
+                border-color: var(--danger);
+                box-shadow: 0 8px 20px rgba(126, 20, 31, .2);
+                transform: translateY(-1px);
+            }
+
+            .brand:focus,
+            .nav-link:focus,
+            .logout-button:focus,
+            .mobile-menu-button:focus {
+                outline: 3px solid rgba(255, 255, 255, .35);
+                outline-offset: 2px;
+            }
+
+        /* Mobile button */
+        .mobile-menu-button {
+            display: none;
+            width: 42px;
+            min-width: 42px;
+            height: 42px;
+            color: white;
+            background: rgba(255, 255, 255, .1);
+            border: 1px solid rgba(255, 255, 255, .22);
+            border-radius: 11px;
+            cursor: pointer;
+            font-size: 18px;
+        }
+
+            .mobile-menu-button:hover {
+                background: rgba(255, 255, 255, .18);
+            }
+
+        /* Page */
+        .page-content {
+            width: 100%;
+            flex: 1;
+        }
+
+        /* Footer */
+        .footer {
+            position: relative;
+            margin-top: auto;
+            padding: 26px 20px;
+            overflow: hidden;
+            color: rgba(255, 255, 255, .7);
+            text-align: center;
+            background: linear-gradient( 135deg, var(--primary-darker), var(--primary-dark) );
+        }
+
+            .footer::before {
+                position: absolute;
+                top: -70px;
+                left: 12%;
+                width: 150px;
+                height: 150px;
+                content: "";
+                border: 1px solid rgba(255, 255, 255, .08);
+                border-radius: 50%;
+            }
+
+        .footer-content {
+            position: relative;
+            z-index: 2;
+            display: flex;
+            width: min(1180px, calc(100% - 32px));
+            margin: 0 auto;
+            align-items: center;
+            justify-content: space-between;
+            gap: 20px;
+        }
+
+        .footer-brand {
+            display: inline-flex;
+            align-items: center;
+            gap: 9px;
+            color: white;
+            font-size: 13px;
+            font-weight: 800;
+        }
+
+        .footer-brand-icon {
+            display: grid;
+            width: 31px;
+            height: 31px;
+            color: var(--primary);
+            background: white;
+            border-radius: 9px;
+            place-items: center;
+        }
+
+        .footer p {
+            margin: 0;
+            font-size: 11px;
+        }
+
+        .footer strong {
+            color: white;
+        }
+
+        /* Responsive */
+        @@media (max-width: 800px) {
+            .navbar {
+                min-height: 67px;
+                padding: 12px 0;
+                align-items: center;
+                flex-wrap: wrap;
+            }
+
+            .mobile-menu-button {
+                display: inline-grid;
+                place-items: center;
+            }
+
+            .navigation {
+                display: none;
+                width: 100%;
+                padding: 12px 0 3px;
+                align-items: stretch;
+                flex-direction: column;
+                border-top: 1px solid rgba(255, 255, 255, .15);
+            }
+
+                .navigation.open {
+                    display: flex;
+                }
+
+            .nav-link {
+                width: 100%;
+                min-height: 46px;
+                padding: 0 14px;
+            }
+
+            .logout-form {
+                width: 100%;
+                margin: 5px 0 0;
+            }
+
+            .logout-button {
+                width: 100%;
+                min-height: 46px;
+                justify-content: flex-start;
+                padding: 0 14px;
+            }
+        }
+
+        @@media (max-width: 600px) {
+            .footer-content {
+                flex-direction: column;
+            }
+        }
+    </style>
+
+    @await RenderSectionAsync("Styles", required: false)
+</head>
+
+<body>
+
+    <header class="main-header">
+        <nav class="navbar">
+
+            <a class="brand"
+               href="@Url.Action("HRDash", "HR")">
+
+                <span class="brand-icon">
+                    <i class="fa-solid fa-store"></i>
+                </span>
+
+                <span class="brand-text">
+                    <span class="brand-name">
+                        SkyTech
+                    </span>
+
+                    <span class="brand-subtitle">
+                        Workforce Management
+                    </span>
+                </span>
+            </a>
+
+            <button type="button"
+                    id="mobileMenuButton"
+                    class="mobile-menu-button"
+                    aria-label="Open navigation menu"
+                    aria-expanded="false">
+
+                <i class="fa-solid fa-bars"></i>
+            </button>
+
+            <div id="mainNavigation"
+                 class="navigation">
+
+                <a class="nav-link"
+                   data-controller="HR"
+                   data-action="HRDash"
+                   href="@Url.Action("HRDash", "HR")">
+
+                    <i class="fa-solid fa-house"></i>
+                    Dashboard
+                </a>
+
+                <a class="nav-link"
+                   data-controller="HR"
+                   data-action="StaffDirectory"
+                   href="@Url.Action("StaffDirectory", "HR")">
+
+                    <i class="fa-solid fa-users"></i>
+                    Staff
+                </a>
+
+                <a class="nav-link"
+                   data-controller="Roster"
+                   data-action=""
+                   href="@Url.Action("RosterList", "Roster")">
+
+                    <i class="fa-solid fa-calendar-days"></i>
+                    Rosters
+                </a>
+
+                <a class="nav-link"
+                   data-controller="HR"
+                   data-action="Branches"
+                   href="@Url.Action("Branches", "HR")">
+
+                    <i class="fa-solid fa-store-flag"></i>
+                    Branches
+                </a>
+
+                <form asp-controller="Authentication"
+                      asp-action="Logout"
+                      method="post"
+                      class="logout-form">
+
+                    @Html.AntiForgeryToken()
+
+                    <button type="submit"
+                            class="logout-button">
+
+                        <i class="fa-solid fa-right-from-bracket"></i>
+                        Logout
+                    </button>
+                </form>
+            </div>
+        </nav>
+    </header>
+
+    <main class="page-content">
+        @RenderBody()
+    </main>
+
+    <footer class="footer">
+        <div class="footer-content">
+            <div class="footer-brand">
+                <span class="footer-brand-icon">
+                    <i class="fa-solid fa-store"></i>
+                </span>
+
+                <span>SkyTech</span>
+            </div>
+
+            <p>
+                &copy; @DateTime.Now.Year
+                <strong>SCRUMS</strong>.
+                All rights reserved.
+            </p>
+        </div>
+    </footer>
+
+    <script>
+        document.addEventListener("DOMContentLoaded", function () {
+            const menuButton =
+                document.getElementById("mobileMenuButton");
+
+            const navigation =
+                document.getElementById("mainNavigation");
+
+            if (menuButton && navigation) {
+                menuButton.addEventListener("click", function () {
+                    const isOpen =
+                        navigation.classList.toggle("open");
+
+                    menuButton.setAttribute(
+                        "aria-expanded",
+                        isOpen.toString()
+                    );
+
+                    const icon =
+                        menuButton.querySelector("i");
+
+                    if (icon) {
+                        icon.className = isOpen
+                            ? "fa-solid fa-xmark"
+                            : "fa-solid fa-bars";
+                    }
+                });
+            }
+
+            // Automatically highlight the current navigation item.
+            const currentPath =
+                window.location.pathname.toLowerCase();
+
+            const links =
+                document.querySelectorAll(".nav-link");
+
+            links.forEach(function (link) {
+                const controller =
+                    link.dataset.controller?.toLowerCase();
+
+                const action =
+                    link.dataset.action?.toLowerCase();
+
+                if (!controller) {
+                    return;
+                }
+
+                const matchesController =
+                    currentPath.includes("/" + controller);
+
+                const matchesAction =
+                    !action ||
+                    currentPath.includes("/" + action);
+
+                if (matchesController && matchesAction) {
+                    link.classList.add("active");
+                }
+            });
+        });
+    </script>
+
+    @await RenderSectionAsync("Scripts", required: false)
+</body>
+</html>

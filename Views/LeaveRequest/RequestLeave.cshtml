@@ -1,0 +1,1470 @@
+﻿@model SkyTech.ViewModels.RequestLeaveViewModel
+@using SkyTech.ViewModels
+
+@{
+    ViewData["Title"] = "Request Leave";
+    Layout = "~/Views/Shared/_Layout.cshtml";
+
+    var balances = Model.LeaveBalances?.ToList()
+        ?? new List<LeaveBalanceSummaryViewModel>();
+}
+
+@section Styles {
+    <style>
+        .leave-page {
+            width: min(1100px, calc(100% - 32px));
+            margin: 35px auto 60px;
+        }
+
+        .leave-header {
+            position: relative;
+            display: flex;
+            min-height: 190px;
+            padding: 35px;
+            margin-bottom: 24px;
+            overflow: hidden;
+            align-items: center;
+            justify-content: space-between;
+            gap: 25px;
+            color: white;
+            background: linear-gradient(135deg, #126f73, #23989a);
+            border-radius: 24px;
+            box-shadow: 0 18px 45px rgba(18, 111, 115, .22);
+        }
+
+            .leave-header::before,
+            .leave-header::after {
+                position: absolute;
+                content: "";
+                border: 1px solid rgba(255, 255, 255, .12);
+                border-radius: 50%;
+            }
+
+            .leave-header::before {
+                width: 270px;
+                height: 270px;
+                top: -175px;
+                right: -60px;
+            }
+
+            .leave-header::after {
+                width: 170px;
+                height: 170px;
+                right: 105px;
+                bottom: -135px;
+            }
+
+        .header-content,
+        .header-icon {
+            position: relative;
+            z-index: 2;
+        }
+
+        .header-label {
+            display: inline-flex;
+            padding: 7px 12px;
+            margin-bottom: 14px;
+            align-items: center;
+            gap: 8px;
+            background: rgba(255, 255, 255, .13);
+            border: 1px solid rgba(255, 255, 255, .18);
+            border-radius: 30px;
+            font-size: 11px;
+            font-weight: 700;
+            letter-spacing: .08em;
+            text-transform: uppercase;
+        }
+
+        .leave-header h1 {
+            margin: 0 0 9px;
+            font-size: clamp(28px, 4vw, 40px);
+            font-weight: 800;
+            letter-spacing: -.04em;
+        }
+
+        .leave-header p {
+            max-width: 650px;
+            margin: 0;
+            color: rgba(255, 255, 255, .82);
+            font-size: 14px;
+            line-height: 1.7;
+        }
+
+        .header-icon {
+            display: grid;
+            width: 84px;
+            min-width: 84px;
+            height: 84px;
+            background: rgba(255, 255, 255, .14);
+            border: 1px solid rgba(255, 255, 255, .2);
+            border-radius: 22px;
+            font-size: 32px;
+            backdrop-filter: blur(8px);
+            place-items: center;
+        }
+
+        .success-message,
+        .error-message {
+            display: flex;
+            padding: 16px 18px;
+            margin-bottom: 20px;
+            align-items: flex-start;
+            gap: 11px;
+            border-radius: 13px;
+            font-size: 12px;
+            line-height: 1.6;
+        }
+
+        .success-message {
+            color: #08754a;
+            background: #e9faf2;
+            border: 1px solid #bee9d4;
+        }
+
+        .error-message {
+            color: #a72e3d;
+            background: #fff0f2;
+            border: 1px solid #f5c6cc;
+        }
+
+            .error-message ul {
+                margin: 7px 0 0;
+                padding-left: 18px;
+            }
+
+        .content-card {
+            margin-bottom: 22px;
+            overflow: hidden;
+            background: white;
+            border: 1px solid #dfe7ef;
+            border-radius: 21px;
+            box-shadow: 0 14px 40px rgba(25, 50, 80, .08);
+        }
+
+        .card-header-modern {
+            display: flex;
+            padding: 23px 26px;
+            align-items: center;
+            justify-content: space-between;
+            gap: 15px;
+            border-bottom: 1px solid #edf1f5;
+        }
+
+        .section-heading {
+            display: flex;
+            align-items: center;
+            gap: 12px;
+        }
+
+        .section-icon {
+            display: grid;
+            width: 44px;
+            min-width: 44px;
+            height: 44px;
+            color: #16888b;
+            background: #e9f8f8;
+            border-radius: 12px;
+            place-items: center;
+        }
+
+        .section-heading h2 {
+            margin: 0 0 3px;
+            color: #15233d;
+            font-size: 17px;
+            font-weight: 800;
+        }
+
+        .section-heading p {
+            margin: 0;
+            color: #748199;
+            font-size: 11px;
+        }
+
+        .balance-count {
+            padding: 7px 11px;
+            color: #106c70;
+            background: #e9f8f8;
+            border-radius: 30px;
+            font-size: 10px;
+            font-weight: 800;
+        }
+
+        .balances-grid {
+            display: grid;
+            padding: 22px 26px 26px;
+            grid-template-columns: repeat(3, minmax(0, 1fr));
+            gap: 14px;
+        }
+
+        .balance-card {
+            padding: 18px;
+            background: #fbfcfe;
+            border: 1.5px solid #dfe7ef;
+            border-radius: 15px;
+        }
+
+        .balance-name {
+            display: flex;
+            margin-bottom: 15px;
+            align-items: center;
+            justify-content: space-between;
+            gap: 10px;
+            color: #15233d;
+            font-size: 13px;
+            font-weight: 800;
+        }
+
+            .balance-name i {
+                color: #16888b;
+            }
+
+        .available-badge {
+            padding: 5px 8px;
+            color: #08754a;
+            background: #e9faf2;
+            border-radius: 20px;
+            font-size: 9px;
+            white-space: nowrap;
+        }
+
+        .balance-stats {
+            display: grid;
+            grid-template-columns: repeat(3, 1fr);
+            gap: 8px;
+        }
+
+        .balance-stat {
+            padding: 9px 5px;
+            text-align: center;
+            background: white;
+            border: 1px solid #e5ebf1;
+            border-radius: 9px;
+        }
+
+            .balance-stat strong {
+                display: block;
+                color: #15233d;
+                font-size: 14px;
+            }
+
+            .balance-stat span {
+                color: #7a8799;
+                font-size: 8px;
+                text-transform: uppercase;
+            }
+
+        .empty-state {
+            padding: 50px 24px;
+            text-align: center;
+        }
+
+            .empty-state i {
+                display: grid;
+                width: 65px;
+                height: 65px;
+                margin: 0 auto 15px;
+                color: #16888b;
+                background: #e9f8f8;
+                border-radius: 18px;
+                font-size: 25px;
+                place-items: center;
+            }
+
+            .empty-state h3 {
+                margin: 0 0 7px;
+                color: #15233d;
+                font-size: 16px;
+            }
+
+            .empty-state p {
+                margin: 0;
+                color: #748199;
+                font-size: 11px;
+            }
+
+        .form-body {
+            padding: 27px;
+        }
+
+        .form-grid {
+            display: grid;
+            grid-template-columns: repeat(2, minmax(0, 1fr));
+            gap: 19px;
+        }
+
+        .form-group {
+            margin: 0;
+        }
+
+            .form-group.full {
+                grid-column: 1 / -1;
+            }
+
+        .form-label-modern {
+            display: flex;
+            margin-bottom: 8px;
+            align-items: center;
+            gap: 7px;
+            color: #15233d;
+            font-size: 12px;
+            font-weight: 800;
+        }
+
+            .form-label-modern i {
+                color: #16888b;
+            }
+
+        .required {
+            color: #dc4052;
+        }
+
+        .input-wrap {
+            position: relative;
+        }
+
+        .input-icon {
+            position: absolute;
+            z-index: 2;
+            top: 17px;
+            left: 15px;
+            color: #8c98aa;
+            pointer-events: none;
+        }
+
+        .form-control-modern {
+            width: 100%;
+            min-height: 50px;
+            padding: 0 15px 0 44px;
+            color: #15233d;
+            background: #fbfcfe;
+            border: 1.5px solid #dfe7ef;
+            border-radius: 12px;
+            outline: none;
+            font-family: inherit;
+            font-size: 13px;
+            transition: .2s ease;
+        }
+
+        textarea.form-control-modern {
+            min-height: 120px;
+            padding-top: 14px;
+            line-height: 1.6;
+            resize: vertical;
+        }
+
+        input[type="file"].form-control-modern {
+            padding-top: 12px;
+        }
+
+        .form-control-modern:focus {
+            background: white;
+            border-color: #16888b;
+            box-shadow: 0 0 0 4px rgba(22, 136, 139, .1);
+        }
+
+        .field-help {
+            display: flex;
+            margin-top: 7px;
+            align-items: center;
+            gap: 6px;
+            color: #748199;
+            font-size: 10px;
+            line-height: 1.5;
+        }
+
+            .field-help i {
+                color: #16888b;
+            }
+
+        .field-validation-error {
+            display: block;
+            margin-top: 6px;
+            color: #c63848;
+            font-size: 10px;
+        }
+
+        .requirements-panel {
+            display: none;
+            grid-column: 1 / -1;
+            padding: 20px;
+            background: #f4fbfb;
+            border: 1px solid #d0ebeb;
+            border-radius: 15px;
+        }
+
+            .requirements-panel.visible {
+                display: block;
+            }
+
+        .requirements-heading {
+            display: flex;
+            margin-bottom: 17px;
+            align-items: center;
+            justify-content: space-between;
+            gap: 10px;
+        }
+
+            .requirements-heading h3 {
+                margin: 0;
+                color: #15233d;
+                font-size: 14px;
+                font-weight: 800;
+            }
+
+        .policy-badge,
+        .document-badge {
+            padding: 6px 9px;
+            border-radius: 20px;
+            font-size: 9px;
+            font-weight: 800;
+        }
+
+        .policy-badge {
+            color: #106c70;
+            background: white;
+            border: 1px solid #d0e5e5;
+        }
+
+        .document-required {
+            color: #c63848;
+            background: #fff0f2;
+        }
+
+        .document-optional {
+            color: #687488;
+            background: #eef2f6;
+        }
+
+        .requirements-grid {
+            display: grid;
+            grid-template-columns: repeat(3, minmax(0, 1fr));
+            gap: 11px;
+        }
+
+        .requirement-item {
+            padding: 13px;
+            background: white;
+            border: 1px solid #dfebed;
+            border-radius: 11px;
+        }
+
+            .requirement-item span {
+                display: block;
+                margin-bottom: 5px;
+                color: #7a8799;
+                font-size: 8px;
+                font-weight: 800;
+                text-transform: uppercase;
+            }
+
+            .requirement-item strong {
+                color: #15233d;
+                font-size: 11px;
+                line-height: 1.4;
+            }
+
+        .button-row {
+            display: flex;
+            padding: 22px 27px;
+            align-items: center;
+            justify-content: space-between;
+            gap: 15px;
+            background: #fbfcfd;
+            border-top: 1px solid #edf1f5;
+        }
+
+        .form-note {
+            display: flex;
+            align-items: center;
+            gap: 7px;
+            color: #748199;
+            font-size: 10px;
+        }
+
+            .form-note i {
+                color: #16888b;
+            }
+
+        .button {
+            display: inline-flex;
+            min-height: 47px;
+            padding: 0 20px;
+            align-items: center;
+            justify-content: center;
+            gap: 8px;
+            border: 0;
+            border-radius: 11px;
+            cursor: pointer;
+            font-family: inherit;
+            font-size: 12px;
+            font-weight: 800;
+            transition: .2s ease;
+        }
+
+        .button-check {
+            color: white;
+            background: linear-gradient(135deg, #16888b, #106c70);
+            box-shadow: 0 9px 22px rgba(22, 136, 139, .22);
+        }
+
+            .button-check:hover {
+                box-shadow: 0 13px 28px rgba(22, 136, 139, .3);
+                transform: translateY(-2px);
+            }
+
+        .button:disabled {
+            cursor: not-allowed;
+            opacity: .65;
+            transform: none;
+        }
+
+        .eligibility-result {
+            display: none;
+            grid-column: 1 / -1;
+            padding: 20px;
+            color: #176542;
+            background: #edfaf4;
+            border: 1px solid #bfe8d3;
+            border-radius: 15px;
+        }
+
+            .eligibility-result.visible {
+                display: block;
+            }
+
+        .result-heading {
+            display: flex;
+            margin-bottom: 17px;
+            align-items: center;
+            gap: 11px;
+        }
+
+        .result-icon {
+            display: grid;
+            width: 40px;
+            height: 40px;
+            background: white;
+            border-radius: 11px;
+            place-items: center;
+        }
+
+        .result-heading h3 {
+            margin: 0 0 3px;
+            color: #075a37;
+            font-size: 14px;
+            font-weight: 800;
+        }
+
+        .result-heading p {
+            margin: 0;
+            color: #418064;
+            font-size: 10px;
+        }
+
+        .result-grid {
+            display: grid;
+            margin-bottom: 18px;
+            grid-template-columns: repeat(3, minmax(0, 1fr));
+            gap: 10px;
+        }
+
+        .result-item {
+            padding: 13px;
+            text-align: center;
+            background: white;
+            border: 1px solid #d4ecdf;
+            border-radius: 10px;
+        }
+
+            .result-item strong {
+                display: block;
+                color: #075a37;
+                font-size: 18px;
+            }
+
+            .result-item span {
+                color: #668877;
+                font-size: 8px;
+                text-transform: uppercase;
+            }
+
+        .submit-button {
+            display: inline-flex;
+            min-height: 45px;
+            padding: 0 18px;
+            align-items: center;
+            gap: 8px;
+            color: white;
+            background: #139561;
+            border: 0;
+            border-radius: 10px;
+            cursor: pointer;
+            font-family: inherit;
+            font-size: 11px;
+            font-weight: 800;
+        }
+
+        @@media (max-width: 850px) {
+            .balances-grid,
+            .requirements-grid {
+                grid-template-columns: repeat(2, minmax(0, 1fr));
+            }
+        }
+
+        @@media (max-width: 650px) {
+            .leave-page {
+                width: min(100% - 20px, 1100px);
+                margin-top: 18px;
+            }
+
+            .leave-header {
+                min-height: auto;
+                padding: 28px 23px;
+            }
+
+            .header-icon {
+                display: none;
+            }
+
+            .balances-grid,
+            .form-grid,
+            .requirements-grid,
+            .result-grid {
+                grid-template-columns: 1fr;
+            }
+
+            .form-group.full,
+            .requirements-panel,
+            .eligibility-result {
+                grid-column: auto;
+            }
+
+            .card-header-modern,
+            .form-body {
+                padding: 21px 19px;
+            }
+
+            .button-row {
+                align-items: stretch;
+                flex-direction: column;
+                padding: 20px;
+            }
+
+            .button {
+                width: 100%;
+            }
+        }
+    </style>
+}
+
+<div class="leave-page">
+
+    <header class="leave-header">
+        <div class="header-content">
+            <div class="header-label">
+                <i class="fa-solid fa-calendar-plus"></i>
+                Employee Leave
+            </div>
+
+            <h1>Request Leave</h1>
+
+            <p>
+                Welcome, <strong>@Model.StaffName</strong>. Review your
+                available balances and submit a leave request for assessment.
+            </p>
+        </div>
+
+        <div class="header-icon">
+            <i class="fa-solid fa-person-walking-arrow-right"></i>
+        </div>
+    </header>
+
+    @if (TempData["Success"] != null)
+    {
+        <div class="success-message">
+            <i class="fa-solid fa-circle-check"></i>
+            <span>@TempData["Success"]</span>
+        </div>
+    }
+
+    <!-- Leave balances -->
+    <section class="content-card">
+        <div class="card-header-modern">
+            <div class="section-heading">
+                <div class="section-icon">
+                    <i class="fa-solid fa-chart-pie"></i>
+                </div>
+
+                <div>
+                    <h2>My Leave Balances</h2>
+                    <p>Your allocated, used and available leave days.</p>
+                </div>
+            </div>
+
+            <div class="balance-count">
+                @balances.Count Leave Type(s)
+            </div>
+        </div>
+
+        @if (balances.Any())
+        {
+            <div class="balances-grid">
+                @foreach (var balance in balances)
+                {
+                    <article class="balance-card">
+                        <div class="balance-name">
+                            <span>
+                                <i class="fa-regular fa-calendar-check"></i>
+                                @balance.LeaveTypeName
+                            </span>
+
+                            <span class="available-badge">
+                                @balance.AvailableDays available
+                            </span>
+                        </div>
+
+                        <div class="balance-stats">
+                            <div class="balance-stat">
+                                <strong>@balance.TotalAllocatedDays</strong>
+                                <span>Allocated</span>
+                            </div>
+
+                            <div class="balance-stat">
+                                <strong>@balance.UsedDays</strong>
+                                <span>Used</span>
+                            </div>
+
+                            <div class="balance-stat">
+                                <strong>@balance.PendingDays</strong>
+                                <span>Pending</span>
+                            </div>
+                        </div>
+                    </article>
+                }
+            </div>
+        }
+        else
+        {
+            <div class="empty-state">
+                <i class="fa-solid fa-calendar-xmark"></i>
+                <h3>No active leave balances</h3>
+                <p>
+                    You currently have no active leave balances available.
+                </p>
+            </div>
+        }
+    </section>
+
+    <!-- Leave request form -->
+    <form id="leaveRequestForm"
+          asp-controller="LeaveRequest"
+          asp-action="RequestLeave"
+          method="post"
+          enctype="multipart/form-data"
+          class="content-card">
+
+        @Html.AntiForgeryToken()
+
+        <div class="card-header-modern">
+            <div class="section-heading">
+                <div class="section-icon">
+                    <i class="fa-solid fa-pen-to-square"></i>
+                </div>
+
+                <div>
+                    <h2>Leave Request Details</h2>
+                    <p>Complete all required information below.</p>
+                </div>
+            </div>
+        </div>
+
+        <div class="form-body">
+            <div asp-validation-summary="ModelOnly"
+                 class="error-message">
+            </div>
+
+            <div id="eligibilityErrors"
+                 class="error-message"
+                 style="display:none;">
+            </div>
+
+            <div class="form-grid">
+
+                <!-- Leave type -->
+                <div class="form-group full">
+                    <label asp-for="LeaveTypeId"
+                           class="form-label-modern">
+
+                        <i class="fa-solid fa-list-check"></i>
+                        Leave Type
+                        <span class="required">*</span>
+                    </label>
+
+                    <div class="input-wrap">
+                        <i class="fa-solid fa-calendar-day input-icon"></i>
+
+                        <select asp-for="LeaveTypeId"
+                                asp-items="Model.LeaveTypes"
+                                id="LeaveTypeId"
+                                class="form-control-modern"
+                                required>
+
+                            <option value="">
+                                -- Select leave type --
+                            </option>
+                        </select>
+                    </div>
+
+                    <span asp-validation-for="LeaveTypeId"></span>
+                </div>
+
+                <!-- Requirements -->
+                <section id="leaveRequirements"
+                         class="requirements-panel">
+
+                    <div class="requirements-heading">
+                        <h3 id="leaveRequirementHeading">
+                            Leave Requirements
+                        </h3>
+
+                        <span class="policy-badge">
+                            <i class="fa-solid fa-shield-halved"></i>
+                            Policy
+                        </span>
+                    </div>
+
+                    <div class="requirements-grid">
+                        <div class="requirement-item">
+                            <span>Payment</span>
+                            <strong id="paidRequirement">—</strong>
+                        </div>
+
+                        <div class="requirement-item">
+                            <span>Document</span>
+                            <strong id="documentRequirement">—</strong>
+                        </div>
+
+                        <div class="requirement-item">
+                            <span>Balance</span>
+                            <strong id="balanceRequirement">—</strong>
+                        </div>
+
+                        <div class="requirement-item">
+                            <span>Minimum Employment</span>
+                            <strong id="employmentRequirement">—</strong>
+                        </div>
+
+                        <div class="requirement-item">
+                            <span>Minimum Notice</span>
+                            <strong id="noticeRequirement">—</strong>
+                        </div>
+
+                        <div class="requirement-item">
+                            <span>Maximum Consecutive</span>
+                            <strong id="maximumRequirement">—</strong>
+                        </div>
+                    </div>
+                </section>
+
+                <!-- Reason -->
+                <div class="form-group full">
+                    <label asp-for="Reason"
+                           class="form-label-modern">
+
+                        <i class="fa-solid fa-message"></i>
+                        Reason for Leave
+                        <span class="required">*</span>
+                    </label>
+
+                    <div class="input-wrap">
+                        <i class="fa-solid fa-align-left input-icon"></i>
+
+                        <textarea asp-for="Reason"
+                                  id="Reason"
+                                  class="form-control-modern"
+                                  minlength="5"
+                                  maxlength="500"
+                                  placeholder="Explain the reason for your leave request..."
+                                  required></textarea>
+                    </div>
+
+                    <span asp-validation-for="Reason"></span>
+                </div>
+
+                <!-- Start date -->
+                <div class="form-group">
+                    <label asp-for="StartDate"
+                           class="form-label-modern">
+
+                        <i class="fa-regular fa-calendar"></i>
+                        Start Date
+                        <span class="required">*</span>
+                    </label>
+
+                    <div class="input-wrap">
+                        <i class="fa-solid fa-calendar-day input-icon"></i>
+
+                        <input asp-for="StartDate"
+                               type="date"
+                               id="StartDate"
+                               class="form-control-modern"
+                               required />
+                    </div>
+
+                    <span asp-validation-for="StartDate"></span>
+                </div>
+
+                <!-- End date -->
+                <div class="form-group">
+                    <label asp-for="EndDate"
+                           class="form-label-modern">
+
+                        <i class="fa-regular fa-calendar"></i>
+                        End Date
+                        <span class="required">*</span>
+                    </label>
+
+                    <div class="input-wrap">
+                        <i class="fa-solid fa-calendar-check input-icon"></i>
+
+                        <input asp-for="EndDate"
+                               type="date"
+                               id="EndDate"
+                               class="form-control-modern"
+                               required />
+                    </div>
+
+                    <span asp-validation-for="EndDate"></span>
+                </div>
+
+                <!-- Document -->
+                <div class="form-group full">
+                    <label asp-for="SupportingDocument"
+                           class="form-label-modern">
+
+                        <i class="fa-solid fa-paperclip"></i>
+                        Supporting Document
+
+                        <span id="documentRequiredBadge"
+                              class="document-badge document-required"
+                              style="display:none;">
+                            Required
+                        </span>
+
+                        <span id="documentOptionalBadge"
+                              class="document-badge document-optional"
+                              style="display:none;">
+                            Optional
+                        </span>
+                    </label>
+
+                    <input asp-for="SupportingDocument"
+                           type="file"
+                           id="SupportingDocument"
+                           class="form-control-modern"
+                           accept=".pdf,.jpg,.jpeg,.png" />
+
+                    <div id="documentHelp"
+                         class="field-help">
+
+                        <i class="fa-solid fa-circle-info"></i>
+
+                        Select a leave type to view document requirements.
+                        Accepted: PDF, JPG and PNG. Maximum 5 MB.
+                    </div>
+
+                    <span asp-validation-for="SupportingDocument"></span>
+                </div>
+
+                <!-- Result -->
+                <section id="eligibilityResult"
+                         class="eligibility-result">
+
+                    <div class="result-heading">
+                        <div class="result-icon">
+                            <i class="fa-solid fa-circle-check"></i>
+                        </div>
+
+                        <div>
+                            <h3>Eligible for Leave</h3>
+                            <p>
+                                Your request meets the current leave requirements.
+                            </p>
+                        </div>
+                    </div>
+
+                    <div class="result-grid">
+                        <div class="result-item">
+                            <strong id="workingDaysRequested">0</strong>
+                            <span>Working days requested</span>
+                        </div>
+
+                        <div id="availableDaysRow"
+                             class="result-item">
+
+                            <strong id="availableDays">0</strong>
+                            <span>Available before request</span>
+                        </div>
+
+                        <div id="remainingDaysRow"
+                             class="result-item">
+
+                            <strong id="remainingDays">0</strong>
+                            <span>Remaining after request</span>
+                        </div>
+                    </div>
+
+                    <button type="submit"
+                            id="confirmSubmitButton"
+                            class="submit-button">
+
+                        <i class="fa-solid fa-paper-plane"></i>
+                        Confirm and Submit Request
+                    </button>
+                </section>
+            </div>
+        </div>
+
+        <footer class="button-row">
+            <div class="form-note">
+                <i class="fa-solid fa-lock"></i>
+                Eligibility must be checked before submission.
+            </div>
+
+            <button type="button"
+                    id="checkEligibilityButton"
+                    class="button button-check">
+
+                <i class="fa-solid fa-shield-check"></i>
+                <span>Check Eligibility</span>
+            </button>
+        </footer>
+    </form>
+</div>
+
+@section Scripts {
+    <partial name="_ValidationScriptsPartial" />
+
+    <script>
+        document.addEventListener("DOMContentLoaded", function () {
+            const form =
+                document.getElementById("leaveRequestForm");
+
+            const checkButton =
+                document.getElementById("checkEligibilityButton");
+
+            const checkButtonText =
+                checkButton.querySelector("span");
+
+            const resultBox =
+                document.getElementById("eligibilityResult");
+
+            const errorBox =
+                document.getElementById("eligibilityErrors");
+
+            const leaveTypeSelect =
+                document.getElementById("LeaveTypeId");
+
+            const requirementsBox =
+                document.getElementById("leaveRequirements");
+
+            const startDate =
+                document.getElementById("StartDate");
+
+            const endDate =
+                document.getElementById("EndDate");
+
+            const documentInput =
+                document.getElementById("SupportingDocument");
+
+            const requiredBadge =
+                document.getElementById("documentRequiredBadge");
+
+            const optionalBadge =
+                document.getElementById("documentOptionalBadge");
+
+            const documentHelp =
+                document.getElementById("documentHelp");
+
+            let eligibilityVerified = false;
+            let formIsSubmitting = false;
+
+            const today = new Date();
+            const localToday =
+                today.getFullYear() + "-" +
+                String(today.getMonth() + 1).padStart(2, "0") + "-" +
+                String(today.getDate()).padStart(2, "0");
+
+            startDate.min = localToday;
+            endDate.min = localToday;
+
+            function resetEligibility() {
+                eligibilityVerified = false;
+                resultBox.classList.remove("visible");
+                errorBox.style.display = "none";
+                errorBox.innerHTML = "";
+            }
+
+            function showErrors(errors) {
+                const errorList =
+                    Array.isArray(errors) && errors.length
+                        ? errors
+                        : ["The request does not meet the leave requirements."];
+
+                errorBox.innerHTML =
+                    "<div>" +
+                    "<i class='fa-solid fa-circle-exclamation'></i> " +
+                    "<strong>Your request cannot be submitted:</strong>" +
+                    "<ul>" +
+                    errorList
+                        .map(error => "<li>" + escapeHtml(error) + "</li>")
+                        .join("") +
+                    "</ul></div>";
+
+                errorBox.style.display = "flex";
+
+                errorBox.scrollIntoView({
+                    behavior: "smooth",
+                    block: "center"
+                });
+            }
+
+            function escapeHtml(value) {
+                const element = document.createElement("div");
+                element.textContent = value ?? "";
+                return element.innerHTML;
+            }
+
+            async function loadRequirements() {
+                resetEligibility();
+
+                const leaveTypeId = leaveTypeSelect.value;
+
+                if (!leaveTypeId) {
+                    requirementsBox.classList.remove("visible");
+                    documentInput.required = false;
+                    requiredBadge.style.display = "none";
+                    optionalBadge.style.display = "none";
+                    return;
+                }
+
+                try {
+                    const url =
+                        '@Url.Action("GetLeaveTypeRequirements", "LeaveRequest")' +
+                        "?leaveTypeId=" +
+                        encodeURIComponent(leaveTypeId);
+
+                    const response = await fetch(url, {
+                        headers: {
+                            "Accept": "application/json"
+                        }
+                    });
+
+                    if (!response.ok) {
+                        throw new Error(
+                            "Leave requirements could not be loaded."
+                        );
+                    }
+
+                    const leaveType = await response.json();
+                    const leaveName = leaveType.leaveTypeName ?? "Leave";
+
+                    document.getElementById(
+                        "leaveRequirementHeading"
+                    ).textContent = leaveName + " Requirements";
+
+                    document.getElementById(
+                        "paidRequirement"
+                    ).textContent =
+                        leaveType.isPaid ? "Paid Leave" : "Unpaid Leave";
+
+                    document.getElementById(
+                        "documentRequirement"
+                    ).textContent =
+                        leaveType.requiresDocument
+                            ? "Required"
+                            : "Not Required";
+
+                    document.getElementById(
+                        "balanceRequirement"
+                    ).textContent =
+                        leaveType.requiresBalance
+                            ? "Required"
+                            : "Not Required";
+
+                    document.getElementById(
+                        "employmentRequirement"
+                    ).textContent =
+                        leaveType.minimumEmploymentMonths > 0
+                            ? leaveType.minimumEmploymentMonths + " month(s)"
+                            : "None";
+
+                    document.getElementById(
+                        "noticeRequirement"
+                    ).textContent =
+                        leaveType.minimumNoticeDays > 0
+                            ? leaveType.minimumNoticeDays + " day(s)"
+                            : "None";
+
+                    document.getElementById(
+                        "maximumRequirement"
+                    ).textContent =
+                        leaveType.maximumConsecutiveDays != null
+                            ? leaveType.maximumConsecutiveDays +
+                              " working day(s)"
+                            : "No configured limit";
+
+                    documentInput.required =
+                        Boolean(leaveType.requiresDocument);
+
+                    requiredBadge.style.display =
+                        leaveType.requiresDocument
+                            ? "inline-block"
+                            : "none";
+
+                    optionalBadge.style.display =
+                        leaveType.requiresDocument
+                            ? "none"
+                            : "inline-block";
+
+                    const isSickLeave =
+                        leaveName.trim().toLowerCase() === "sick leave";
+
+                    documentHelp.innerHTML =
+                        "<i class='fa-solid fa-circle-info'></i> " +
+                        (
+                            leaveType.requiresDocument
+                                ? (
+                                    isSickLeave
+                                        ? "Upload a doctor's note or medical certificate."
+                                        : "A supporting document is required."
+                                  )
+                                : "A supporting document is optional."
+                        ) +
+                        " Accepted: PDF, JPG and PNG. Maximum 5 MB.";
+
+                    requirementsBox.classList.add("visible");
+                }
+                catch (error) {
+                    console.error(error);
+                    requirementsBox.classList.remove("visible");
+                    documentInput.required = false;
+
+                    showErrors([
+                        "The leave-type requirements could not be loaded. Please try again."
+                    ]);
+                }
+            }
+
+            startDate.addEventListener("change", function () {
+                endDate.min = startDate.value || localToday;
+
+                if (endDate.value &&
+                    endDate.value < startDate.value) {
+                    endDate.value = startDate.value;
+                }
+
+                resetEligibility();
+            });
+
+            endDate.addEventListener("change", function () {
+                if (startDate.value &&
+                    endDate.value < startDate.value) {
+                    endDate.setCustomValidity(
+                        "End date cannot be earlier than the start date."
+                    );
+                }
+                else {
+                    endDate.setCustomValidity("");
+                }
+
+                resetEligibility();
+            });
+
+            documentInput.addEventListener("change", function () {
+                resetEligibility();
+
+                const file = documentInput.files[0];
+
+                if (!file) {
+                    documentInput.setCustomValidity("");
+                    return;
+                }
+
+                const allowedExtensions =
+                    [".pdf", ".jpg", ".jpeg", ".png"];
+
+                const fileName = file.name.toLowerCase();
+
+                const validExtension =
+                    allowedExtensions.some(extension =>
+                        fileName.endsWith(extension)
+                    );
+
+                if (!validExtension) {
+                    documentInput.setCustomValidity(
+                        "Only PDF, JPG, JPEG and PNG files are allowed."
+                    );
+
+                    documentInput.reportValidity();
+                    return;
+                }
+
+                if (file.size > 5 * 1024 * 1024) {
+                    documentInput.setCustomValidity(
+                        "The supporting document cannot exceed 5 MB."
+                    );
+
+                    documentInput.reportValidity();
+                    return;
+                }
+
+                documentInput.setCustomValidity("");
+            });
+
+            leaveTypeSelect.addEventListener(
+                "change",
+                loadRequirements
+            );
+
+            document.getElementById("Reason")
+                .addEventListener("input", resetEligibility);
+
+            checkButton.addEventListener("click", async function () {
+                resetEligibility();
+
+                if (!form.checkValidity()) {
+                    form.reportValidity();
+                    return;
+                }
+
+                if (endDate.value < startDate.value) {
+                    endDate.setCustomValidity(
+                        "End date cannot be earlier than the start date."
+                    );
+
+                    endDate.reportValidity();
+                    return;
+                }
+
+                checkButton.disabled = true;
+                checkButtonText.textContent = "Checking Eligibility...";
+
+                try {
+                    const formData = new FormData(form);
+
+                    const response = await fetch(
+                        '@Url.Action("CheckEligibility", "LeaveRequest")',
+                        {
+                            method: "POST",
+                            body: formData,
+                            headers: {
+                                "X-Requested-With": "XMLHttpRequest"
+                            }
+                        }
+                    );
+
+                    const contentType =
+                        response.headers.get("content-type") || "";
+
+                    if (!response.ok ||
+                        !contentType.includes("application/json")) {
+                        throw new Error(
+                            "The server returned an invalid response."
+                        );
+                    }
+
+                    const result = await response.json();
+
+                    if (!result.isEligible) {
+                        showErrors(result.errors);
+                        return;
+                    }
+
+                    document.getElementById(
+                        "workingDaysRequested"
+                    ).textContent =
+                        result.workingDaysRequested ?? 0;
+
+                    updateOptionalResult(
+                        "availableDaysRow",
+                        "availableDays",
+                        result.availableDays
+                    );
+
+                    updateOptionalResult(
+                        "remainingDaysRow",
+                        "remainingDays",
+                        result.remainingDaysAfterRequest
+                    );
+
+                    eligibilityVerified = true;
+                    resultBox.classList.add("visible");
+
+                    resultBox.scrollIntoView({
+                        behavior: "smooth",
+                        block: "center"
+                    });
+                }
+                catch (error) {
+                    console.error(error);
+
+                    showErrors([
+                        "Something went wrong while checking eligibility. Please try again."
+                    ]);
+                }
+                finally {
+                    checkButton.disabled = false;
+                    checkButtonText.textContent = "Check Eligibility";
+                }
+            });
+
+            function updateOptionalResult(
+                rowId,
+                valueId,
+                value
+            ) {
+                const row = document.getElementById(rowId);
+
+                if (value === null || value === undefined) {
+                    row.style.display = "none";
+                    return;
+                }
+
+                document.getElementById(valueId).textContent = value;
+                row.style.display = "block";
+            }
+
+            form.addEventListener("submit", function (event) {
+                if (formIsSubmitting) {
+                    event.preventDefault();
+                    return;
+                }
+
+                if (!eligibilityVerified) {
+                    event.preventDefault();
+
+                    showErrors([
+                        "Please check your eligibility before submitting the leave request."
+                    ]);
+
+                    return;
+                }
+
+                formIsSubmitting = true;
+
+                const submitButton =
+                    document.getElementById("confirmSubmitButton");
+
+                submitButton.disabled = true;
+                submitButton.innerHTML =
+                    "<i class='fa-solid fa-spinner fa-spin'></i>" +
+                    " Submitting Request...";
+            });
+
+            if (leaveTypeSelect.value) {
+                loadRequirements();
+            }
+        });
+    </script>
+}

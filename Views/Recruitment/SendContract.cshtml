@@ -1,0 +1,147 @@
+﻿@model SkyTech.ViewModels.SendContractViewModel
+
+@{
+    ViewData["Title"] = "Send Employment Contract";
+    Layout = "~/Views/Shared/_MinimalLayout.cshtml";
+}
+
+<link rel="stylesheet" href="~/CSS/HRCSS/SendContract.css" />
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
+
+<div class="hr-page-wrap sc2-wrap">
+
+    <div class="hr-header">
+        <p class="hr-eyebrow">Recruitment</p>
+        <h1 class="hr-title">Employment Contract</h1>
+        <p class="hr-sub">Review the details below, then sign to send the contract to the candidate.</p>
+    </div>
+
+    <form asp-action="SendContract" method="post" id="contractForm">
+
+        @Html.AntiForgeryToken()
+
+        <input asp-for="ApplicationId" type="hidden" />
+        <input asp-for="PostId" type="hidden" />
+        <input asp-for="CompanySignature" id="signatureInput" type="hidden" />
+
+        <div class="hr-card">
+            <h2 class="hr-card-title">Candidate information</h2>
+
+            <div class="sc2-info-grid">
+                <div class="sc2-field">
+                    <p class="sc2-field-label">Name</p>
+                    <p class="sc2-field-value">@Model.CandidateName</p>
+                </div>
+                <div class="sc2-field">
+                    <p class="sc2-field-label">Email</p>
+                    <p class="sc2-field-value">@Model.Email</p>
+                </div>
+            </div>
+
+            <h3 class="sc2-section-title">Employment information</h3>
+            <div class="sc2-info-grid">
+                <div class="sc2-field">
+                    <p class="sc2-field-label">Job title</p>
+                    <p class="sc2-field-value">@Model.JobTitle</p>
+                </div>
+                <div class="sc2-field">
+                    <p class="sc2-field-label">Employment type</p>
+                    <p class="sc2-field-value">@Model.EmploymentType</p>
+                </div>
+            </div>
+
+            <h3 class="sc2-section-title">Job description</h3>
+            <div class="sc2-block">@Model.JobDescription</div>
+
+            <h3 class="sc2-section-title">Terms &amp; conditions</h3>
+            <div class="sc2-block">@Model.ContractTerms</div>
+        </div>
+
+        <div class="hr-card sc2-signature-card">
+            <h2 class="hr-card-title">Company signature</h2>
+
+            <canvas id="signatureCanvas" class="sc2-canvas"></canvas>
+
+            <div class="sc2-signature-actions">
+                <span class="sc2-signature-hint">Sign above using your mouse or touchscreen.</span>
+                <button type="button" class="hr-btn hr-btn-outline hr-btn-sm" id="clearSignatureBtn">
+                    <i class="fa-solid fa-eraser"></i> Clear
+                </button>
+            </div>
+        </div>
+
+        <div class="sc2-actions">
+            <a asp-action="ShortlistedCandidates" class="hr-btn hr-btn-outline">Cancel</a>
+            <button type="submit" class="hr-btn hr-btn-primary">
+                <i class="fa-solid fa-paper-plane"></i> Send Contract
+            </button>
+        </div>
+
+    </form>
+</div>
+
+<script>
+    const canvas = document.getElementById("signatureCanvas");
+    const ctx = canvas.getContext("2d");
+    const hidden = document.getElementById("signatureInput");
+    let drawing = false;
+    let hasSignature = false;
+
+    function resize() {
+        const rect = canvas.getBoundingClientRect();
+        canvas.width = rect.width;
+        canvas.height = rect.height;
+        ctx.lineWidth = 2;
+        ctx.lineCap = "round";
+        ctx.strokeStyle = "#0e1b35";
+    }
+    resize();
+    window.addEventListener("resize", resize);
+
+    canvas.addEventListener("mousedown", start);
+    canvas.addEventListener("mousemove", draw);
+    window.addEventListener("mouseup", stop);
+
+    function pos(e) {
+        const r = canvas.getBoundingClientRect();
+        return {
+            x: e.clientX - r.left,
+            y: e.clientY - r.top
+        };
+    }
+
+    function start(e) {
+        drawing = true;
+        hasSignature = true;
+        const p = pos(e);
+        ctx.beginPath();
+        ctx.moveTo(p.x, p.y);
+    }
+
+    function draw(e) {
+        if (!drawing) return;
+        const p = pos(e);
+        ctx.lineTo(p.x, p.y);
+        ctx.stroke();
+    }
+
+    function stop() {
+        drawing = false;
+    }
+
+    document.getElementById("clearSignatureBtn").onclick = function() {
+        ctx.clearRect(0, 0, canvas.width, canvas.height);
+        hasSignature = false;
+    };
+
+    document.getElementById("contractForm").onsubmit = function(e) {
+        if (!hasSignature) {
+            alert("Please sign before sending.");
+            e.preventDefault();
+            return;
+        }
+        hidden.value = canvas.toDataURL("image/png");
+    };
+</script>

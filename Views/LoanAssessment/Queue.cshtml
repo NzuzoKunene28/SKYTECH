@@ -1,0 +1,208 @@
+﻿@model List<SkyTech.Models.SkytechWorkers.LoanApplication>
+
+@{
+    ViewData["Title"] = "Loan Assessment Queue";
+    Layout = "~/Views/Shared/_MinimalLayout.cshtml";
+}
+
+<style>
+    :root {
+        --blue: #5f9ea0;
+        --blue-dark: #2d6b6d;
+        --blue-deep: #1f4f50;
+        --bg: #f0f4fc;
+        --border: #dde6f5;
+        --text: #0e1b35;
+        --text-2: #4a5878;
+        --text-m: #8a96b0;
+        --red: #dc2626;
+    }
+
+    .queue-page {
+        min-height: 80vh;
+        background: var(--bg);
+        padding: 45px 20px;
+    }
+
+    .queue-container {
+        max-width: 1000px;
+        margin: auto;
+    }
+
+    .step-label {
+        color: var(--blue-dark);
+        font-size: 13px;
+        font-weight: 700;
+        text-transform: uppercase;
+        letter-spacing: 1px;
+    }
+
+    .page-title {
+        color: var(--text);
+        font-size: 35px;
+        font-weight: 750;
+        margin: 7px 0;
+    }
+
+    .page-subtitle {
+        color: var(--text-2);
+        margin-bottom: 30px;
+    }
+
+    .empty-card {
+        background: white;
+        border: 1px solid var(--border);
+        border-radius: 22px;
+        padding: 45px;
+        text-align: center;
+        color: var(--text-2);
+        box-shadow: 0 12px 35px rgba(31, 79, 80, 0.07);
+    }
+
+    .queue-card {
+        background: white;
+        border: 1px solid var(--border);
+        border-radius: 20px;
+        padding: 25px 28px;
+        margin-bottom: 18px;
+        box-shadow: 0 8px 25px rgba(31, 79, 80, 0.06);
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        gap: 20px;
+        flex-wrap: wrap;
+    }
+
+    .queue-info {
+        flex: 1;
+        min-width: 220px;
+    }
+
+    .queue-app-number {
+        color: var(--text);
+        font-size: 19px;
+        font-weight: 700;
+        margin-bottom: 6px;
+    }
+
+    .queue-detail {
+        color: var(--text-2);
+        font-size: 14px;
+        margin-bottom: 3px;
+    }
+
+        .queue-detail strong {
+            color: var(--text);
+        }
+
+    .queue-badge {
+        display: inline-block;
+        padding: 6px 12px;
+        border-radius: 20px;
+        font-size: 12px;
+        font-weight: 700;
+        background: #e6f3f3;
+        color: var(--blue-deep);
+        margin-top: 8px;
+    }
+
+    .assess-button {
+        background: var(--blue-dark);
+        color: white;
+        border: none;
+        padding: 12px 22px;
+        border-radius: 10px;
+        font-weight: 650;
+        cursor: pointer;
+        white-space: nowrap;
+    }
+
+        .assess-button:hover {
+            background: var(--blue-deep);
+        }
+</style>
+
+<div class="queue-page">
+
+    <div class="queue-container">
+
+        <div class="step-label">
+            Shop Owner
+        </div>
+
+        <h1 class="page-title">
+            Loan Assessment Queue
+        </h1>
+
+        <a asp-action="History" class="assess-button" style="text-decoration:none; display:inline-block; margin-top:7px; white-space:nowrap;">
+            History →
+        </a>
+
+        <p class="page-subtitle">
+            Applications submitted at your branch, awaiting physical assessment.
+        </p>
+
+        @if (!Model.Any())
+        {
+            <div class="empty-card">
+                No applications are currently awaiting assessment.
+            </div>
+        }
+        else
+        {
+            @foreach (var app in Model)
+            {
+                <div class="queue-card">
+
+                    <div class="queue-info">
+
+                        <div class="queue-app-number">
+                            Application #@app.LoanApplicationId
+                        </div>
+
+                        <div class="queue-detail">
+                            <strong>Requested Amount:</strong>
+                            @app.RequestedAmount.ToString("C")
+                        </div>
+
+                        <div class="queue-detail">
+                            <strong>Collateral Items:</strong>
+                            @app.CollateralItems.Count
+                        </div>
+
+                        <div class="queue-detail">
+                            <strong>Submitted:</strong>
+                            @(app.SubmittedOn?.ToLocalTime().ToString("f") ?? "—")
+                        </div>
+
+                        <span class="queue-badge">
+                            @app.Status
+                        </span>
+
+                    </div>
+
+                    <form asp-action="StartAssessment"
+                          asp-controller="LoanAssessment"
+                          method="post">
+
+                        @Html.AntiForgeryToken()
+
+                        <input type="hidden"
+                               name="loanApplicationId"
+                               value="@app.LoanApplicationId" />
+
+                        <button type="submit" class="assess-button">
+                            @(app.Status == SkyTech.Models.SkytechWorkers.LoanApplicationStatus.UnderStaffReview
+                                ? "Continue Assessment →"
+                                : "Assess →")
+                        </button>
+
+                    </form>
+
+                </div>
+            }
+        }
+
+    </div>
+
+</div>

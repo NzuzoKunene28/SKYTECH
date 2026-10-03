@@ -1,0 +1,362 @@
+﻿@using SkyTech.Models
+@model List<SkyTech.Models.OrderItem>
+@{
+    ViewBag.Title = "Returns";
+    Layout = "~/Views/Shared/_MinimalLayout.cshtml";
+    ViewBag.ActivePage = "Returns";
+    bool restricted = ViewBag.ApplicationStatus == ApplicationStat.Pending
+                  || ViewBag.ApplicationStatus == ApplicationStat.Rejected;
+
+    int totalActive = Model.Count;
+    int refundCount = Model.Count(i => i.RefundOrExchange == GetRefund.Refund);
+    int exchangeCount = Model.Count(i => i.RefundOrExchange == GetRefund.Exchange_item);
+}
+
+@section Styles {
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+    <link href="https://api.fontshare.com/v2/css?f[]=clash-display@400,500,600,700&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="~/CSS/ShopOwnerStyle.css">
+    <link rel="stylesheet" href="~/CSS/ReturnedItemStyle.css">
+}
+@section Scripts {
+   
+    <script>
+        // Toggle dropdown for Received Orders
+        const dropdownToggle = document.getElementById('ordersDropdown');
+        const dropdownMenu = document.getElementById('ordersSubmenu');
+
+        if (dropdownToggle && dropdownMenu) {
+            dropdownToggle.addEventListener('click', function(e) {
+                e.preventDefault();
+                this.classList.toggle('open');
+                dropdownMenu.classList.toggle('show');
+            });
+
+            // Keep submenu open if a sub-link is active
+            if (window.location.href.includes('DeliveryOrders') || window.location.href.includes('PickupOrders')) {
+                dropdownToggle.classList.add('open');
+                dropdownMenu.classList.add('show');
+            }
+        }
+    </script>
+
+}
+<div class="so-wrap">
+
+    <!-- SIDEBAR -->
+    <aside class="so-sidebar">
+        <div class="so-brand">
+            <div class="so-brand-icon"><i class="fas fa-store"></i></div>
+            <div>
+                <div class="so-brand-name">SkyTech</div>
+                <div class="so-brand-sub">Shop Owner Portal</div>
+            </div>
+        </div>
+        <nav class="so-nav">
+            <div class="so-nav-label">OVERVIEW</div>
+
+            <a href="@Url.Action("ShopOwnerDash", "ShopOwner")" class="so-link active"><i class="fas fa-grid-2"></i><span>Dashboard</span></a>
+
+            <div class="so-nav-label" style="margin-top:1rem">INVENTORY</div>
+            <a href="@Url.Action("AddProductPage", "ShopOwner")" class="so-link @(restricted ? "disabled-link" : "")"><i class="fas fa-circle-plus"></i><span>Add Product</span></a>
+            <a href="@Url.Action("TrackStockLevelPage", "ShopOwner")" class="so-link @(restricted ? "disabled-link" : "")"><i class="fas fa-boxes-stacked"></i><span>Track Stock</span></a>
+
+            <div class="so-nav-label" style="margin-top:1rem">ORDERS & STAFF</div>
+
+            <!-- Received Orders with submenu -->
+            <div class="nav-item-dropdown">
+                <a href="#" class="so-link so-dropdown-toggle @(restricted ? "disabled-link" : "")" id="ordersDropdown">
+                    <i class="fas fa-bag-shopping"></i>
+                    <span>Received Orders</span>
+                    <i class="fas fa-chevron-down dropdown-icon"></i>
+                </a>
+                <div class="so-dropdown-menu" id="ordersSubmenu">
+                    <a href="@Url.Action("DeliveryOrders", "ShopOwner")" class="so-link so-sub-link @(restricted ? "disabled-link" : "")">
+                        <i class="fas fa-truck"></i> Delivery Orders
+                    </a>
+                    <a href="@Url.Action("PickupOrders", "ShopOwner")" class="so-link so-sub-link @(restricted ? "disabled-link" : "")">
+                        <i class="fas fa-store"></i> In-Store Collection
+                    </a>
+                </div>
+            </div>
+
+            <a href="@Url.Action("StaffReg", "ShopOwner")" class="so-link @(restricted ? "disabled-link" : "")"><i class="fas fa-user-plus"></i><span>Register Staff</span></a>
+            <a href="@Url.Action("StaffMembers", "ShopOwner")" class="so-link @(restricted ? "disabled-link" : "")"><i class="fas fa-users"></i><span>Staff Members</span></a>
+
+            <a href="@Url.Action("ReturnedItems", "ShopOwner")" class="so-link @(restricted ? "disabled-link" : "")"><i class="fas fa-bag-shopping"></i><span>Returned Items</span></a>
+            <a href="@Url.Action("StaffReg", "ShopOwner")" class="so-link @(restricted ? "disabled-link" : "")"><i class="fas fa-user-plus"></i><span>Register Staff</span></a>
+            <a href="@Url.Action("StaffMembers", "ShopOwner")" class="so-link @(restricted ? "disabled-link" : "")"><i class="fas fa-users"></i><span>Staff Members</span></a>
+            <div class="so-nav-label" style="margin-top:1rem">ACCOUNT</div>
+            <a href="@Url.Action("OwnerProfile", "ShopOwner")" class="so-link"><i class="fas fa-circle-user"></i><span>Profile</span></a>
+        </nav>
+        <div class="so-sidebar-foot">
+            <div class="so-foot-avatar"><i class="fas fa-store"></i></div>
+            <div>
+                <div class="so-foot-role">SkyTech</div>
+            </div>
+        </div>
+
+        <!--Logout button-->
+        <div style="padding:.8rem 1.2rem">
+            @using (Html.BeginForm("Logout", "Authentication", FormMethod.Post))
+            {
+                @Html.AntiForgeryToken()
+                <button type="submit" style="width:100%;background:rgba(239,68,68,.08);
+                    border:1.5px solid rgba(239,68,68,.25);border-radius:8px;
+                    padding:.6rem 1rem;cursor:pointer;color:#ef4444;
+                    font-weight:600;font-size:.85rem;display:flex;
+                    align-items:center;gap:.5rem;justify-content:center">
+                    <i class="fas fa-right-from-bracket"></i> Log Out
+                </button>
+            }
+        </div>
+    </aside>
+
+
+    <!-- ── MAIN ── -->
+    <main class="so-main">
+
+        @if (TempData["Message"] != null)
+        {
+            <div class="so-alert-success">
+                <i class="fas fa-circle-check"></i> @TempData["Message"]
+            </div>
+        }
+        @if (TempData["Error"] != null)
+        {
+            <div class="alert alert-warning">
+                <i class="fas fa-triangle-exclamation"></i> @TempData["Error"]
+            </div>
+        }
+
+        <!-- Topbar -->
+        <div class="so-topbar">
+            <div>
+                <div class="so-page-title">Returns</div>
+                <div class="so-page-sub">Manage all active return and exchange requests.</div>
+            </div>
+        </div>
+
+        <!-- Summary chips -->
+        <div class="chip-row">
+            <div class="chip yellow"><span class="cn">@totalActive</span>  <span class="cl">Active</span></div>
+            <div class="chip green"> <span class="cn">@refundCount</span>  <span class="cl">Want Refund</span></div>
+            <div class="chip blue">  <span class="cn">@exchangeCount</span><span class="cl">Want Exchange</span></div>
+        </div>
+
+        <!-- Search -->
+        <div class="toolbar">
+            <div class="so-search">
+                <i class="fas fa-magnifying-glass"></i>
+                <input type="text" placeholder="Search by product, customer, order…"
+                       oninput="filterCards(this.value)">
+            </div>
+        </div>
+
+        @if (!Model.Any())
+        {
+            <div class="ret-empty">
+                <i class="fas fa-rotate-left"></i>
+                <h3>No active returns</h3>
+                <p>When customers submit return requests for your products, they will appear here.</p>
+            </div>
+        }
+        else
+        {
+            <div id="retList">
+                @foreach (var item in Model)
+                {
+                    string typePill = item.RefundOrExchange == GetRefund.Refund ? "type-refund" : "type-exchange";
+                    string typeLabel = item.RefundOrExchange == GetRefund.Refund ? "Refund" : "Exchange";
+                    string typeIcon = item.RefundOrExchange == GetRefund.Refund ? "fa-money-bill-wave" : "fa-arrow-right-arrow-left";
+                    string custName = item.Order?.Customers != null
+                                     ? $"{item.Order.Customers.FirstName} {item.Order.Customers.LastName}"
+                                     : "Customer";
+                    string searchTag = $"{item.ProdName} {custName} {item.OrderId} {typeLabel}".ToLower();
+
+                    // Status badge
+                    string statusClass, statusLabel;
+                    switch (item.ReturnPStatus)
+                    {
+                        case ReturnProduct.Return_Pending:
+                            statusClass = "badge-pending"; statusLabel = "Pending Approval"; break;
+                        case ReturnProduct.Collection_Assigned:
+                            statusClass = "badge-assigned"; statusLabel = "Collection Assigned"; break;
+                        case ReturnProduct.Item_Collected:
+                            statusClass = "badge-collected"; statusLabel = "Item Collected"; break;
+                        case ReturnProduct.Exchange_Dispatched:
+                            statusClass = "badge-dispatch"; statusLabel = "Exchange Dispatched"; break;
+                        default:
+                            statusClass = "badge-pending"; statusLabel = item.ReturnPStatus.ToString(); break;
+                    }
+
+                    <div class="ret-card" data-search="@searchTag">
+
+                        <!-- Product + type -->
+                        <div class="rc-top">
+                            <div class="rc-thumb">
+                                @if (item.Products?.ProductPictures != null && item.Products.ProductPictures.Any())
+                                {
+                                    var pic = item.Products.ProductPictures.First();
+                                    <img src="@pic.FilePath" alt="@pic.FileName" />
+                                }
+                                else
+                                {
+
+                                    <i class="fas fa-image"></i>
+                                }
+                            </div>
+                            <div class="rc-info">
+                                <div class="rc-name">@item.ProdName</div>
+                                <div class="rc-meta">
+                                    <span><i class="fas fa-hashtag"></i> Order #@item.OrderId</span>
+                                    <span>
+                                        <i class="fas fa-user"></i>
+                                        <span class="cust-chip">
+                                            <i class="fas fa-circle-user" style="font-size:.65rem"></i>
+                                            @custName
+                                        </span>
+                                    </span>
+                                    <span class="type-pill @typePill">
+                                        <i class="fas @typeIcon" style="font-size:.65rem"></i>
+                                        @typeLabel Requested
+                                    </span>
+                                    <span class="type-pill @statusClass">@statusLabel</span>
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- Detail cells -->
+                        <div class="rc-details">
+                            <div class="rc-detail-cell">
+                                <div class="rdc-label">QTY TO RETURN</div>
+                                <div class="rdc-value big">
+                                    @item.QuantityReturned
+                                    <span style="font-size:.75rem;color:#8a96b0;font-weight:500">of @item.Quantity purchased</span>
+                                </div>
+                            </div>
+                            <div class="rc-detail-cell">
+                                <div class="rdc-label">REFUND ESTIMATE</div>
+                                <div class="rdc-value big">R @((item.PriceAtTimeOfPurchase * item.QuantityReturned).ToString("N2"))</div>
+                            </div>
+                            <div class="rc-detail-cell">
+                                <div class="rdc-label">UNIT PRICE</div>
+                                <div class="rdc-value">R @item.PriceAtTimeOfPurchase.ToString("N2")</div>
+                            </div>
+                            <div class="rc-detail-cell">
+                                <div class="rdc-label">DELIVERED ON</div>
+                                <div class="rdc-value">@(item.Order?.DeliveredOn?.ToString("dd MMM yyyy") ?? "—")</div>
+                            </div>
+                            @if (item.CollectionDate != null)
+                            {
+                                <div class="rc-detail-cell">
+                                    <div class="rdc-label">COLLECTION DATE</div>
+                                    <div class="rdc-value">@item.CollectionDate.Value.ToString("dd MMM yyyy")</div>
+                                </div>
+                            }
+                            @if (item.NewDeliveryDate != null)
+                            {
+                                <div class="rc-detail-cell">
+                                    <div class="rdc-label">RE-DELIVERY DATE</div>
+                                    <div class="rdc-value">@item.NewDeliveryDate.Value.ToString("dd MMM yyyy")</div>
+                                </div>
+                            }
+                        </div>
+
+                        <!-- Driver info (if assigned) -->
+                        @if (item.DeliveryDriver != null)
+                        {
+                            <div class="rc-reason" style="gap:.6rem">
+                                <i class="fas fa-truck"></i>
+                                <div>
+                                    <div style="font-size:.7rem;font-weight:700;color:#8a96b0;letter-spacing:.5px;margin-bottom:.2rem">ASSIGNED DRIVER</div>
+                                    @item.DeliveryDriver.DriverName @item.DeliveryDriver.DriverSurname
+                                    &nbsp;·&nbsp; @(item.DeliveryDriver.VehicleNumber ?? "N/A")
+                                </div>
+                            </div>
+                        }
+
+                        <!-- Reason -->
+                        <div class="rc-reason">
+                            <i class="fas fa-comment-dots"></i>
+                            <div>
+                                <div style="font-size:.7rem;font-weight:700;color:#8a96b0;letter-spacing:.5px;margin-bottom:.2rem">CUSTOMER'S REASON</div>
+                                @(string.IsNullOrWhiteSpace(item.RetunReason) ? "No reason provided." : item.RetunReason)
+                            </div>
+                        </div>
+
+                        <!-- Footer — contextual action button -->
+                        <div class="rc-footer">
+                            <div class="rc-order-ref">
+                                <i class="fas fa-receipt"></i>
+                                Order <span>#@item.OrderId</span>
+                            </div>
+
+                            @if (item.ReturnPStatus == ReturnProduct.Return_Pending)
+                            {
+                                @* Step 1: Approve and assign collection driver *@
+                                using (Html.BeginForm("ApproveReturn", "ShopOwner", FormMethod.Post))
+                                {
+                                    @Html.AntiForgeryToken()
+                                    <input type="hidden" name="orderItemId" value="@item.OrderItemId" />
+                                    <button type="submit" class="btn-approve"
+                                            onclick="return confirm('Approve return for \'@item.ProdName.Replace("'", "\\'")\' and assign a collection driver?')">
+                                        <i class="fas fa-circle-check"></i> Approve & Assign Driver
+                                    </button>
+                                }
+                            }
+                            else if (item.ReturnPStatus == ReturnProduct.Collection_Assigned)
+                            {
+                                @* Step 2: Confirm item has been collected *@
+                                using (Html.BeginForm("MarkItemCollected", "ShopOwner", FormMethod.Post))
+                                {
+                                    @Html.AntiForgeryToken()
+                                    <input type="hidden" name="orderItemId" value="@item.OrderItemId" />
+                                    <button type="submit" class="btn-collected"
+                                            onclick="return confirm('Confirm that \'@item.ProdName.Replace("'", "\\'")\' has been collected by the driver?')">
+                                        <i class="fas fa-box-open"></i> Mark as Collected
+                                    </button>
+                                }
+                            }
+                            else if (item.ReturnPStatus == ReturnProduct.Item_Collected)
+                            {
+                                @* Step 3: Assign driver to deliver the replacement *@
+                                using (Html.BeginForm("AssignExchangeDriver", "ShopOwner", FormMethod.Post))
+                                {
+                                    @Html.AntiForgeryToken()
+                                    <input type="hidden" name="orderItemId" value="@item.OrderItemId" />
+                                    <button type="submit" class="btn-dispatch"
+                                            onclick="return confirm('Assign a delivery driver for the replacement of \'@item.ProdName.Replace("'", "\\'")\' ?')">
+                                        <i class="fas fa-truck"></i> Dispatch Replacement
+                                    </button>
+                                }
+                            }
+                            else if (item.ReturnPStatus == ReturnProduct.Exchange_Dispatched)
+                            {
+                                @* Waiting — driver is delivering, no action needed *@
+                                <span class="btn-waiting">
+                                    <i class="fas fa-clock"></i> Awaiting Delivery Confirmation
+                                </span>
+                            }
+
+                        </div>
+
+                    </div>
+                }
+            </div>
+        }
+
+    </main>
+</div>
+
+<script>
+    function filterCards(q) {
+        var term  = q.toLowerCase();
+        var cards = document.querySelectorAll('#retList .ret-card');
+        cards.forEach(function(c) {
+            c.style.display = (c.dataset.search || '').includes(term) ? '' : 'none';
+        });
+    }
+</script>

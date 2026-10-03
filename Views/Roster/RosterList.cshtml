@@ -1,0 +1,76 @@
+﻿@model List<SkyTech.Models.SkytechWorkers.Roster>
+@{
+    ViewData["Title"] = "All Rosters";
+    Layout = "~/Views/Shared/_MinimalLayout.cshtml";
+}
+
+<link rel="stylesheet" href="~/CSS/HRCSS/RosterList.css" />
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
+
+<div class="rl-wrap">
+
+    <div class="rl-header">
+        <div>
+            <p class="rl-eyebrow">Staffing</p>
+            <h1 class="rl-title">All Rosters</h1>
+            <p class="rl-sub">Browse published and draft rosters across all branches.</p>
+        </div>
+
+        <a href="@Url.Action("GenerateWeekly", "Roster")" class="rl-new-btn">
+            <i class="fa-solid fa-plus"></i>
+            Generate New Roster
+        </a>
+    </div>
+
+    @if (Model.Any())
+    {
+        <div class="rl-table-wrap">
+            <table class="rl-table">
+                <thead>
+                    <tr>
+                        <th>Branch</th>
+                        <th>Week Starting</th>
+                        <th>Status</th>
+                        <th></th>
+                    </tr>
+                </thead>
+                <tbody>
+                    @foreach (var roster in Model)
+                    {
+                        <tr>
+                            <td class="rl-branch">@roster.Branch.BranchName</td>
+                            <td>@roster.WeekStartDate.ToShortDateString()</td>
+                            <td>
+                                @if (roster.Status == SkyTech.Models.SkytechWorkers.RosterStatus.Draft)
+                                {
+                                    <span class="rl-badge draft"><i class="fa-solid fa-pen"></i> Draft</span>
+                                }
+                                else
+                                {
+                                    <span class="rl-badge published"><i class="fa-solid fa-check"></i> @roster.Status</span>
+                                }
+                            </td>
+                            <td class="rl-view-cell">
+                                <a href="@Url.Action("RosterDetails", "Roster", new { rosterId = roster.RosterId })" class="rl-view-link">
+                                    View <i class="fa-solid fa-arrow-right"></i>
+                                </a>
+                            </td>
+                        </tr>
+                    }
+                </tbody>
+            </table>
+        </div>
+    }
+    else
+    {
+        <div class="rl-table-wrap">
+            <div class="rl-empty">
+                <i class="fa-solid fa-calendar-xmark"></i>
+                No rosters yet. Generate your first weekly roster to get started.
+            </div>
+        </div>
+    }
+
+</div>

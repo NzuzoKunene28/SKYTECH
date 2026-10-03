@@ -1,0 +1,73 @@
+﻿/* Password strength bar */
+.pw-strength {
+    margin-top: .4rem;
+    height: 4px;
+    border-radius: 4px;
+    background: var(--border);
+    overflow: hidden;
+}
+
+.pw-strength-fill {
+    height: 100%;
+    border-radius: 4px;
+    width: 0;
+    transition: width .3s, background .3s;
+}
+
+.pw-hint {
+    font-size: .72rem;
+    color: var(--text-muted);
+    margin-top: .25rem;
+    font-weight: 600;
+}
+
+/* Toggle password eye */
+.pw-wrap {
+    position: relative;
+}
+
+    .pw-wrap .so-input {
+        padding-right: 2.8rem;
+    }
+
+.pw-eye {
+    position: absolute;
+    right: .9rem;
+    top: 50%;
+    transform: translateY(-50%);
+    color: var(--text-muted);
+    cursor: pointer;
+    font-size: .9rem;
+    transition: color .18s;
+}
+
+    .pw-eye:hover {
+        color: var(--blue);
+    }
+
+
+/* File input styling */
+.file-input-group {
+    grid-column: span 2;
+    background: var(--gray-light);
+    border-radius: 20px;
+    padding: 1.2rem;
+    border: 1px dashed var(--blue);
+}
+
+    .file-input-group label {
+        font-weight: 600;
+        color: var(--text-dark);
+        display: flex;
+        align-items: center;
+        gap: 0.5rem;
+        margin-bottom: 0.75rem;
+    }
+
+    .file-input-group input[type="file"] {
+        padding: 0.7rem;
+        background: var(--white);
+        border-radius: 12px;
+        border: 1px solid var(--gray-border);
+        width: 100%;
+    }

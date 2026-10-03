@@ -1,0 +1,207 @@
+﻿@using SkyTech.Models
+@model List<SkyTech.Models.Order>
+@{
+    ViewBag.Title = "Order History";
+    Layout = "~/Views/Shared/_MinimalLayout.cshtml";
+}
+
+@section Styles {
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+    <link href="https://api.fontshare.com/v2/css?f[]=clash-display@400,500,600,700&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="~/CSS/OrderHistory.css">
+    }
+    <div class="oh-page">
+
+        <!-- Topbar -->
+        <div class="oh-topbar">
+            <div>
+                <div class="oh-title">Order History</div>
+                <div class="oh-sub">All your past orders in one place.</div>
+            </div>
+            <a href="@Url.Action("ShoppingPage","Customer")"
+               style="display:inline-flex;align-items:center;gap:.45rem;padding:.7rem 1.4rem;border:1.5px solid #dde6f5;border-radius:50px;font-weight:700;font-size:.875rem;color:#4a5878;background:#fff;text-decoration:none;transition:all .2s"
+               onmouseover="this.style.borderColor='#1a73e8';this.style.color='#1a73e8'"
+               onmouseout="this.style.borderColor='#dde6f5';this.style.color='#4a5878'">
+                <i class="fas fa-bag-shopping"></i> Continue Shopping
+            </a>
+        </div>
+
+        @if (Model == null || !Model.Any())
+        {
+            <div class="oh-empty">
+                <i class="fas fa-clock-rotate-left"></i>
+                <h2>No orders yet</h2>
+                <p>Looks like you haven't placed any orders. Start shopping to see them here.</p>
+                <a href="@Url.Action("ShoppingPage","Customer")"
+                   style="display:inline-flex;align-items:center;gap:.45rem;padding:.8rem 1.8rem;background:#1a73e8;color:#fff;border-radius:50px;font-weight:700;font-size:.9rem;text-decoration:none;box-shadow:0 4px 14px rgba(26,115,232,.28)">
+                    <i class="fas fa-arrow-right"></i> Browse Products
+                </a>
+            </div>
+        }
+        else
+        {
+            /* Summary chips */
+            int totalOrders = Model.Count;
+            double totalSpent = Model.Sum(o => o.TotalAmount);
+
+            <div class="oh-chips">
+                <div class="oh-chip blue">
+                    <span class="ch-num">@totalOrders</span>
+                    <span class="ch-label">Total Orders</span>
+                </div>
+               
+            </div>
+
+            <!-- Order cards -->
+            <div id="ordersList">
+                @foreach (var order in Model)
+                {
+                    double subtotal = order.OrderItems?.Sum(i => i.PriceAtTimeOfPurchase * i.Quantity) ?? 0;
+                    double delivery = 50;
+                    //double grandTotal = order.TotalAmount > 0 ? order.TotalAmount : subtotal + delivery;
+                    double grandTotal = subtotal + delivery;
+
+
+                    string searchData = $"{order.OrderId} {order.DeliveryAddress} {order.Status}".ToLower();
+
+                    if (order.OrderItems != null)
+                    {
+                        searchData += " " + string.Join(" ", order.OrderItems.Select(i => i.ProdName?.ToLower() ?? ""));
+
+                    }
+
+                    <div class="order-card" data-search="@searchData">
+
+                        <!-- Header row (always visible, click to expand) -->
+                        <div class="oc-head" onclick="toggleCard(this)">
+                          
+                            <div class="oc-meta">
+
+                                <div class="oc-meta-item">
+                                    <i class="fas fa-calendar-days"></i>
+                                    @order.OrderedOn.ToString("dd MMM yyyy")
+                                </div>
+
+                                <div class="oc-meta-item">
+                                    <i class="fas fa-box"></i>
+                                    @(order.OrderItems?.Count ?? 0) item@(order.OrderItems?.Count != 1 ? "s" : "")
+                                </div>
+
+                            </div>
+
+                            <div class="oc-right">
+                                <div class="oc-total">R @grandTotal.ToString("N2")</div>
+                                <i class="fas fa-chevron-down oc-toggle"></i>
+                            </div>
+                        </div>
+
+                        <!-- Collapsible body -->
+                        <div class="oc-body">
+
+                            <!-- Info strip -->
+                            <div class="oc-info-strip">
+                                <div class="oc-info-pill">
+                                    <i class="fas fa-location-dot"></i>
+                                    @order.DeliveryAddress
+                                </div>
+                                <div class="oc-info-pill">
+                                    <i class="fas fa-clock"></i>
+                                    @order.OrderedOn.ToString("HH:mm")
+                                </div>
+                                @if (order.Driver != null)
+                                {
+                                    <div class="oc-info-pill">
+                                        <i class="fas fa-user-tie"></i>
+                                        @order.Driver.DriverName
+                                    </div>
+                                }
+                            </div>
+
+                            <!-- Items table -->
+                            <div class="oc-table-wrap">
+                                <table class="oc-table">
+                                    <thead>
+                                        <tr>
+                                            <th>Product</th>
+                                            <th>Store</th>
+                                            <th>Qty</th>
+                                            <th>Unit Price</th>
+                                            <th>Subtotal</th>
+                                           <th>Subtotal</th>
+                                        </tr>
+                                    </thead>
+
+
+                                    <tbody>
+                                        @if (order.OrderItems != null)
+                                        {
+                                            foreach (var item in order.OrderItems)
+                                            {
+                                                double itemSub = item.PriceAtTimeOfPurchase * item.Quantity;
+                                                <tr>
+                                                    <td><div class="prod-name">@item.ProdName</div></td>
+                                                    <td><span class="qty-badge">@item.Quantity</span></td>
+                                                    <td class="price-cell">R @item.PriceAtTimeOfPurchase.ToString("N2")</td>
+                                                    <td class="price-cell">R @itemSub.ToString("N2")</td>
+                                                    @* <td class="price-cell"></td>  *@
+                                                </tr>
+                                            }
+                                        }
+                                    </tbody>
+                                </table>
+                            </div>
+
+                            <!-- Subtotal / total row -->
+                            <div class="oc-subtotal">
+                                <div class="row-item">
+                                    Items subtotal
+                                    <span>R @subtotal.ToString("N2")</span>
+                                </div>
+                                <div class="row-item">
+                                    <i class="fas fa-truck" style="color:#1a73e8"></i> Delivery
+                                    <span>R @delivery.ToString("N2")</span>
+                                </div>
+                                <div class="row-item" style="color:#0e1b35">
+                                    Total
+                                    <span class="total-due">R @grandTotal.ToString("N2")</span>
+                                </div>
+                                @*================================RETUN ITEM POLICY========================= *@
+                                <div class="row-item" style="color:#0e1b35">
+                                <a class="price-cell" href="@Url.Action("ReturnItem", "Customer")"> Return Item </a>
+                                </div>
+                            </div>
+
+                        </div>
+                    </div>
+                }
+            </div>
+        }
+
+    </div>
+
+    <script>
+    function toggleCard(head) {
+            var body = head.nextElementSibling;
+            var toggle = head.querySelector('.oc-toggle');
+            var isOpen = body.classList.contains('open');
+            body.classList.toggle('open', !isOpen);
+            toggle.classList.toggle('open', !isOpen);
+        }
+
+        function filterCards(q) {
+            var term = q.toLowerCase();
+            var cards = document.querySelectorAll('#ordersList .order-card');
+            cards.forEach(function (c) {
+                c.style.display = (c.dataset.search || '').includes(term) ? '' : 'none';
+            });
+        }
+
+        /* Open first card by default */
+        document.addEventListener('DOMContentLoaded', function () {
+            var first = document.querySelector('.oc-head');
+            if (first) toggleCard(first);
+        });
+        
+    </script>

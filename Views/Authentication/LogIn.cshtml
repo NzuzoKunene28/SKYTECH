@@ -1,0 +1,125 @@
+﻿@model SkyTech.ViewModels.LogInViewModel
+@{
+    ViewBag.Title = "Login";
+    Layout = "~/Views/Shared/_MinimalLayout.cshtml";
+}
+
+@section Styles {
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+    <link href="https://api.fontshare.com/v2/css?f[]=clash-display@400,500,600,700&display=swap" rel="stylesheet">
+    <link href="~/CSS/LoginStyle.css" rel="stylesheet">
+  
+}
+
+@section Scripts{
+    
+    <script>    
+        function togglePw() {
+            var f = document.getElementById('pwField');
+            var i = document.getElementById('pwIcon');
+            if (f.type === 'password') {
+                f.type = 'text';
+                i.className = 'fas fa-eye-slash';
+            } else {
+                f.type = 'password';
+                i.className = 'fas fa-eye';
+            }
+        }</script>
+}
+
+<div class="orb orb-1"></div>
+<div class="orb orb-2"></div>
+
+<div class="login-card">
+
+    <!-- ── LEFT PANEL ── -->
+    <div class="login-panel">
+        <div class="circle-ring cr-1"></div>
+        <div class="circle-ring cr-2"></div>
+        <div class="circle-ring cr-3"></div>
+
+        <div class="panel-logo">
+            <div class="panel-logo-icon"><i class="fas fa-store"></i></div>
+            <span class="panel-logo-text">SkyTech</span>
+        </div>
+
+        <div class="panel-body">
+            <h2>Your local<br>marketplace,<br>made simple.</h2>
+            <p>Shop from our stores in your neighbourhood — fast delivery and trusted products.</p>
+        </div>
+
+        <div class="panel-chips">
+            <div class="panel-chip"><i class="fas fa-shield-halved"></i> Secure &amp; encrypted login</div>
+            <div class="panel-chip"><i class="fas fa-truck-fast"></i> 3-5 days delivery available</div>
+            <div class="panel-chip"><i class="fas fa-map-marker-alt"></i> Nationwide coverage</div>
+        </div>
+    </div>
+
+    <!-- ── RIGHT FORM ── -->
+    <div class="login-form">
+        <div class="form-top">
+            <h2>Welcome back 👋</h2>
+            <p>Sign in to your SkyTech account</p>
+        </div>
+
+        @using (Html.BeginForm("LogIn", "Authentication", FormMethod.Post))
+        {
+            @Html.AntiForgeryToken()
+
+            if (!ViewData.ModelState.IsValid)
+            {
+                <div class="val-summary">
+                    @Html.ValidationSummary(true, "")
+                </div>
+            }
+
+            <!-- Email -->
+            <div class="f-group">
+                <label class="f-label"><i class="fas fa-envelope"></i> Email address</label>
+                <div class="f-wrap">
+                    <i class="fas fa-envelope"></i>
+                    @Html.TextBoxFor(m => m.Email, new { @class = "", placeholder = "you@example.com", type = "email" })
+                </div>
+                @Html.ValidationMessageFor(m => m.Email, "", new { @class = "text-danger" })
+            </div>
+
+            <!-- Password -->
+            <div class="f-group">
+                <label class="f-label"><i class="fas fa-lock"></i> Password</label>
+                <div class="f-wrap">
+                    <i class="fas fa-lock"></i>
+                    @Html.PasswordFor(m => m.Password, new { @class = "", placeholder = "Enter password", id = "pwField" })
+                    <button type="button" class="toggle-pw" onclick="togglePw()" id="pwToggle">
+                        <i class="fas fa-eye" id="pwIcon"></i>
+                    </button>
+                </div>
+                @Html.ValidationMessageFor(m => m.Password, "", new { @class = "text-danger" })
+            </div>
+
+            <!-- Remember + forgot -->
+            <div class="f-row">
+                <label class="f-remember">
+                    <input type="checkbox" name="rememberMe" /> Remember me
+                </label>
+                <a href="@Url.Action("ForgotPassword","Authentication")" class="f-forgot">
+                    Forgot password?
+                </a>
+            </div>
+
+            <!-- Submit -->
+            <button type="submit" class="btn-login">
+                <i class="fas fa-right-to-bracket"></i> Sign In
+            </button>
+
+            <div class="divider"><span>or</span></div>
+
+            <div class="signup-row" style="margin-top:1.2rem">
+                Don't have an account?
+                <a href="@Url.Action("Home","Authentication")">Create one</a>
+            </div>
+        }
+    </div>
+</div>
+

@@ -1,0 +1,267 @@
+﻿@model SkyTech.Models.SkytechWorkers.LoanApplication
+
+@{
+    ViewData["Title"] = "Scanning Collateral";
+    Layout = "~/Views/Shared/_MinimalLayout.cshtml";
+}
+
+<style>
+    :root {
+        --blue: #5f9ea0;
+        --blue-dark: #2d6b6d;
+        --blue-deep: #1f4f50;
+        --bg: #f0f4fc;
+        --border: #dde6f5;
+        --text: #0e1b35;
+        --text-2: #4a5878;
+        --text-m: #8a96b0;
+        --red: #dc2626;
+    }
+
+    .scan-page {
+        min-height: 80vh;
+        background: var(--bg);
+        display: flex;
+        justify-content: center;
+        align-items: center;
+        padding: 40px 20px;
+    }
+
+    .scan-card {
+        width: 100%;
+        max-width: 680px;
+        background: #ffffff;
+        border: 1px solid var(--border);
+        border-radius: 25px;
+        padding: 50px 40px;
+        text-align: center;
+        box-shadow: 0 20px 55px rgba(31, 79, 80, 0.10);
+    }
+
+    .scanner {
+        width: 105px;
+        height: 105px;
+        margin: 0 auto 30px;
+        border-radius: 50%;
+        background: #e4f2f2;
+        display: flex;
+        justify-content: center;
+        align-items: center;
+        position: relative;
+    }
+
+        .scanner::before {
+            content: "";
+            position: absolute;
+            inset: 12px;
+            border: 4px solid var(--blue);
+            border-top-color: transparent;
+            border-radius: 50%;
+            animation: scanSpin 1s linear infinite;
+        }
+
+        .scanner::after {
+            content: "AI";
+            color: var(--blue-deep);
+            font-size: 21px;
+            font-weight: 800;
+        }
+
+    @@keyframes scanSpin {
+        from {
+            transform: rotate(0deg);
+        }
+
+        to {
+            transform: rotate(360deg);
+        }
+    }
+
+    .scan-title {
+        color: var(--text);
+        font-size: 30px;
+        font-weight: 750;
+        margin-bottom: 10px;
+    }
+
+    .scan-description {
+        color: var(--text-2);
+        margin-bottom: 30px;
+    }
+
+    .scan-progress {
+        height: 8px;
+        width: 100%;
+        background: #e9edf4;
+        border-radius: 20px;
+        overflow: hidden;
+        margin-bottom: 14px;
+    }
+
+    .scan-progress-bar {
+        width: 35%;
+        height: 100%;
+        background: var(--blue);
+        border-radius: 20px;
+        animation: scanningProgress 1.6s ease-in-out infinite;
+    }
+
+    @@keyframes scanningProgress {
+        0% {
+            transform: translateX(-120%);
+        }
+
+        50% {
+            transform: translateX(100%);
+        }
+
+        100% {
+            transform: translateX(300%);
+        }
+    }
+
+    .scan-status {
+        color: var(--text-2);
+        font-size: 14px;
+        margin-bottom: 30px;
+    }
+
+    .items {
+        border-top: 1px solid var(--border);
+        text-align: left;
+        padding-top: 18px;
+    }
+
+    .item {
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+        padding: 13px 0;
+        border-bottom: 1px solid var(--border);
+    }
+
+    .item-name {
+        color: var(--text);
+        font-weight: 600;
+    }
+
+    .item-status {
+        color: var(--blue-dark);
+        font-size: 13px;
+        font-weight: 600;
+    }
+</style>
+
+<div class="scan-page">
+
+    <div class="scan-card">
+
+        <div class="scanner"></div>
+
+        <h1 class="scan-title">
+            Scanning your collateral
+        </h1>
+
+        <p class="scan-description">
+            Our AI is examining the images you uploaded.
+            This may take a little while depending on the number of items.
+        </p>
+
+        <div class="scan-progress">
+            <div class="scan-progress-bar"></div>
+        </div>
+
+        <div id="scanStatus" class="scan-status">
+            Preparing AI analysis...
+        </div>
+
+        <div class="items">
+
+            @foreach (var item in Model.CollateralItems)
+            {
+                <div class="item">
+
+                    <span class="item-name">
+                        @item.Description
+                    </span>
+
+                    <span class="item-status">
+                        Scanning...
+                    </span>
+
+                </div>
+            }
+
+        </div>
+
+    </div>
+
+</div>
+
+<form id="scanForm"
+      asp-action="StartCollateralScan"
+      asp-route-id="@Model.LoanApplicationId"
+      method="post">
+
+    @Html.AntiForgeryToken()
+
+</form>
+
+<script>
+
+    const form = document.getElementById("scanForm");
+
+    const scanStatus =
+        document.getElementById("scanStatus");
+
+    async function startScan() {
+
+        scanStatus.innerText =
+            "AI is analyzing your collateral...";
+
+        try {
+
+            const response = await fetch(
+                form.action,
+                {
+                    method: "POST",
+                    body: new FormData(form)
+                }
+            );
+
+            if (!response.ok) {
+                throw new Error(
+                    "The AI scan could not be completed."
+                );
+            }
+
+            const result =
+                await response.json();
+
+            if (result.success) {
+
+                scanStatus.innerText =
+                    "AI scan complete. Loading results...";
+
+                window.location.href =
+                    '@Url.Action(
+                                                "ReviewScan",
+                                                "LoanApplication",
+                                new { id = Model.LoanApplicationId }
+                                        )';
+            }
+
+        }
+        catch (error) {
+
+            console.error(error);
+
+            scanStatus.innerText =
+                "The scan could not be completed. Please refresh the page and try again.";
+
+        }
+    }
+
+    startScan();
+
+</script>

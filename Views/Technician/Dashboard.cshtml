@@ -1,0 +1,295 @@
+@{
+    ViewBag.Title = "Dashboard";
+    Layout = "~/Views/Shared/_MinimalLayout.cshtml";
+    ViewBag.ActivePage = "Dashboard";
+}
+
+@section Styles {
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+    <link href="https://api.fontshare.com/v2/css?f[]=clash-display@400,500,600,700&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="~/CSS/DashboardStyle.css">
+}
+
+@section Scripts {
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <script>
+        // Bar chart for workload distribution
+        new Chart(document.getElementById('workloadChart'), {
+            type: 'bar',
+            data: {
+                labels: ['Pending', 'In Progress', 'Completed This Week'],
+                datasets: [{
+                    label: 'Tasks',
+                    data: [@(ViewBag.PendingCount ?? 0), @(ViewBag.InProgressCount ?? 0), @(ViewBag.CompletedThisWeek ?? 0)],
+                    backgroundColor: ['#d97706', '#f59e0b', '#16a34a'],
+                    borderRadius: 8,
+                    borderSkipped: false
+                }]
+            },
+            options: {
+                indexAxis: 'x',
+                responsive: true,
+                plugins: {
+                    legend: { display: false }
+                },
+                scales: {
+                    y: {
+                        beginAtZero: true,
+                        grid: { color: 'rgba(221,230,245,.6)' },
+                        ticks: { color: '#8a96b0', font: { family: 'Plus Jakarta Sans', size: 11 } }
+                    },
+                    x: {
+                        grid: { display: false },
+                        ticks: { color: '#8a96b0', font: { family: 'Plus Jakarta Sans', size: 11 } }
+                    }
+                }
+            }
+        });
+    </script>
+}
+
+<div class="dash-wrap">
+
+    <!-- ══ SIDEBAR ══ -->
+    <aside class="dash-sidebar">
+        <div class="dash-brand">
+            <div class="dash-brand-icon"><i class="fas fa-tools"></i></div>
+            <div>
+                <div class="dash-brand-name">SkyTech</div>
+                <div class="dash-brand-sub">Technician Portal</div>
+            </div>
+        </div>
+        <nav class="dash-nav">
+            <div class="dash-nav-label">OVERVIEW</div>
+            <a href="@Url.Action("Dashboard", "Technician")" class="dash-link active">
+                <i class="fas fa-grid-2"></i><span>Dashboard</span>
+            </a>
+
+            <div class="dash-nav-label">WORK</div>
+            <a href="@Url.Action("MyAssignments", "Technician")" class="dash-link">
+                <i class="fas fa-tasks"></i><span>My Assignments</span>
+                <span class="dash-card-badge" style="margin-left:auto">@(ViewBag.AssignedCount ?? 0)</span>
+            </a>
+            <a href="@Url.Action("ActiveRepairs", "Technician")" class="dash-link">
+                <i class="fas fa-wrench"></i><span>Active Repairs</span>
+                <span class="dash-card-badge" style="margin-left:auto">@(ViewBag.InProgressCount ?? 0)</span>
+            </a>
+            <a href="@Url.Action("ViewQuotations", "Technician")" class="dash-link">
+                <i class="fas fa-file-invoice-dollar"></i><span>Quotations</span>
+                <span class="dash-card-badge" style="margin-left:auto">@(ViewBag.QuotationPendingCount ?? 0)</span>
+            </a>
+            <a href="@Url.Action("CompletedRepairs", "Technician")" class="dash-link">
+                <i class="fas fa-check-double"></i><span>Completed</span>
+            </a>
+
+            <div class="dash-nav-label">ACCOUNT</div>
+            <a href="@Url.Action("Profile", "Technician")" class="dash-link">
+                <i class="fas fa-user"></i><span>Profile</span>
+            </a>
+        </nav>
+
+        <div class="dash-sidebar-foot">
+            <div class="dash-foot-avatar"><i class="fas fa-user-tie"></i></div>
+            <div>
+                <div class="dash-foot-name">@(ViewBag.TechnicianName ?? "Technician")</div>
+                <div class="dash-foot-role">Technician</div>
+            </div>
+        </div>
+
+        <div style="padding:.8rem 1.2rem;margin-top:1rem">
+            @using (Html.BeginForm("Logout", "Authentication", FormMethod.Post))
+            {
+                @Html.AntiForgeryToken()
+                <button type="submit" style="width:100%;background:rgba(220,38,38,.08);border:1.5px solid rgba(220,38,38,.25);border-radius:8px;padding:.6rem 1rem;cursor:pointer;color:#dc2626;font-weight:600;font-size:.85rem;display:flex;align-items:center;gap:.5rem;justify-content:center">
+                    <i class="fas fa-right-from-bracket"></i> Log Out
+                </button>
+            }
+        </div>
+    </aside>
+
+    <!-- ══ MAIN CONTENT ══ -->
+    <main class="dash-main">
+
+        <!-- Top Bar -->
+        <div class="dash-topbar">
+            <div>
+                <div class="dash-page-title">Technician Dashboard</div>
+                <div class="dash-page-sub">Your repairs and work schedule at a glance</div>
+            </div>
+        </div>
+
+        <!-- Status Alerts -->
+        @if (!string.IsNullOrEmpty(ViewBag.StatusMessage))
+        {
+            <div class="dash-alert dash-alert-info">
+                <i class="fas fa-info-circle"></i>
+                <div>@ViewBag.StatusMessage</div>
+            </div>
+        }
+
+        <!-- Key Metrics -->
+        <div class="dash-grid dash-grid-4" style="margin-bottom:2rem">
+            <div class="dash-stat">
+                <div class="dash-stat-header">
+                    <div>
+                        <div class="dash-stat-value">@(ViewBag.PendingCount ?? 0)</div>
+                        <div class="dash-stat-label">Pending Tasks</div>
+                    </div>
+                    <div class="dash-stat-icon">
+                        <i class="fas fa-hourglass-start"></i>
+                    </div>
+                </div>
+            </div>
+
+            <div class="dash-stat">
+                <div class="dash-stat-header">
+                    <div>
+                        <div class="dash-stat-value">@(ViewBag.InProgressCount ?? 0)</div>
+                        <div class="dash-stat-label">In Progress</div>
+                    </div>
+                    <div class="dash-stat-icon">
+                        <i class="fas fa-wrench"></i>
+                    </div>
+                </div>
+            </div>
+
+            <div class="dash-stat">
+                <div class="dash-stat-header">
+                    <div>
+                        <div class="dash-stat-value">@(ViewBag.CompletedThisWeek ?? 0)</div>
+                        <div class="dash-stat-label">Completed (Week)</div>
+                    </div>
+                    <div class="dash-stat-icon">
+                        <i class="fas fa-check-circle"></i>
+                    </div>
+                </div>
+            </div>
+
+            <div class="dash-stat">
+                <div class="dash-stat-header">
+                    <div>
+                        <div class="dash-stat-value">@(ViewBag.AvailabilityStatus ?? "Available")</div>
+                        <div class="dash-stat-label">Your Status</div>
+                    </div>
+                    <div class="dash-stat-icon">
+                        <i class="fas fa-circle-dot"></i>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <div class="dash-grid dash-grid-2" style="margin-bottom:2rem">
+            <!-- Workload Chart -->
+            <div class="dash-card">
+                <div class="dash-card-head">
+                    <div class="dash-card-title">Your Workload</div>
+                </div>
+                <div style="display:flex;justify-content:center;align-items:center;height:250px">
+                    <canvas id="workloadChart"></canvas>
+                </div>
+            </div>
+
+            <!-- Quick Actions -->
+            <div class="dash-card">
+                <div class="dash-card-head">
+                    <div class="dash-card-title">Quick Actions</div>
+                </div>
+
+                <div style="display:flex;flex-direction:column;gap:0.8rem;padding:0.4rem">
+                    <a href="@Url.Action("MyAssignments", "Technician")" class="dash-btn dash-btn-warning" style="justify-content:center;width:100%">
+                        <i class="fas fa-tasks"></i> View Assignments (@(ViewBag.PendingCount ?? 0))
+                    </a>
+
+                    <a href="@Url.Action("ActiveRepairs", "Technician")" class="dash-btn dash-btn-secondary" style="justify-content:center;width:100%">
+                        <i class="fas fa-wrench"></i> Active Repairs (@(ViewBag.InProgressCount ?? 0))
+                    </a>
+
+                    <a href="@Url.Action("Profile", "Technician")" class="dash-btn dash-btn-secondary" style="justify-content:center;width:100%">
+                        <i class="fas fa-user"></i> View Profile
+                    </a>
+                </div>
+            </div>
+        </div>
+
+        <!-- Specializations -->
+        @if (ViewBag.Specializations != null && ((System.Collections.ICollection)ViewBag.Specializations).Count > 0)
+        {
+            <div class="dash-card" style="margin-bottom:2rem">
+                <div class="dash-card-head">
+                    <div class="dash-card-title">Specializations</div>
+                </div>
+
+                <div style="display:grid;grid-template-columns:repeat(auto-fill,minmax(150px,1fr));gap:1rem">
+                    @foreach (var spec in ViewBag.Specializations)
+                    {
+                        <div style="padding:1rem;background:var(--blue-soft);border-radius:var(--radius-sm);text-align:center;border:1px solid var(--border-lit)">
+                            <div style="font-weight:600;color:var(--blue);margin-bottom:0.3rem">@spec.CategoryName</div>
+                            <div style="font-size:0.8rem;color:var(--text-muted)">Specialist</div>
+                        </div>
+                    }
+                </div>
+            </div>
+        }
+
+        <!-- Recent Assignments Table -->
+        <div class="dash-card">
+            <div class="dash-card-head">
+                <div class="dash-card-title">Recent Assignments</div>
+                <a href="@Url.Action("MyAssignments", "Technician")" style="font-size:0.9rem;color:var(--blue);font-weight:600">View All →</a>
+            </div>
+
+            @if (ViewBag.RecentAssignments != null && ((System.Collections.ICollection)ViewBag.RecentAssignments).Count > 0)
+            {
+                <div style="overflow-x:auto">
+                    <table class="dash-table">
+                        <thead>
+                            <tr>
+                                <th>Request ID</th>
+                                <th>Customer</th>
+                                <th>Item</th>
+                                <th>Status</th>
+                                <th>Assigned</th>
+                                <th>Action</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            @foreach (var assignment in ViewBag.RecentAssignments)
+                            {
+                                var statusBadgeClass = assignment.RepairRequest.Status switch
+                                {
+                                    SkyTech.Models.Repair_Item_Services.RepairStatus.Pending => "dash-badge-warning",
+                                    SkyTech.Models.Repair_Item_Services.RepairStatus.InProgress => "dash-badge-info",
+                                    SkyTech.Models.Repair_Item_Services.RepairStatus.Completed => "dash-badge-success",
+                                    _ => "dash-badge-primary"
+                                };
+
+                                <tr>
+                                    <td><strong>#@assignment.RepairRequest.RequestId</strong></td>
+                                    <td>@assignment.RepairRequest.Customers.FirstName @assignment.RepairRequest.Customers.LastName</td>
+                                    <td>@assignment.RepairRequest.ItemName</td>
+                                    <td><span class="dash-badge @statusBadgeClass">@assignment.RepairRequest.Status.ToString()</span></td>
+                                    <td>@assignment.AssignedDate.ToString("dd MMM yyyy")</td>
+                                    <td>
+                                        <a href="@Url.Action("ViewAssignment", "Technician", new { id = assignment.AssignmentId })" class="dash-btn dash-btn-primary dash-btn-icon">
+                                            <i class="fas fa-arrow-right"></i>
+                                        </a>
+                                    </td>
+                                </tr>
+                            }
+                        </tbody>
+                    </table>
+                </div>
+            }
+            else
+            {
+                <div style="text-align:center;padding:2rem;color:var(--text-muted)">
+                    <i class="fas fa-inbox" style="font-size:2.5rem;margin-bottom:0.5rem;display:block;opacity:0.5"></i>
+                    <p>No recent assignments</p>
+                </div>
+            }
+        </div>
+
+    </main>
+</div>

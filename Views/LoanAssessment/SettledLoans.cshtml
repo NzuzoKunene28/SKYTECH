@@ -1,0 +1,289 @@
+﻿@model List<SkyTech.Models.SkytechWorkers.Loan>
+
+<style>
+    :root {
+        --blue: #5f9ea0;
+        --blue-dark: #2d6b6d;
+        --blue-deep: #1f4f50;
+        --bg: #f0f4fc;
+        --border: #dde6f5;
+        --text: #0e1b35;
+        --text-m: #8a96b0;
+        --green: #16a34a;
+        --amber: #d97706;
+    }
+
+    .settled-wrap {
+        font-family: 'Plus Jakarta Sans', sans-serif;
+        max-width: 1080px;
+        margin: 2rem auto;
+        padding: 0 1rem;
+    }
+
+    .settled-head h2 {
+        font-family: 'Clash Display', 'Plus Jakarta Sans', sans-serif;
+        font-size: 1.6rem;
+        font-weight: 700;
+        color: var(--text);
+        margin-bottom: .3rem;
+    }
+
+    .settled-head p {
+        font-size: .85rem;
+        color: var(--text-m);
+        margin-bottom: 1.75rem;
+    }
+
+    .settled-table {
+        background: #fff;
+        border: 1.5px solid var(--border);
+        border-radius: 20px;
+        overflow: hidden;
+        box-shadow: 0 12px 40px rgba(31,79,80,.08);
+    }
+
+    .settled-row {
+        display: grid;
+        grid-template-columns: 1.2fr 1fr 1fr 1fr 1fr 1.3fr;
+        gap: 1rem;
+        padding: 1rem 1.5rem;
+        align-items: center;
+        border-bottom: 1px solid var(--border);
+    }
+
+        .settled-row:last-child {
+            border-bottom: none;
+        }
+
+        .settled-row.head {
+            background: var(--bg);
+            font-size: .72rem;
+            font-weight: 700;
+            color: var(--text-m);
+            text-transform: uppercase;
+            letter-spacing: .4px;
+        }
+
+    .cell-strong {
+        font-weight: 700;
+        color: var(--text);
+        font-size: .88rem;
+    }
+
+    .cell-muted {
+        font-size: .82rem;
+        color: var(--text-m);
+    }
+
+    .payment-list {
+        font-size: .74rem;
+        color: var(--text-m);
+    }
+
+    .badge-settled {
+        display: inline-flex;
+        align-items: center;
+        gap: .3rem;
+        background: rgba(22,163,74,.1);
+        color: var(--green);
+        font-size: .72rem;
+        font-weight: 700;
+        padding: .3rem .7rem;
+        border-radius: 20px;
+        width: fit-content;
+    }
+
+    .badge-collected {
+        display: inline-flex;
+        align-items: center;
+        gap: .3rem;
+        background: rgba(22,163,74,.1);
+        color: var(--green);
+        font-size: .72rem;
+        font-weight: 700;
+        padding: .3rem .7rem;
+        border-radius: 20px;
+        width: fit-content;
+    }
+
+    .btn-confirm-collection {
+        background: linear-gradient(135deg, #5f9ea0, #2d6b6d);
+        color: #fff;
+        border: none;
+        border-radius: 20px;
+        padding: .4rem .9rem;
+        font-size: .74rem;
+        font-weight: 700;
+        cursor: pointer;
+        display: inline-flex;
+        align-items: center;
+        gap: .35rem;
+    }
+
+        .btn-confirm-collection:hover {
+            opacity: .9;
+        }
+
+    .empty-state {
+        text-align: center;
+        padding: 3rem 1rem;
+        color: var(--text-m);
+        font-size: .9rem;
+    }
+
+    .collect-form {
+        display: flex;
+        gap: .4rem;
+    }
+
+    .token-input {
+        border: 1.5px solid var(--border);
+        border-radius: 20px;
+        padding: .35rem .8rem;
+        font-size: .74rem;
+        width: 130px;
+    }
+
+    .btn-scan {
+        background: var(--bg);
+        border: 1.5px solid var(--border);
+        border-radius: 50%;
+        width: 34px;
+        height: 34px;
+        color: var(--blue-dark);
+        cursor: pointer;
+        flex-shrink: 0;
+    }
+
+    .scanner-modal {
+        display: none;
+        position: fixed;
+        inset: 0;
+        background: rgba(14,27,53,.82);
+        z-index: 999;
+        align-items: center;
+        justify-content: center;
+    }
+
+        .scanner-modal.active {
+            display: flex;
+        }
+
+    .scanner-modal-content {
+        background: #fff;
+        border-radius: 16px;
+        padding: 1.5rem;
+        text-align: center;
+    }
+
+    .btn-close-scanner {
+        margin-top: 1rem;
+        background: rgba(220,38,38,.08);
+        border: 1.5px solid rgba(220,38,38,.25);
+        color: #dc2626;
+        border-radius: 8px;
+        padding: .5rem 1.2rem;
+        font-weight: 600;
+        cursor: pointer;
+        width: 100%;
+    }
+</style>
+
+<div class="settled-wrap">
+    <div class="settled-head">
+        <h2>Settled Loans</h2>
+        <p>Loans customers have fully paid off at your branch.</p>
+    </div>
+
+    <div class="settled-table">
+        @if (!Model.Any())
+        {
+            <div class="empty-state">No settled loans yet.</div>
+        }
+        else
+        {
+            <div class="settled-row head">
+                <div>Customer</div>
+                <div>Loan ID</div>
+                <div>Total Repaid</div>
+                <div>Settled On</div>
+                <div>Payments Made</div>
+                <div>Collateral</div>
+            </div>
+
+            @foreach (var loan in Model)
+            {
+                <div class="settled-row">
+                    <div class="cell-strong">@loan.LoanApplication.Customer.FirstName @loan.LoanApplication.Customer.LastName</div>
+                    <div class="cell-muted">#@loan.LoanId</div>
+                    <div class="cell-strong">R@(loan.TotalRepayable.ToString("N2"))</div>
+                    <div class="cell-muted">@(loan.SettledOn?.ToString("dd MMM yyyy") ?? "-")</div>
+                    <div class="payment-list">@loan.Payments.Count payment(s)</div>
+                    <div>
+                        @if (loan.CollateralCollected)
+                        {
+                            <span class="badge-collected">
+                                <i class="fa-solid fa-check"></i> Collected @loan.CollateralCollectedOn?.ToString("dd MMM")
+                            </span>
+                        }
+                        else
+                        {
+                            <form asp-action="ConfirmCollateralCollected" asp-controller="LoanAssessment" method="post" class="collect-form">
+                                @Html.AntiForgeryToken()
+                                <input type="hidden" name="loanId" value="@loan.LoanId" />
+                                <input type="text" name="collectionTokenInput" id="token-@loan.LoanId" placeholder="Scan or enter code" class="token-input" required />
+                                <button type="button" class="btn-scan" onclick="openScanner(@loan.LoanId)">
+                                    <i class="fa-solid fa-camera"></i>
+                                </button>
+                                <button type="submit" class="btn-confirm-collection">
+                                    <i class="fa-solid fa-qrcode"></i> Verify & Confirm
+                                </button>
+                            </form>
+                        }
+                    </div>
+                </div>
+            }
+
+            <div id="scannerModal" class="scanner-modal">
+                <div class="scanner-modal-content">
+                    <div id="qr-reader" style="width: 320px;"></div>
+                    <button type="button" class="btn-close-scanner" onclick="closeScanner()">
+                        <i class="fa-solid fa-xmark"></i> Close
+                    </button>
+                </div>
+            </div>
+        }
+    </div>
+</div>
+
+<script src="https://unpkg.com/html5-qrcode@2.3.8/html5-qrcode.min.js"></script>
+<script>
+    let html5QrCode;
+    let activeLoanId;
+
+    function openScanner(loanId) {
+        activeLoanId = loanId;
+        document.getElementById('scannerModal').classList.add('active');
+
+        html5QrCode = new Html5Qrcode("qr-reader");
+        html5QrCode.start(
+            { facingMode: "environment" },
+            { fps: 10, qrbox: 220 },
+            (decodedText) => {
+                document.getElementById('token-' + activeLoanId).value = decodedText;
+                closeScanner();
+            },
+            (errorMessage) => { /* ignore per-frame scan misses */ }
+        ).catch((err) => {
+            alert("Could not access camera: " + err);
+            closeScanner();
+        });
+    }
+
+    function closeScanner() {
+        document.getElementById('scannerModal').classList.remove('active');
+        if (html5QrCode) {
+            html5QrCode.stop().catch(() => {});
+        }
+    }
+</script>

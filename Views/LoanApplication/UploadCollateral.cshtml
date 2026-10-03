@@ -1,0 +1,576 @@
+@model SkyTech.Models.ViewModels.UploadCollateralViewModel
+
+@{
+    ViewData["Title"] = "Upload Collateral";
+    Layout = "~/Views/Shared/_MinimalLayout.cshtml";
+}
+
+<style>
+    :root {
+        --blue: #5f9ea0;
+        --blue-dark: #2d6b6d;
+        --blue-deep: #1f4f50;
+        --bg: #f0f4fc;
+        --border: #dde6f5;
+        --text: #0e1b35;
+        --text-2: #4a5878;
+        --text-m: #8a96b0;
+        --red: #dc2626;
+    }
+
+    .collateral-page {
+        min-height: 80vh;
+        background: var(--bg);
+        padding: 45px 20px;
+    }
+
+    .collateral-container {
+        max-width: 900px;
+        margin: auto;
+    }
+
+    .step-label {
+        color: var(--blue-dark);
+        font-size: 13px;
+        font-weight: 700;
+        text-transform: uppercase;
+        letter-spacing: 1px;
+    }
+
+    .page-title {
+        color: var(--text);
+        font-size: 34px;
+        font-weight: 750;
+        margin: 7px 0;
+    }
+
+    .page-subtitle {
+        color: var(--text-2);
+        margin-bottom: 30px;
+    }
+
+    .existing-card {
+        background: white;
+        border: 1px solid var(--border);
+        border-radius: 18px;
+        padding: 25px;
+        margin-bottom: 25px;
+    }
+
+    .existing-title {
+        color: var(--text);
+        font-weight: 700;
+        margin-bottom: 15px;
+    }
+
+    .existing-item {
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        padding: 15px 0;
+        border-bottom: 1px solid var(--border);
+    }
+
+        .existing-item:last-child {
+            border-bottom: none;
+        }
+
+    .item-name {
+        color: var(--text);
+        font-weight: 600;
+    }
+
+    .item-value {
+        color: var(--text-2);
+        font-size: 14px;
+    }
+
+    .item-status {
+        padding: 5px 10px;
+        border-radius: 20px;
+        background: #edf1f5;
+        color: var(--text-2);
+        font-size: 12px;
+        font-weight: 600;
+    }
+
+    .validation {
+        color: var(--red);
+        margin-bottom: 15px;
+    }
+
+    .collateral-row {
+        background: white;
+        border: 1px solid var(--border);
+        border-radius: 20px;
+        padding: 28px;
+        margin-bottom: 20px;
+        box-shadow: 0 8px 25px rgba(31, 79, 80, 0.05);
+    }
+
+    .field {
+        margin-bottom: 20px;
+    }
+
+    .field-label {
+        display: block;
+        color: var(--text);
+        font-weight: 650;
+        margin-bottom: 8px;
+    }
+
+    .field-input,
+    .field-select {
+        width: 100%;
+        border: 1px solid var(--border);
+        border-radius: 10px;
+        padding: 12px 14px;
+        color: var(--text);
+        background: #fbfcff;
+        outline: none;
+        transition: border 0.2s ease, box-shadow 0.2s ease;
+    }
+
+        .field-input:focus,
+        .field-select:focus {
+            border-color: var(--blue);
+            box-shadow: 0 0 0 3px rgba(95, 158, 160, 0.14);
+        }
+
+    .field-help {
+        color: var(--text-m);
+        font-size: 13px;
+        margin-top: 6px;
+    }
+
+    .remove-item {
+        border: 1px solid #f0b7b7;
+        background: white;
+        color: var(--red);
+        padding: 8px 14px;
+        border-radius: 9px;
+        font-weight: 600;
+    }
+
+    .add-item {
+        border: 1px dashed var(--blue);
+        background: white;
+        color: var(--blue-dark);
+        padding: 11px 18px;
+        border-radius: 10px;
+        font-weight: 650;
+        margin-bottom: 20px;
+    }
+
+    .scan-submit {
+        background: var(--blue-dark);
+        color: white;
+        border: none;
+        padding: 13px 24px;
+        border-radius: 10px;
+        font-weight: 650;
+        cursor: pointer;
+    }
+
+        .scan-submit:hover {
+            background: var(--blue-deep);
+        }
+</style>
+
+<div class="collateral-page">
+
+    <div class="collateral-container">
+
+        <div class="step-label">
+            Step 3 of 4
+        </div>
+
+        <h1 class="page-title">
+            Upload Collateral
+        </h1>
+
+        <p class="page-subtitle">
+            Add each item you're offering as collateral.
+            Our AI will scan the photos after submission.
+        </p>
+
+        @if (Model.ExistingItems.Any())
+        {
+            <div class="existing-card">
+
+                <div class="existing-title">
+                    Already added
+                </div>
+
+                @foreach (var item in Model.ExistingItems)
+                {
+                    <div class="existing-item">
+
+                        <div>
+                            <div class="item-name">
+                                @item.Description
+                            </div>
+
+                            <div class="item-value">
+                                @item.DeclaredValue.ToString("C")
+                            </div>
+                        </div>
+
+                        <span class="item-status">
+                            @item.AiScanResult
+                        </span>
+
+                    </div>
+                }
+
+            </div>
+        }
+
+        <div asp-validation-summary="ModelOnly"
+             class="validation">
+        </div>
+
+        <form asp-action="UploadCollateral"
+              asp-route-id="@Model.LoanApplicationId"
+              method="post"
+              enctype="multipart/form-data">
+
+            <div id="collateral-items">
+
+                @for (var i = 0; i < Model.NewItems.Count; i++)
+                {
+                    <div class="collateral-row">
+
+                        <div class="field">
+
+                            <label class="field-label">
+                                Description
+                            </label>
+
+                            <input name="NewItems[@i].Description"
+                                   class="field-input"
+                                   required />
+
+                        </div>
+
+                        <div class="field">
+
+                            <label class="field-label">
+                                Declared Value
+                            </label>
+
+                            <input name="NewItems[@i].DeclaredValue"
+                                   type="number"
+                                   step="0.01"
+                                   min="0.01"
+                                   class="field-input"
+                                   required />
+
+                        </div>
+
+                        <div class="field">
+
+                            <label class="field-label">
+                                Photo
+                            </label>
+
+                            <input name="NewItems[@i].Photo"
+                                   type="file"
+                                   accept=".jpg,.jpeg,.png"
+                                   class="field-input"
+                                   required />
+
+                            <div class="field-help">
+                                JPG or PNG, maximum 5MB.
+                            </div>
+
+                        </div>
+
+                        <div class="field">
+
+                            <label class="field-label">
+                                Serial Number
+                            </label>
+
+                            <input name="NewItems[@i].SerialNumber"
+                                   class="field-input" />
+
+                            <div class="field-help">
+                                Optional.
+                            </div>
+
+                        </div>
+
+                        <div class="field">
+
+                            <label class="field-label">
+                                Condition
+                            </label>
+
+                            <select name="NewItems[@i].Condition"
+                                    class="field-select"
+                                    required>
+
+                                <option value="">
+                                    -- Select --
+                                </option>
+
+                                <option value="Excellent">
+                                    Excellent
+                                </option>
+
+                                <option value="UsedButGood">
+                                    Used but good
+                                </option>
+
+                                <option value="Damaged">
+                                    Damaged
+                                </option>
+
+                            </select>
+
+                        </div>
+
+                        <button type="button"
+                                class="remove-item remove-row"
+                            @(Model.NewItems.Count <= 1 ? "style=display:none" : "")>
+
+                            Remove item
+
+                        </button>
+
+                    </div>
+                }
+
+            </div>
+
+            <button type="button"
+                    id="add-item"
+                    class="add-item">
+
+                + Add another item
+
+            </button>
+
+            <br />
+
+            <button type="submit"
+                    class="scan-submit">
+
+                Upload &amp; Run AI Scan
+
+            </button>
+
+        </form>
+
+    </div>
+
+</div>
+
+<template id="collateral-row-template">
+
+    <div class="collateral-row">
+
+        <div class="field">
+
+            <label class="field-label">
+                Description
+            </label>
+
+            <input name="NewItems[__index__].Description"
+                   class="field-input"
+                   required />
+
+        </div>
+
+        <div class="field">
+
+            <label class="field-label">
+                Declared Value
+            </label>
+
+            <input name="NewItems[__index__].DeclaredValue"
+                   type="number"
+                   step="0.01"
+                   min="0.01"
+                   class="field-input"
+                   required />
+
+        </div>
+
+        <div class="field">
+
+            <label class="field-label">
+                Photo
+            </label>
+
+            <input name="NewItems[__index__].Photo"
+                   type="file"
+                   accept=".jpg,.jpeg,.png"
+                   class="field-input"
+                   required />
+
+            <div class="field-help">
+                JPG or PNG, maximum 5MB.
+            </div>
+
+        </div>
+
+        <div class="field">
+
+            <label class="field-label">
+                Serial Number
+            </label>
+
+            <input name="NewItems[__index__].SerialNumber"
+                   class="field-input" />
+
+            <div class="field-help">
+                Optional.
+            </div>
+
+        </div>
+
+        <div class="field">
+
+            <label class="field-label">
+                Condition
+            </label>
+
+            <select name="NewItems[__index__].Condition"
+                    class="field-select"
+                    required>
+
+                <option value="">
+                    -- Select --
+                </option>
+
+                <option value="Excellent">
+                    Excellent
+                </option>
+
+                <option value="UsedButGood">
+                    Used but good
+                </option>
+
+                <option value="Damaged">
+                    Damaged
+                </option>
+
+            </select>
+
+        </div>
+
+        <button type="button"
+                class="remove-item remove-row">
+
+            Remove item
+
+        </button>
+
+    </div>
+
+</template>
+
+@section Scripts {
+
+    <script>
+
+        (function() {
+
+            const container =
+                document.getElementById("collateral-items");
+
+            const templateHtml =
+                document.getElementById(
+                    "collateral-row-template"
+                ).innerHTML;
+
+            function reindex() {
+
+                const rows =
+                    container.querySelectorAll(
+                        ".collateral-row"
+                    );
+
+                rows.forEach(function(row, index) {
+
+                    row.querySelectorAll(
+                        '[name^="NewItems["]'
+                    ).forEach(function(element) {
+
+                        element.name =
+                            element.name.replace(
+                                /NewItems\[\d+\]/,
+                                `NewItems[${index}]`
+                            );
+
+                    });
+
+                    const removeButton =
+                        row.querySelector(".remove-row");
+
+                    if (removeButton) {
+
+                        removeButton.style.display =
+                            rows.length > 1
+                                ? ""
+                                : "none";
+
+                    }
+
+                });
+            }
+
+            document
+                .getElementById("add-item")
+                .addEventListener("click", function() {
+
+                    const index =
+                        container.querySelectorAll(
+                            ".collateral-row"
+                        ).length;
+
+                    const wrapper =
+                        document.createElement("div");
+
+                    wrapper.innerHTML =
+                        templateHtml.replace(
+                            /__index__/g,
+                            index
+                        );
+
+                    container.appendChild(
+                        wrapper.firstElementChild
+                    );
+
+                    reindex();
+
+                });
+
+            container.addEventListener(
+                "click",
+                function(event) {
+
+                    if (
+                        event.target.classList.contains(
+                            "remove-row"
+                        )
+                    ) {
+
+                        event.target
+                            .closest(".collateral-row")
+                            .remove();
+
+                        reindex();
+
+                    }
+
+                }
+            );
+
+        })();
+
+    </script>
+
+}

@@ -1,0 +1,570 @@
+﻿@model SkyTech.Models.LeaseAgreement
+@using SkyTech.Models
+@{
+    ViewData["Title"] = "Review Lease Request";
+
+    bool IsImage(string? path) =>
+        !string.IsNullOrEmpty(path) &&
+        new[] { ".jpg", ".jpeg", ".png" }.Contains(System.IO.Path.GetExtension(path).ToLowerInvariant());
+
+    var docs = new[]
+    {
+        (Label: "Bank statement", DocPath: Model.BankStatementDocPath),
+        (Label: "Proof of residence", DocPath: Model.ProofOfResidenceDocPath)
+    };
+}
+
+<style>
+    :root {
+        --st-teal-dark: #3d7873;
+        --st-teal: #4a8f8c;
+        --st-teal-light: #eaf5f4;
+        --st-teal-pale: #d7ece9;
+        --st-orange: #f5820d;
+        --st-ink: #1b2a2f;
+        --st-muted: #6b8481;
+        --st-border: #e1eeec;
+        --st-white: #ffffff;
+        --st-field-bg: #eef1fb;
+    }
+
+    .rv-page {
+        background: linear-gradient(160deg, var(--st-teal) 0%, var(--st-teal-dark) 100%);
+        min-height: 100%;
+        padding: 32px 20px 60px;
+    }
+
+    .rv-wrap {
+        max-width: 900px;
+        margin: 0 auto;
+        font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
+        color: var(--st-ink);
+    }
+
+        .rv-wrap > h2 {
+            display: flex;
+            align-items: center;
+            gap: 14px;
+            margin: 0 0 22px;
+            padding: 0 4px;
+            font-weight: 800;
+            font-size: 1.55rem;
+            color: var(--st-white);
+        }
+
+            .rv-wrap > h2::before {
+                content: "";
+                display: inline-block;
+                width: 48px;
+                height: 48px;
+                flex-shrink: 0;
+                border-radius: 12px;
+                background: var(--st-white) url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='22' height='22' viewBox='0 0 24 24' fill='none' stroke='%233d7873' stroke-width='2' stroke-linecap='round' stroke-linejoin='round'%3E%3Cpath d='M9 12h6M9 16h6M9 8h6M5 4h14a1 1 0 0 1 1 1v14a1 1 0 0 1-1 1H5a1 1 0 0 1-1-1V5a1 1 0 0 1 1-1z'/%3E%3C/svg%3E") no-repeat center;
+                box-shadow: 0 4px 12px rgba(0, 0, 0, 0.12);
+            }
+
+        /* Info card wrapping the summary paragraphs */
+        .rv-wrap > p {
+            background: var(--st-field-bg);
+            border-radius: 14px;
+            padding: 12px 16px;
+            margin: 0 0 10px;
+            font-size: 0.94rem;
+            color: var(--st-ink);
+        }
+
+            .rv-wrap > p strong {
+                color: var(--st-teal-dark);
+                font-weight: 700;
+                margin-right: 4px;
+            }
+
+            .rv-wrap > p:last-of-type {
+                margin-bottom: 10px;
+            }
+
+    .rv-wrap {
+        display: block;
+    }
+
+        /* Supporting documents card */
+        .rv-wrap .rv-docs {
+            background: var(--st-field-bg);
+            border-radius: 14px;
+            padding: 14px 16px 16px;
+            margin: 0 0 22px;
+            font-size: 0.94rem;
+            color: var(--st-ink);
+        }
+
+            .rv-wrap .rv-docs > strong {
+                display: block;
+                color: var(--st-teal-dark);
+                font-weight: 700;
+                margin-bottom: 12px;
+            }
+
+        .rv-wrap .rv-docs-grid {
+            display: flex;
+            gap: 16px;
+            flex-wrap: wrap;
+        }
+
+        .rv-wrap .rv-doc {
+            flex: 1;
+            min-width: 260px;
+        }
+
+        .rv-wrap .rv-doc-label {
+            font-size: 0.8rem;
+            color: var(--st-muted);
+            margin-bottom: 6px;
+        }
+
+        /* The dashed box, same look as the customer upload boxes */
+        .rv-wrap .rv-doc-box {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            min-height: 52px;
+            padding: 8px 12px;
+            border: 1.5px solid #17845a;
+            border-radius: 10px;
+            background: #f1faf5;
+        }
+
+            .rv-wrap .rv-doc-box.missing {
+                border: 1.5px dashed #e0a39e;
+                background: #fdf3f2;
+            }
+
+        .rv-wrap .rv-doc-icon {
+            color: #17845a;
+            flex-shrink: 0;
+        }
+
+        .rv-wrap .rv-doc-name {
+            flex: 1;
+            min-width: 0;
+            font-size: 0.84rem;
+            font-weight: 500;
+            overflow: hidden;
+            text-overflow: ellipsis;
+            white-space: nowrap;
+        }
+
+        .rv-wrap .rv-doc-missing {
+            color: #b3261e;
+            font-size: 0.86rem;
+            font-weight: 600;
+        }
+
+        .rv-wrap .rv-view-btn {
+            display: inline-flex;
+            align-items: center;
+            gap: 6px;
+            border: none;
+            border-radius: 8px;
+            padding: 7px 14px;
+            background: #17845a;
+            color: var(--st-white);
+            font-size: 0.82rem;
+            font-weight: 700;
+            font-family: inherit;
+            cursor: pointer;
+            white-space: nowrap;
+            transition: background 0.15s ease;
+        }
+
+            .rv-wrap .rv-view-btn:hover {
+                background: #136c49;
+            }
+
+    /* Preview modal (sits outside .rv-wrap, so not scoped) */
+    .doc-modal {
+        position: fixed;
+        inset: 0;
+        z-index: 2000;
+        background: rgba(15, 28, 38, 0.65);
+        display: none;
+        align-items: center;
+        justify-content: center;
+        padding: 1rem;
+    }
+
+        .doc-modal.open {
+            display: flex;
+        }
+
+    .doc-modal-box {
+        background: #fff;
+        border-radius: 14px;
+        width: 100%;
+        max-width: 860px;
+        max-height: 92vh;
+        display: flex;
+        flex-direction: column;
+        overflow: hidden;
+        box-shadow: 0 20px 50px rgba(0, 0, 0, 0.35);
+        font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
+    }
+
+    .doc-modal-head {
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+        gap: 1rem;
+        padding: 0.8rem 1.1rem;
+        border-bottom: 1px solid #e6ebf0;
+    }
+
+    .doc-modal-title {
+        font-weight: 700;
+        color: #1b2a2f;
+        font-size: 0.95rem;
+        overflow: hidden;
+        text-overflow: ellipsis;
+        white-space: nowrap;
+    }
+
+    .doc-modal-actions {
+        display: flex;
+        align-items: center;
+        gap: 0.5rem;
+        flex-shrink: 0;
+    }
+
+        .doc-modal-actions a {
+            font-size: 0.82rem;
+            font-weight: 600;
+            color: #3d7873;
+            text-decoration: none;
+            padding: 0.3rem 0.5rem;
+        }
+
+            .doc-modal-actions a:hover {
+                text-decoration: underline;
+            }
+
+    .doc-modal-close {
+        border: none;
+        background: transparent;
+        font-size: 1.1rem;
+        color: #667085;
+        cursor: pointer;
+        padding: 0.3rem 0.6rem;
+        border-radius: 6px;
+    }
+
+        .doc-modal-close:hover {
+            background: #f1f3f5;
+            color: #1b2a2f;
+        }
+
+    .doc-modal-body {
+        flex: 1;
+        min-height: 300px;
+        overflow: auto;
+        background: #f4f6f8;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+    }
+
+        .doc-modal-body img {
+            max-width: 100%;
+            max-height: 78vh;
+            object-fit: contain;
+        }
+
+        .doc-modal-body iframe {
+            width: 100%;
+            height: 78vh;
+            border: 0;
+            background: #fff;
+        }
+
+    /* Table card */
+    .rv-wrap .table {
+        width: 100%;
+        border-collapse: collapse;
+        margin: 0;
+        color: var(--st-ink);
+        background: var(--st-white);
+        border-radius: 18px;
+        overflow: hidden;
+        box-shadow: 0 12px 32px rgba(0, 0, 0, 0.14);
+    }
+
+        .rv-wrap .table thead th {
+            background: var(--st-teal-light);
+            color: var(--st-teal-dark);
+            text-align: left;
+            font-size: 0.76rem;
+            text-transform: uppercase;
+            letter-spacing: 0.3px;
+            font-weight: 700;
+            padding: 14px 16px;
+            border: none;
+        }
+
+        .rv-wrap .table tbody td {
+            padding: 13px 16px;
+            font-size: 0.92rem;
+            border-bottom: 1px solid var(--st-border);
+        }
+
+        .rv-wrap .table tbody tr:last-child td {
+            border-bottom: none;
+        }
+
+        .rv-wrap .table tbody tr:hover {
+            background: #fbfefe;
+        }
+
+        .rv-wrap .table tfoot th {
+            padding: 14px 16px;
+            font-size: 0.94rem;
+            background: var(--st-teal-light);
+            color: var(--st-teal-dark);
+            border-top: 1px solid var(--st-border);
+        }
+
+            .rv-wrap .table tfoot th:last-child {
+                color: var(--st-orange);
+                font-size: 1.05rem;
+                font-weight: 800;
+            }
+
+    /* Action row */
+    .rv-wrap .d-flex.gap-2 {
+        margin-top: 24px;
+        display: flex;
+        gap: 12px;
+        flex-wrap: wrap;
+    }
+
+        .rv-wrap .d-flex.gap-2 form {
+            margin: 0;
+        }
+
+    .rv-wrap .btn {
+        display: inline-flex;
+        align-items: center;
+        gap: 8px;
+        border: none;
+        border-radius: 999px;
+        font-weight: 700;
+        font-size: 0.92rem;
+        padding: 11px 24px;
+        text-decoration: none;
+        cursor: pointer;
+        transition: filter 0.15s ease, background 0.15s ease, color 0.15s ease;
+    }
+
+    .rv-wrap .btn-success {
+        background: linear-gradient(135deg, #3aa86b 0%, #1e7a44 100%);
+        color: var(--st-white);
+        box-shadow: 0 6px 16px rgba(30, 122, 68, 0.35);
+    }
+
+        .rv-wrap .btn-success:hover {
+            filter: brightness(1.08);
+            color: var(--st-white);
+        }
+
+    .rv-wrap .btn-danger {
+        background: var(--st-white);
+        color: #b3261e;
+        border: 1.5px solid #f3bcb9;
+    }
+
+        .rv-wrap .btn-danger:hover {
+            background: #fdeceb;
+            color: #b3261e;
+        }
+
+    .rv-wrap .btn-secondary {
+        background: var(--st-white);
+        color: var(--st-teal-dark);
+        border: 1.5px solid var(--st-border);
+        box-shadow: 0 4px 12px rgba(0, 0, 0, 0.08);
+    }
+
+        .rv-wrap .btn-secondary:hover {
+            background: var(--st-teal-light);
+            color: var(--st-teal-dark);
+        }
+
+    @@media (max-width: 560px) {
+        .rv-wrap .d-flex.gap-2 {
+            flex-direction: column;
+            align-items: stretch;
+        }
+
+        .rv-wrap .btn {
+            justify-content: center;
+        }
+    }
+</style>
+
+<div class="rv-page">
+    <div class="rv-wrap">
+
+        <h2>Lease Request #@Model.LeaseAgreementId</h2>
+
+        <p><strong>Customer:</strong> @Model.Customer?.FirstName @Model.Customer?.LastName @Model.Customer?.Email</p>
+        <p><strong>Shop:</strong> @Model.ShopOwner?.Names</p>
+        <p><strong>Term:</strong> @Model.StartDate.ToString("dd MMM yyyy") &rarr; @Model.EndDate.ToString("dd MMM yyyy") (@Model.TermMonths month(s))</p>
+        <p><strong>Delivery:</strong> @Model.DeliveryType &mdash; @Model.DeliveryAddress</p>
+
+        <div class="rv-docs">
+            <strong>Supporting documents:</strong>
+            <div class="rv-docs-grid">
+                @foreach (var doc in docs)
+                {
+                    <div class="rv-doc">
+                        <div class="rv-doc-label">@doc.Label</div>
+
+                        @if (string.IsNullOrEmpty(doc.DocPath))
+                        {
+                            <div class="rv-doc-box missing">
+                                <span class="rv-doc-missing">Not provided</span>
+                            </div>
+                        }
+                        else
+                        {
+                            <div class="rv-doc-box">
+                                <i class="fas fa-file-lines rv-doc-icon"></i>
+                                <span class="rv-doc-name" title="@System.IO.Path.GetFileName(doc.DocPath)">@System.IO.Path.GetFileName(doc.DocPath)</span>
+                                <button type="button" class="rv-view-btn"
+                                        data-src="@doc.DocPath"
+                                        data-label="@doc.Label"
+                                        data-type="@(IsImage(doc.DocPath) ? "image" : "pdf")">
+                                    View file
+                                </button>
+                            </div>
+                        }
+                    </div>
+                }
+            </div>
+        </div>
+
+        <table class="table">
+            <thead>
+                <tr>
+                    <th>Item</th>
+                    <th>Serial Number</th>
+                    <th>Monthly Rate</th>
+                    <th>Deposit</th>
+                </tr>
+            </thead>
+            <tbody>
+                @foreach (var item in Model.Items)
+                {
+                    <tr>
+                        <td>@item.LeaseUnit?.LeaseProduct?.LeaseProdName</td>
+                        <td>@item.LeaseUnit?.SerialNumber</td>
+                        @{
+                            var monthlyRate = item.MonthlyRateAtLease.ToString("N2");
+                            var deposit = item.DepositAtLease.ToString("N2");
+                        }
+                        <td>R@(monthlyRate)</td>
+                        <td>R@(deposit)</td>
+                    </tr>
+                }
+            </tbody>
+            <tfoot>
+                <tr>
+                    <th colspan="2" class="text-end">Total due at signing:</th>
+                    @{
+                        var totalDue = Model.Items.Sum(i => i.MonthlyRateAtLease + i.DepositAtLease).ToString("N2");
+                    }
+                    <th colspan="2">R@(totalDue)</th>
+                </tr>
+            </tfoot>
+        </table>
+
+        @if (Model.Status == LeaseAgreementStatus.PendingApproval)
+        {
+            <div class="d-flex gap-2">
+                <form asp-action="ApproveLeaseAgreement" asp-route-id="@Model.LeaseAgreementId" method="post">
+                    <button type="submit" class="btn btn-success">Approve</button>
+                </form>
+                <form asp-action="RejectLeaseAgreement" asp-route-id="@Model.LeaseAgreementId" method="post"
+                      onsubmit="return confirm('Reject this lease request? Reserved units will be released.');">
+                    <button type="submit" class="btn btn-danger">Reject</button>
+                </form>
+                <a asp-action="PendingLeaseAgreements" class="btn btn-secondary">Back to Pending</a>
+            </div>
+        }
+        else
+        {
+            <p style="margin-top:24px;"><strong>Status:</strong> @Model.Status (already reviewed)</p>
+            <div class="d-flex gap-2">
+                <a asp-action="AllLeaseAgreements" class="btn btn-secondary">Back to All Agreements</a>
+            </div>
+        }
+
+    </div>
+</div>
+
+<!-- Document preview modal -->
+<div class="doc-modal" id="docModal" aria-hidden="true">
+    <div class="doc-modal-box" role="dialog" aria-modal="true" aria-labelledby="docModalTitle">
+        <div class="doc-modal-head">
+            <div class="doc-modal-title" id="docModalTitle">Document preview</div>
+            <div class="doc-modal-actions">
+                <a id="docModalDownload" href="#" download>Download</a>
+                <button type="button" class="doc-modal-close" id="docModalClose" aria-label="Close preview">&#10005;</button>
+            </div>
+        </div>
+        <div class="doc-modal-body" id="docModalBody"></div>
+    </div>
+</div>
+
+<script>
+    (function () {
+        var modal = document.getElementById('docModal');
+        var body = document.getElementById('docModalBody');
+        var title = document.getElementById('docModalTitle');
+        var download = document.getElementById('docModalDownload');
+
+        function closeModal() {
+            modal.classList.remove('open');
+            modal.setAttribute('aria-hidden', 'true');
+            body.innerHTML = '';
+        }
+
+        function openModal(src, label, type) {
+            title.textContent = label;
+            download.href = src;
+            body.innerHTML = '';
+
+            if (type === 'image') {
+                var img = document.createElement('img');
+                img.src = src;
+                img.alt = label;
+                body.appendChild(img);
+            } else {
+                var frame = document.createElement('iframe');
+                frame.src = src;
+                frame.title = label;
+                body.appendChild(frame);
+            }
+
+            modal.classList.add('open');
+            modal.setAttribute('aria-hidden', 'false');
+        }
+
+        document.querySelectorAll('.rv-view-btn').forEach(function (btn) {
+            btn.addEventListener('click', function () {
+                openModal(btn.dataset.src, btn.dataset.label, btn.dataset.type);
+            });
+        });
+
+        document.getElementById('docModalClose').addEventListener('click', closeModal);
+        modal.addEventListener('click', function (e) { if (e.target === modal) closeModal(); });
+        document.addEventListener('keydown', function (e) { if (e.key === 'Escape') closeModal(); });
+    })();
+</script>

@@ -1,0 +1,132 @@
+﻿* {
+    margin: 0;
+    padding: 0;
+    box-sizing: border-box;
+    font-family: system-ui, -apple-system, 'Segoe UI', Roboto, 'Helvetica Neue', sans-serif;
+}
+
+:root {
+    --blue: #1a73e8;
+    --blue-dark: #0c5bc0;
+    --white: #ffffff;
+    --light-bg: #f5f9ff;
+    --gray-border: #e2ecff;
+    --text-dark: #202124;
+    --gray-border: #eaeef2;
+    --blue-light: #e8f0fe;
+    --gray-light: #f2f5f9;
+    --text-light: #5f6368; /*also called text muted*/
+    --shadow-sm: 0 4px 12px rgba(26,115,232,0.08);
+    --shadow-hover: 0 12px 24px -8px rgba(26,115,232,0.2);
+    --shadow-sm: 0 2px 8px rgba(0,0,0,0.03);
+    --shadow-md: 0 4px 20px rgba(0,0,0,0.08);
+    --shadow-lg: 0 8px 30px rgba(0,0,0,0.12);
+}
+
+body {
+    background: var(--light-bg);
+    color: var(--text-dark);
+    line-height: 1.5;
+    min-height: 100vh;
+}
+
+.text-danger {
+    color: red;
+}
+
+.container {
+    max-width: 1400px;
+    margin: 0 auto;
+    padding: 0.8rem 1rem;
+    display: flex;
+    flex-direction: column;
+}
+
+/* ===== HEADER (exactly like previous pages) ===== */
+.header {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: center;
+    justify-content: space-between;
+    gap: 0.75rem 1rem;
+    margin-bottom: 1.5rem;
+}
+
+.logo {
+    font-size: 1.8rem;
+    font-weight: 700;
+    letter-spacing: -0.5px;
+    background: var(--blue);
+    color: white;
+    display: inline-block;
+    padding: 0.3rem 1rem 0.3rem 0.8rem;
+    border-radius: 30px 8px 8px 30px;
+    line-height: 1.2;
+    box-shadow: var(--shadow-sm);
+}
+
+    .logo span {
+        font-weight: 300;
+        font-size: 1rem;
+        margin-left: 4px;
+        color: #f0f7ff;
+    }
+
+.header-icons {
+    display: flex;
+    gap: 1.2rem;
+    align-items: center;
+}
+
+    .header-icons a {
+        color: var(--text-dark);
+        text-decoration: none;
+        font-size: 1.4rem;
+        transition: color 0.2s;
+    }
+
+        .header-icons a:hover {
+            color: var(--blue);
+        }
+
+.search-wrapper {
+    flex: 1 1 100%;
+    display: flex;
+    gap: 0.6rem;
+    align-items: center;
+    order: 3;
+}
+
+.search-bar {
+    flex: 1;
+    display: flex;
+    border: 1.5px solid var(--gray-border);
+    border-radius: 50px;
+    overflow: hidden;
+    background: white;
+    transition: box-shadow 0.2s, border-color 0.2s;
+    box-shadow: var(--shadow-sm);
+}
+
+    .search-bar:focus-within {
+        border-color: var(--blue);
+        box-shadow: 0 0 0 4px rgba(26,115,232,0.15);
+    }
+
+    .search-bar input {
+        flex: 1;
+        border: none;
+        padding: 0.7rem 1.2rem;
+        font-size: 0.95rem;
+        outline: none;
+    }
+
+    .search-bar button {
+        background: transparent;
+        border: none;
+        padding: 0 1.2rem;
+        font-size: 1.2rem;
+        color: var(--blue);
+        cursor: pointer;
+        border-left: 1px solid var(--gray-border);
+    }

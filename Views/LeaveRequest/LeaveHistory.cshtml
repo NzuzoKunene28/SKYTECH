@@ -1,0 +1,749 @@
+﻿@model List<SkyTech.Models.SkytechWorkers.LeaveRequest>
+
+@using SkyTech.Models.SkytechWorkers
+
+@{
+    ViewData["Title"] = "My Leave History";
+    Layout = "~/Views/Shared/_Layout.cshtml";
+
+    var requests = Model ?? new List<LeaveRequest>();
+
+    int approvedCount = requests.Count(r =>
+        r.Status == LeaveRequestStatus.Approved);
+
+    int rejectedCount = requests.Count(r =>
+        r.Status == LeaveRequestStatus.Rejected);
+
+    int pendingCount = requests.Count -
+        approvedCount -
+        rejectedCount;
+}
+
+@section Styles {
+    <style>
+        .history-page {
+            width: min(1180px, calc(100% - 32px));
+            margin: 35px auto 60px;
+        }
+
+        /* Header */
+        .history-header {
+            position: relative;
+            display: flex;
+            min-height: 190px;
+            padding: 35px;
+            margin-bottom: 22px;
+            overflow: hidden;
+            align-items: center;
+            justify-content: space-between;
+            gap: 25px;
+            color: white;
+            background: linear-gradient(135deg, #126f73, #23989a);
+            border-radius: 24px;
+            box-shadow: 0 18px 45px rgba(18, 111, 115, .22);
+        }
+
+            .history-header::before,
+            .history-header::after {
+                position: absolute;
+                content: "";
+                border: 1px solid rgba(255, 255, 255, .12);
+                border-radius: 50%;
+            }
+
+            .history-header::before {
+                width: 270px;
+                height: 270px;
+                top: -175px;
+                right: -65px;
+            }
+
+            .history-header::after {
+                width: 170px;
+                height: 170px;
+                right: 105px;
+                bottom: -135px;
+            }
+
+        .header-content,
+        .header-action {
+            position: relative;
+            z-index: 2;
+        }
+
+        .header-label {
+            display: inline-flex;
+            padding: 7px 12px;
+            margin-bottom: 14px;
+            align-items: center;
+            gap: 8px;
+            background: rgba(255, 255, 255, .13);
+            border: 1px solid rgba(255, 255, 255, .18);
+            border-radius: 30px;
+            font-size: 11px;
+            font-weight: 700;
+            letter-spacing: .08em;
+            text-transform: uppercase;
+        }
+
+        .history-header h1 {
+            margin: 0 0 9px;
+            font-size: clamp(28px, 4vw, 40px);
+            font-weight: 800;
+            letter-spacing: -.04em;
+        }
+
+        .history-header p {
+            max-width: 650px;
+            margin: 0;
+            color: rgba(255, 255, 255, .82);
+            font-size: 14px;
+            line-height: 1.7;
+        }
+
+        .header-button {
+            display: inline-flex;
+            min-height: 49px;
+            padding: 0 18px;
+            align-items: center;
+            justify-content: center;
+            gap: 8px;
+            color: #106c70;
+            background: white;
+            border: 1px solid white;
+            border-radius: 12px;
+            box-shadow: 0 10px 25px rgba(9, 70, 73, .16);
+            font-size: 11px;
+            font-weight: 800;
+            text-decoration: none;
+            white-space: nowrap;
+            transition: .2s ease;
+        }
+
+            .header-button:hover {
+                color: #106c70;
+                background: #f3ffff;
+                text-decoration: none;
+                transform: translateY(-2px);
+            }
+
+        /* Summary cards */
+        .summary-grid {
+            display: grid;
+            grid-template-columns: repeat(4, minmax(0, 1fr));
+            gap: 14px;
+            margin-bottom: 22px;
+        }
+
+        .summary-card {
+            display: flex;
+            padding: 18px;
+            align-items: center;
+            gap: 14px;
+            background: white;
+            border: 1px solid #dfe7ef;
+            border-radius: 16px;
+            box-shadow: 0 8px 24px rgba(25, 50, 80, .05);
+        }
+
+        .summary-icon {
+            display: grid;
+            width: 45px;
+            min-width: 45px;
+            height: 45px;
+            border-radius: 12px;
+            place-items: center;
+        }
+
+            .summary-icon.total {
+                color: #16888b;
+                background: #e9f8f8;
+            }
+
+            .summary-icon.pending {
+                color: #9b620f;
+                background: #fff6e5;
+            }
+
+            .summary-icon.approved {
+                color: #08754a;
+                background: #e9faf2;
+            }
+
+            .summary-icon.rejected {
+                color: #c63d4d;
+                background: #fff0f2;
+            }
+
+        .summary-value {
+            display: block;
+            color: #15233d;
+            font-size: 21px;
+            font-weight: 800;
+        }
+
+        .summary-label {
+            display: block;
+            margin-top: 2px;
+            color: #748199;
+            font-size: 10px;
+            font-weight: 600;
+        }
+
+        /* Main card */
+        .history-card {
+            overflow: hidden;
+            background: white;
+            border: 1px solid #dfe7ef;
+            border-radius: 21px;
+            box-shadow: 0 14px 40px rgba(25, 50, 80, .08);
+        }
+
+        .card-heading {
+            display: flex;
+            padding: 23px 25px;
+            align-items: center;
+            justify-content: space-between;
+            gap: 15px;
+            border-bottom: 1px solid #edf1f5;
+        }
+
+        .card-title {
+            display: flex;
+            align-items: center;
+            gap: 12px;
+        }
+
+        .card-title-icon {
+            display: grid;
+            width: 43px;
+            min-width: 43px;
+            height: 43px;
+            color: #16888b;
+            background: #e9f8f8;
+            border-radius: 12px;
+            place-items: center;
+        }
+
+        .card-title h2 {
+            margin: 0 0 3px;
+            color: #15233d;
+            font-size: 17px;
+            font-weight: 800;
+        }
+
+        .card-title p {
+            margin: 0;
+            color: #748199;
+            font-size: 11px;
+        }
+
+        .request-count {
+            padding: 7px 11px;
+            color: #106c70;
+            background: #e9f8f8;
+            border-radius: 30px;
+            font-size: 10px;
+            font-weight: 800;
+        }
+
+        /* Table */
+        .table-container {
+            overflow-x: auto;
+        }
+
+        .history-table {
+            width: 100%;
+            margin: 0;
+            border-collapse: collapse;
+        }
+
+            .history-table thead {
+                background: #f7fafc;
+            }
+
+            .history-table th {
+                padding: 14px 15px;
+                color: #6b778c;
+                border-bottom: 1px solid #dfe7ef;
+                font-size: 9px;
+                font-weight: 800;
+                letter-spacing: .06em;
+                text-align: left;
+                text-transform: uppercase;
+                white-space: nowrap;
+            }
+
+            .history-table td {
+                padding: 17px 15px;
+                color: #354158;
+                border-bottom: 1px solid #edf1f5;
+                font-size: 11px;
+                line-height: 1.55;
+                vertical-align: middle;
+            }
+
+            .history-table tbody tr {
+                transition: background-color .2s ease;
+            }
+
+                .history-table tbody tr:hover {
+                    background: #fbfdfd;
+                }
+
+                .history-table tbody tr:last-child td {
+                    border-bottom: 0;
+                }
+
+        .leave-type {
+            display: flex;
+            min-width: 145px;
+            align-items: center;
+            gap: 10px;
+        }
+
+        .leave-icon {
+            display: grid;
+            width: 39px;
+            min-width: 39px;
+            height: 39px;
+            color: #16888b;
+            background: #e9f8f8;
+            border-radius: 11px;
+            place-items: center;
+        }
+
+        .leave-type-name {
+            color: #15233d;
+            font-size: 11px;
+            font-weight: 800;
+        }
+
+        .leave-type-label {
+            display: block;
+            margin-top: 3px;
+            color: #8793a5;
+            font-size: 9px;
+        }
+
+        .date-value {
+            color: #425166;
+            white-space: nowrap;
+        }
+
+            .date-value i {
+                margin-right: 5px;
+                color: #16888b;
+            }
+
+        .working-days {
+            display: inline-flex;
+            padding: 7px 10px;
+            align-items: center;
+            gap: 6px;
+            color: #23639a;
+            background: #eaf4fc;
+            border-radius: 20px;
+            font-size: 10px;
+            font-weight: 800;
+            white-space: nowrap;
+        }
+
+        .status-badge {
+            display: inline-flex;
+            padding: 7px 10px;
+            align-items: center;
+            gap: 6px;
+            border-radius: 20px;
+            font-size: 10px;
+            font-weight: 800;
+            white-space: nowrap;
+        }
+
+        .status-dot {
+            width: 7px;
+            height: 7px;
+            background: currentColor;
+            border-radius: 50%;
+        }
+
+        .status-approved {
+            color: #08754a;
+            background: #e9faf2;
+        }
+
+        .status-rejected {
+            color: #c63d4d;
+            background: #fff0f2;
+        }
+
+        .status-pending {
+            color: #9b620f;
+            background: #fff6e5;
+        }
+
+        .review-note {
+            min-width: 170px;
+            max-width: 260px;
+            padding: 9px 11px;
+            color: #526074;
+            background: #f7f9fb;
+            border: 1px solid #e3e9ef;
+            border-radius: 9px;
+            font-size: 10px;
+        }
+
+        .not-reviewed {
+            color: #929dab;
+            font-style: italic;
+        }
+
+        /* Empty state */
+        .empty-state {
+            padding: 70px 24px;
+            text-align: center;
+        }
+
+        .empty-icon {
+            display: grid;
+            width: 75px;
+            height: 75px;
+            margin: 0 auto 18px;
+            color: #16888b;
+            background: #e9f8f8;
+            border-radius: 22px;
+            font-size: 29px;
+            place-items: center;
+        }
+
+        .empty-state h3 {
+            margin: 0 0 8px;
+            color: #15233d;
+            font-size: 18px;
+            font-weight: 800;
+        }
+
+        .empty-state p {
+            max-width: 440px;
+            margin: 0 auto 20px;
+            color: #748199;
+            font-size: 12px;
+            line-height: 1.7;
+        }
+
+        .empty-button {
+            display: inline-flex;
+            min-height: 45px;
+            padding: 0 18px;
+            align-items: center;
+            gap: 8px;
+            color: white;
+            background: linear-gradient(135deg, #16888b, #106c70);
+            border-radius: 11px;
+            box-shadow: 0 9px 22px rgba(22, 136, 139, .22);
+            font-size: 11px;
+            font-weight: 800;
+            text-decoration: none;
+        }
+
+            .empty-button:hover {
+                color: white;
+                text-decoration: none;
+                transform: translateY(-2px);
+            }
+
+        @@media (max-width: 900px) {
+            .summary-grid {
+                grid-template-columns: repeat(2, minmax(0, 1fr));
+            }
+        }
+
+        @@media (max-width: 650px) {
+            .history-page {
+                width: min(100% - 20px, 1180px);
+                margin-top: 18px;
+            }
+
+            .history-header {
+                min-height: auto;
+                padding: 28px 23px;
+            }
+
+            .header-action {
+                display: none;
+            }
+
+            .summary-grid {
+                grid-template-columns: 1fr;
+            }
+
+            .card-heading {
+                align-items: flex-start;
+                flex-direction: column;
+            }
+        }
+    </style>
+}
+
+<div class="history-page">
+
+    <header class="history-header">
+        <div class="header-content">
+            <div class="header-label">
+                <i class="fa-solid fa-clock-rotate-left"></i>
+                Employee Leave
+            </div>
+
+            <h1>My Leave History</h1>
+
+            <p>
+                View every leave request you have submitted, its current
+                approval status and any feedback provided by HR.
+            </p>
+        </div>
+
+        <div class="header-action">
+            <a asp-controller="LeaveRequest"
+               asp-action="RequestLeave"
+               class="header-button">
+
+                <i class="fa-solid fa-calendar-plus"></i>
+                Request Leave
+            </a>
+        </div>
+    </header>
+
+    <!-- Summary -->
+    <section class="summary-grid">
+        <article class="summary-card">
+            <div class="summary-icon total">
+                <i class="fa-solid fa-folder-open"></i>
+            </div>
+
+            <div>
+                <span class="summary-value">@requests.Count</span>
+                <span class="summary-label">Total requests</span>
+            </div>
+        </article>
+
+        <article class="summary-card">
+            <div class="summary-icon pending">
+                <i class="fa-solid fa-hourglass-half"></i>
+            </div>
+
+            <div>
+                <span class="summary-value">@pendingCount</span>
+                <span class="summary-label">Pending review</span>
+            </div>
+        </article>
+
+        <article class="summary-card">
+            <div class="summary-icon approved">
+                <i class="fa-solid fa-circle-check"></i>
+            </div>
+
+            <div>
+                <span class="summary-value">@approvedCount</span>
+                <span class="summary-label">Approved requests</span>
+            </div>
+        </article>
+
+        <article class="summary-card">
+            <div class="summary-icon rejected">
+                <i class="fa-solid fa-circle-xmark"></i>
+            </div>
+
+            <div>
+                <span class="summary-value">@rejectedCount</span>
+                <span class="summary-label">Rejected requests</span>
+            </div>
+        </article>
+    </section>
+
+    <section class="history-card">
+        <div class="card-heading">
+            <div class="card-title">
+                <div class="card-title-icon">
+                    <i class="fa-solid fa-clipboard-list"></i>
+                </div>
+
+                <div>
+                    <h2>Leave Request History</h2>
+                    <p>
+                        Submitted applications and HR assessment results.
+                    </p>
+                </div>
+            </div>
+
+            <div class="request-count">
+                @requests.Count Request(s)
+            </div>
+        </div>
+
+        @if (requests.Any())
+        {
+            <div class="table-container">
+                <table class="history-table">
+                    <thead>
+                        <tr>
+                            <th>Leave type</th>
+                            <th>Start date</th>
+                            <th>End date</th>
+                            <th>Working days</th>
+                            <th>Status</th>
+                            <th>Submitted</th>
+                            <th>HR review note</th>
+                            <th>Reviewed date</th>
+                        </tr>
+                    </thead>
+
+                    <tbody>
+                        @foreach (var request in requests)
+                        {
+                            <tr>
+                                <td>
+                                    <div class="leave-type">
+                                        <div class="leave-icon">
+                                            <i class="fa-regular fa-calendar-check"></i>
+                                        </div>
+
+                                        <div>
+                                            <span class="leave-type-name">
+                                                @(request.LeaveType
+                                                                                        ?.LeaveTypeName
+                                                                                        ?? "Leave")
+                                    </span>
+
+                                            <span class="leave-type-label">
+                                                Leave application
+                                            </span>
+                                        </div>
+                                    </div>
+                                </td>
+
+                                <td>
+                                    <span class="date-value">
+                                        <i class="fa-regular fa-calendar"></i>
+
+                                        @request.StartDate
+                                        
+                                    </span>
+                                </td>
+
+                                <td>
+                                    <span class="date-value">
+                                        <i class="fa-regular fa-calendar"></i>
+
+                                        @request.EndDate
+                                       
+                                    </span>
+                                </td>
+
+                                <td>
+                                    <span class="working-days">
+                                        <i class="fa-solid fa-business-time"></i>
+
+                                        @request.WorkingDaysRequested
+                                        day(s)
+                                    </span>
+                                </td>
+
+                                <td>
+                            @switch (request.Status)
+                                    {
+                                        case LeaveRequestStatus.Approved:
+                                            <span class="status-badge status-approved">
+                                                <span class="status-dot"></span>
+                                                Approved
+                                            </span>
+                                            break;
+
+                                        case LeaveRequestStatus.Rejected:
+                                            <span class="status-badge status-rejected">
+                                                <span class="status-dot"></span>
+                                                Rejected
+                                            </span>
+                                            break;
+
+                                        default:
+                                            <span class="status-badge status-pending">
+                                                <span class="status-dot"></span>
+                                                Pending
+                                            </span>
+                                            break;
+                                    }
+                                </td>
+
+                                <td>
+                                    <span class="date-value">
+                                        <i class="fa-regular fa-clock"></i>
+
+                                        @request.SubmittedAt
+                                       
+                                    </span>
+                                </td>
+
+                                <td>
+                                    @if (!string.IsNullOrWhiteSpace(
+                                                                request.ReviewNote))
+                                    {
+                                        <div class="review-note">
+                                            @request.ReviewNote
+                                        </div>
+                                    }
+                                    else
+                                    {
+                                        <div class="review-note not-reviewed">
+                                            No HR review note yet.
+                                        </div>
+                                    }
+                                </td>
+
+                                <td>
+                                    @if (request.ReviewedAt.HasValue)
+                                    {
+                                        <span class="date-value">
+                                            <i class="fa-solid fa-user-check"></i>
+
+                                            @request.ReviewedAt.Value
+                                          
+                                        </span>
+                                    }
+                                    else
+                                    {
+                                        <span class="not-reviewed">
+                                            Awaiting review
+                                        </span>
+                                    }
+                                </td>
+                            </tr>
+                        }
+                    </tbody>
+                </table>
+            </div>
+        }
+        else
+        {
+            <div class="empty-state">
+                <div class="empty-icon">
+                    <i class="fa-solid fa-calendar-plus"></i>
+                </div>
+
+                <h3>No leave requests yet</h3>
+
+                <p>
+                    You have not submitted any leave requests.
+                    Submit your first request to begin tracking it here.
+                </p>
+
+                <a asp-controller="LeaveRequest"
+                   asp-action="RequestLeave"
+                   class="empty-button">
+
+                    <i class="fa-solid fa-paper-plane"></i>
+                    Request Leave
+                </a>
+            </div>
+        }
+    </section>
+</div>

@@ -1,0 +1,140 @@
+﻿@model SkyTech.Models.Repair_Item_Services.Repair_Request
+
+@{
+    ViewData["Title"] = "Repair Request Details";
+    Layout = "~/Views/Shared/_MinimalLayout.cshtml";
+    ViewBag.ActivePage = "MyRepairs";
+}
+
+@section Styles {
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+    <link href="https://api.fontshare.com/v2/css?f[]=clash-display@400,500,600,700&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="~/CSS/DashboardStyle.css">
+}
+
+<div class="dash-wrap">
+    <aside class="dash-sidebar">
+        {{-- paste your sidebar here --}}
+    </aside>
+
+    <main class="dash-main">
+
+        <div class="dash-topbar" style="display:flex;justify-content:space-between;align-items:flex-start">
+            <div>
+                <div class="dash-page-title">Repair Request Details</div>
+                <div class="dash-page-sub">Request #@Model.RequestId</div>
+            </div>
+            <div style="display:flex;gap:0.8rem">
+                <a asp-action="Edit" asp-route-id="@Model.RequestId" class="dash-btn dash-btn-warning">
+                    <i class="fas fa-edit"></i> Edit
+                </a>
+                <a asp-action="Index" class="dash-btn dash-btn-secondary">
+                    <i class="fas fa-arrow-left"></i> Back
+                </a>
+            </div>
+        </div>
+
+        <!-- Status Banner -->
+        @{
+            var (sBannerColor, sBannerBg, sBannerBorder) = Model.Status switch
+            {
+                SkyTech.Models.Repair_Item_Services.RepairStatus.Pending => ("var(--yellow)", "rgba(217,119,6,.06)", "rgba(217,119,6,.25)"),
+                SkyTech.Models.Repair_Item_Services.RepairStatus.Assigned => ("#3b82f6", "rgba(59,130,246,.06)", "rgba(59,130,246,.25)"),
+                SkyTech.Models.Repair_Item_Services.RepairStatus.Qouted => ("var(--text-3)", "rgba(74,88,120,.06)", "rgba(74,88,120,.25)"),
+                SkyTech.Models.Repair_Item_Services.RepairStatus.InProgress => ("var(--blue)", "rgba(95,158,160,.06)", "rgba(95,158,160,.25)"),
+                SkyTech.Models.Repair_Item_Services.RepairStatus.Completed => ("var(--green)", "rgba(22,163,74,.06)", "rgba(22,163,74,.25)"),
+                SkyTech.Models.Repair_Item_Services.RepairStatus.Cancelled => ("var(--red)", "rgba(220,38,38,.06)", "rgba(220,38,38,.25)"),
+                _ => ("var(--text-muted)", "rgba(138,150,176,.06)", "rgba(138,150,176,.25)")
+            };
+        }
+        <div style="background:@sBannerBg;border:1px solid @sBannerBorder;border-radius:var(--radius-sm);padding:0.9rem 1.2rem;margin-bottom:2rem;display:flex;align-items:center;gap:0.8rem">
+            <i class="fas fa-circle-dot" style="color:@sBannerColor"></i>
+            <span style="font-weight:600;color:@sBannerColor">Status: @Model.Status</span>
+        </div>
+
+        <!-- Main Details Card -->
+        <div class="dash-card" style="margin-bottom:1.4rem">
+            <div class="dash-card-head">
+                <div class="dash-card-title">
+                    <i class="fas fa-tools" style="color:var(--orange);margin-right:0.5rem"></i>
+                    Request Information
+                </div>
+                <span class="dash-card-badge">ID #@Model.RequestId</span>
+            </div>
+
+            <div style="display:grid;grid-template-columns:1fr 1fr;gap:1.6rem">
+
+                <div>
+                    <div style="font-size:0.85rem;color:var(--text-muted);font-weight:600;margin-bottom:0.3rem">
+                        <i class="fas fa-user" style="color:var(--blue);margin-right:0.4rem"></i>Customer
+                    </div>
+                    <div style="font-size:1rem;color:var(--text);font-weight:500">
+                        @Html.DisplayFor(m => m.Customers.FirstName) @Html.DisplayFor(m => m.Customers.LastName)
+                    </div>
+                </div>
+
+                <div>
+                    <div style="font-size:0.85rem;color:var(--text-muted);font-weight:600;margin-bottom:0.3rem">
+                        <i class="fas fa-tag" style="color:var(--blue);margin-right:0.4rem"></i>Category
+                    </div>
+                    <div>
+                        <span class="dash-badge dash-badge-info">
+                            @Html.DisplayFor(m => m.Category.CategoryName)
+                        </span>
+                    </div>
+                </div>
+
+                <div>
+                    <div style="font-size:0.85rem;color:var(--text-muted);font-weight:600;margin-bottom:0.3rem">
+                        <i class="fas fa-box" style="color:var(--blue);margin-right:0.4rem"></i>Item Name
+                    </div>
+                    <div style="font-size:1rem;color:var(--text);font-weight:500">
+                        @Html.DisplayFor(m => m.ItemName)
+                    </div>
+                </div>
+
+                <div>
+                    <div style="font-size:0.85rem;color:var(--text-muted);font-weight:600;margin-bottom:0.3rem">
+                        <i class="fas fa-calendar" style="color:var(--blue);margin-right:0.4rem"></i>Date Submitted
+                    </div>
+                    <div style="font-size:1rem;color:var(--text);font-weight:500">
+                        @Model.DateCreated.ToString("dd MMM yyyy, HH:mm")
+                    </div>
+                </div>
+
+                <div style="grid-column:1/-1">
+                    <div style="font-size:0.85rem;color:var(--text-muted);font-weight:600;margin-bottom:0.3rem">
+                        <i class="fas fa-align-left" style="color:var(--blue);margin-right:0.4rem"></i>Item Description
+                    </div>
+                    <div style="font-size:1rem;color:var(--text);font-weight:500;line-height:1.6;background:var(--bg);padding:0.8rem 1rem;border-radius:var(--radius-sm)">
+                        @Html.DisplayFor(m => m.ItemDescription)
+                    </div>
+                </div>
+
+                <div style="grid-column:1/-1">
+                    <div style="font-size:0.85rem;color:var(--text-muted);font-weight:600;margin-bottom:0.3rem">
+                        <i class="fas fa-exclamation-circle" style="color:var(--orange);margin-right:0.4rem"></i>Issue Description
+                    </div>
+                    <div style="font-size:1rem;color:var(--text);font-weight:500;line-height:1.6;background:var(--bg);padding:0.8rem 1rem;border-radius:var(--radius-sm)">
+                        @Html.DisplayFor(m => m.IssueDescription)
+                    </div>
+                </div>
+
+            </div>
+        </div>
+
+        <!-- Footer Actions -->
+        <div style="display:flex;gap:0.8rem">
+           
+            <a asp-action="Delete" asp-route-id="@Model.RequestId" class="dash-btn dash-btn-danger">
+                <i class="fas fa-trash"></i> Delete
+            </a>
+            <a asp-action="Index" class="dash-btn dash-btn-secondary">
+                <i class="fas fa-arrow-left"></i> Back to List
+            </a>
+        </div>
+
+    </main>
+</div>

@@ -1,0 +1,45 @@
+﻿@* @{
+    ViewData["Title"] = "My application status";
+    var test = ViewBag.Test as SkyTech.Models.TestResult;
+    var interview = ViewBag.Interview as SkyTech.Models.Interviews.Interview;
+}
+
+<h2>My application status</h2>
+
+@if (TempData["Info"] != null)
+{
+    <div class="alert alert-info">@TempData["Info"]</div>
+}
+
+@if (test == null)
+{
+    <p>You haven't taken your online test yet.</p>
+}
+else
+{
+    <div class="card p-3 mb-3">
+        <h5>Test</h5>
+        <p>Status: <strong>@test.Status</strong></p>
+        @if (test.Score.HasValue)
+        {
+            <p>Score: @test.Score</p>
+        }
+    </div>
+}
+
+@if (interview != null)
+{
+    <div class="card p-3 mb-3">
+        <h5>Interview</h5>
+        <p>Status: <strong>@interview.Status</strong></p>
+        <a asp-action="MyInterview" class="btn btn-sm btn-primary">View interview details</a>
+    </div>
+}
+
+@if (interview != null && interview.Status == SkyTech.Models.Interviews.InterviewStatus.Employed)
+{
+    <div class="card p-3 mb-3">
+        <h5>Offer</h5>
+        <a asp-action="MyOffer" class="btn btn-sm btn-success">View my offer</a>
+    </div>
+} *@

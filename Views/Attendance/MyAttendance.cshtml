@@ -1,0 +1,59 @@
+﻿@model List<SkyTech.ViewModels.AttendanceRowViewModel>
+@{ 
+    ViewData["Title"] = "My Attendance"; 
+    Layout = "~/Views/Shared/_MinimalLayout.cshtml";
+}
+
+@section Styles {
+    <link rel="stylesheet" href="~/CSS/STAFFCSS/MyAttendance.css" />
+}
+
+@* <style>
+    .status-ontime { color: #15803d; font-weight: bold; }
+    .status-late { color: #b45309; font-weight: bold; }
+    .status-absent { color: #b91c1c; font-weight: bold; }
+    .status-pending { color: #6b7280; }
+</style> *@
+
+<h1>My Attendance</h1>
+
+@if (Model == null || Model.Count == 0)
+{
+    <p>No attendance records yet.</p>
+}
+else
+{
+    <table border="1" cellpadding="6">
+        <thead>
+            <tr>
+                <th>Date</th>
+                <th>Scheduled start</th>
+                <th>Check-in</th>
+                <th>Check-out</th>
+                <th>Hours</th>
+                <th>Status</th>
+            </tr>
+        </thead>
+        <tbody>
+            @foreach (var row in Model)
+            {
+                var statusClass = row.Status switch
+                {
+                    SkyTech.Models.AttendanceMods.AttendanceStatus.OnTime => "status-ontime",
+                    SkyTech.Models.AttendanceMods.AttendanceStatus.Late => "status-late",
+                    SkyTech.Models.AttendanceMods.AttendanceStatus.Absent => "status-absent",
+                    _ => "status-pending"
+                };
+
+                <tr>
+                    <td>@row.Date.ToString("dd MMM yyyy")</td>
+                    <td>@row.ScheduledStart.ToString(@"hh\:mm")</td>
+                    <td>@(row.CheckInTime?.ToString("HH:mm") ?? "—")</td>
+                    <td>@(row.CheckOutTime?.ToString("HH:mm") ?? "—")</td>
+                    <td>@(row.HoursWorked.HasValue ? row.HoursWorked.Value.ToString("0.0") : "—")</td>
+                    <td class="@statusClass">@row.Status</td>
+                </tr>
+            }
+        </tbody>
+    </table>
+}

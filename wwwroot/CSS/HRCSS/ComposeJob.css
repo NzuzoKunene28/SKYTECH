@@ -1,0 +1,223 @@
+/* ============================================================
+   Compose Job Post styles
+   Place at: CSS/HRCSS/ComposeJob.css
+   Shares the same palette/components as the other HR pages
+   ============================================================ */
+
+@import url('https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&display=swap');
+
+:root {
+    --blue: #5f9ea0;
+    --blue-dark: #2d6b6d;
+    --blue-deep: #1f4f50;
+    --bg: #f0f4fc;
+    --border: #dde6f5;
+    --text: #0e1b35;
+    --text-2: #4a5878;
+    --text-m: #8a96b0;
+    --red: #dc2626;
+}
+
+*, *::before, *::after {
+    box-sizing: border-box;
+}
+
+.hr-page {
+    font-family: 'Plus Jakarta Sans', sans-serif;
+    background-color: var(--bg);
+    min-height: 100vh;
+    padding: 2.5rem 2rem;
+    color: var(--text);
+    position: relative;
+}
+
+.hr-page::before {
+    content: '';
+    position: fixed;
+    inset: 0;
+    pointer-events: none;
+    z-index: 0;
+    background-image: linear-gradient(rgba(31,79,80,.03) 1px, transparent 1px),
+                       linear-gradient(90deg, rgba(31,79,80,.03) 1px, transparent 1px);
+    background-size: 40px 40px;
+}
+
+.hr-container-narrow {
+    position: relative;
+    z-index: 1;
+    max-width: 760px;
+    margin: 0 auto;
+}
+
+/* ---------- Header banner ---------- */
+.hr-header-sm {
+    background: linear-gradient(135deg, cadetblue, var(--blue-dark));
+    border-radius: 22px;
+    padding: 1.75rem 2rem;
+    box-shadow: 0 18px 50px rgba(31,79,80,.22);
+    margin-bottom: 1.5rem;
+    position: relative;
+    overflow: hidden;
+}
+
+    .hr-header-sm::before {
+        content: '';
+        position: absolute;
+        inset: 0;
+        pointer-events: none;
+        background-image: linear-gradient(rgba(255,255,255,.05) 1px, transparent 1px),
+                           linear-gradient(90deg, rgba(255,255,255,.05) 1px, transparent 1px);
+        background-size: 30px 30px;
+    }
+
+.hr-header-sm h2 {
+    position: relative;
+    z-index: 1;
+    font-size: 1.5rem;
+    font-weight: 800;
+    color: #fff;
+    letter-spacing: -.4px;
+    margin-bottom: .3rem;
+}
+
+.hr-header-sm p {
+    position: relative;
+    z-index: 1;
+    font-size: .82rem;
+    color: rgba(255,255,255,.7);
+}
+
+/* ---------- Form card ---------- */
+.form-container {
+    background: #fff;
+    border-radius: 22px;
+    box-shadow: 0 18px 50px rgba(31,79,80,.1);
+    border: 1px solid var(--border);
+    padding: 2.25rem;
+}
+
+/* section labels to break up the long form */
+.form-section-label {
+    font-size: .74rem;
+    font-weight: 800;
+    letter-spacing: .6px;
+    text-transform: uppercase;
+    color: var(--blue-dark);
+    margin: 1.6rem 0 .9rem;
+    padding-bottom: .5rem;
+    border-bottom: 1.5px solid var(--border);
+}
+
+    .form-section-label:first-child {
+        margin-top: 0;
+    }
+
+.form-row {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 0 1.25rem;
+}
+
+@media (max-width: 600px) {
+    .form-row {
+        grid-template-columns: 1fr;
+    }
+}
+
+.form-group {
+    margin-bottom: 1.2rem;
+}
+
+    .form-group label {
+        font-size: .8rem;
+        font-weight: 700;
+        color: var(--text-2);
+        display: block;
+        margin-bottom: .45rem;
+    }
+
+    .form-group select,
+    .form-group input,
+    .form-group textarea {
+        width: 100%;
+        padding: .82rem 1.1rem;
+        background: var(--bg);
+        border: 1.5px solid var(--border);
+        border-radius: 14px;
+        font-family: 'Plus Jakarta Sans', sans-serif;
+        font-size: .9rem;
+        color: var(--text);
+        outline: none;
+        transition: border-color .2s, box-shadow .2s, background-color .2s;
+        appearance: none;
+    }
+
+        .form-group select:focus,
+        .form-group input:focus,
+        .form-group textarea:focus {
+            border-color: var(--blue);
+            background: #fff;
+            box-shadow: 0 0 0 3px rgba(95,158,160,.12);
+        }
+
+    .form-group textarea {
+        resize: vertical;
+        line-height: 1.5;
+    }
+
+    .form-group select {
+        background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='12' height='8' viewBox='0 0 12 8'%3E%3Cpath fill='%238a96b0' d='M6 8 0 0h12z'/%3E%3C/svg%3E");
+        background-repeat: no-repeat;
+        background-position: right 1.1rem center;
+        padding-right: 2.6rem;
+        cursor: pointer;
+    }
+
+    .form-group ::placeholder {
+        color: var(--text-m);
+    }
+
+.form-group span[asp-validation-for],
+.form-group .field-validation-error {
+    font-size: .75rem;
+    color: var(--red);
+    margin-top: .35rem;
+    font-weight: 600;
+    display: block;
+    padding-left: .3rem;
+}
+
+/* ---------- Submit ---------- */
+.btn-submit {
+    margin-top: .75rem;
+}
+
+    .btn-submit button {
+        width: 100%;
+        padding: .9rem;
+        border: none;
+        border-radius: 50px;
+        background: linear-gradient(135deg, #5f9ea0, #2d6b6d);
+        color: #fff;
+        font-family: 'Plus Jakarta Sans', sans-serif;
+        font-size: .95rem;
+        font-weight: 700;
+        cursor: pointer;
+        box-shadow: 0 4px 18px rgba(95,158,160,.3);
+        transition: all .2s;
+    }
+
+        .btn-submit button:hover {
+            box-shadow: 0 6px 24px rgba(95,158,160,.42);
+            transform: translateY(-1px);
+        }
+
+@media (max-width: 640px) {
+    .hr-page {
+        padding: 1.5rem 1rem;
+    }
+
+    .form-container {
+        padding: 1.5rem;
+    }
+}

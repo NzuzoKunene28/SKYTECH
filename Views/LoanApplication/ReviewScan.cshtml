@@ -1,0 +1,372 @@
+@model SkyTech.Models.ViewModels.ReviewScanViewModel
+
+@{
+    ViewData["Title"] = "Review AI Scan Results";
+    Layout = "~/Views/Shared/_MinimalLayout.cshtml";
+}
+
+<style>
+    :root {
+        --blue: #5f9ea0;
+        --blue-dark: #2d6b6d;
+        --blue-deep: #1f4f50;
+        --bg: #f0f4fc;
+        --border: #dde6f5;
+        --text: #0e1b35;
+        --text-2: #4a5878;
+        --text-m: #8a96b0;
+        --red: #dc2626;
+    }
+
+    .review-page {
+        min-height: 80vh;
+        background: var(--bg);
+        padding: 45px 20px;
+    }
+
+    .review-container {
+        max-width: 1100px;
+        margin: auto;
+    }
+
+    .step-label {
+        color: var(--blue-dark);
+        font-size: 13px;
+        font-weight: 700;
+        text-transform: uppercase;
+        letter-spacing: 1px;
+    }
+
+    .page-title {
+        color: var(--text);
+        font-size: 34px;
+        font-weight: 750;
+        margin: 7px 0;
+    }
+
+    .page-subtitle {
+        color: var(--text-2);
+        margin-bottom: 25px;
+    }
+
+    .notice {
+        background: white;
+        border: 1px solid var(--border);
+        border-left: 5px solid var(--blue);
+        border-radius: 15px;
+        padding: 18px 20px;
+        color: var(--text-2);
+        margin-bottom: 30px;
+    }
+
+    .warning {
+        border-left-color: #d39e00;
+    }
+
+    .items-grid {
+        display: grid;
+        grid-template-columns: repeat(2, 1fr);
+        gap: 22px;
+    }
+
+    .collateral-card {
+        background: white;
+        border: 1px solid var(--border);
+        border-radius: 20px;
+        overflow: hidden;
+        box-shadow: 0 8px 25px rgba(31, 79, 80, 0.06);
+    }
+
+    .collateral-image {
+        width: 100%;
+        height: 260px;
+        object-fit: contain;
+        display: block;
+        background: #f7f9fc;
+        padding: 10px;
+    }
+
+    .collateral-body {
+        padding: 24px;
+    }
+
+    .collateral-name {
+        color: var(--text);
+        font-size: 20px;
+        font-weight: 700;
+        margin-bottom: 15px;
+    }
+
+    .detail {
+        color: var(--text-2);
+        margin-bottom: 7px;
+        font-size: 14px;
+    }
+
+        .detail strong {
+            color: var(--text);
+        }
+
+    .badge {
+        display: inline-block;
+        padding: 6px 10px;
+        border-radius: 20px;
+        font-size: 12px;
+        font-weight: 700;
+        margin: 5px 5px 0 0;
+    }
+
+    .accepted {
+        background: #e1f4e9;
+        color: #177245;
+    }
+
+    .rejected {
+        background: #fde8e8;
+        color: var(--red);
+    }
+
+    .manual {
+        background: #fff4d6;
+        color: #8a6100;
+    }
+
+    .confidence {
+        background: #f1f4f8;
+        color: var(--text-2);
+        border: 1px solid var(--border);
+    }
+
+    .bottom-summary {
+        background: white;
+        border: 1px solid var(--border);
+        border-radius: 18px;
+        padding: 25px;
+        margin-top: 25px;
+    }
+
+    .summary-row {
+        display: flex;
+        justify-content: space-between;
+        padding: 8px 0;
+        color: var(--text-2);
+    }
+
+        .summary-row strong {
+            color: var(--text);
+        }
+
+    .actions {
+        display: flex;
+        gap: 12px;
+        margin-top: 25px;
+    }
+
+    .add-button {
+        text-decoration: none;
+        background: white;
+        border: 1px solid var(--border);
+        color: var(--text-2);
+        padding: 12px 20px;
+        border-radius: 10px;
+        font-weight: 650;
+    }
+
+    .submit-button {
+        background: var(--blue-dark);
+        color: white;
+        border: none;
+        padding: 12px 22px;
+        border-radius: 10px;
+        font-weight: 650;
+    }
+
+    @@media (max-width: 800px) {
+        .items-grid {
+            grid-template-columns: 1fr;
+        }
+    }
+</style>
+
+<div class="review-page">
+
+    <div class="review-container">
+
+        <div class="step-label">
+            Step 4 of 4
+        </div>
+
+        <h1 class="page-title">
+            Review AI Scan Results
+        </h1>
+
+        <p class="page-subtitle">
+            Review each item's AI verdict before submitting your application.
+        </p>
+
+        <div class="notice">
+
+            <strong>Important:</strong>
+            An item being accepted by the automated scan does not mean
+            your loan is approved. Our staff will physically review the
+            collateral before making the final decision.
+
+        </div>
+
+        @if (TempData["SubmitError"] != null)
+        {
+            <div class="notice warning">
+                @TempData["SubmitError"]
+            </div>
+        }
+
+        <div class="items-grid">
+
+            @foreach (var item in Model.Items)
+            {
+                var badgeClass =
+                    item.AiScanResult switch
+                    {
+                        SkyTech.Models.SkytechWorkers.AiScanResult.Accepted
+                            => "accepted",
+
+                        SkyTech.Models.SkytechWorkers.AiScanResult.Rejected
+                            => "rejected",
+
+                        SkyTech.Models.SkytechWorkers.AiScanResult.NeedsManualReview
+                            => "manual",
+
+                        _
+                            => "confidence"
+                    };
+
+                var badgeText =
+                    item.AiScanResult ==
+                    SkyTech.Models.SkytechWorkers.AiScanResult.NeedsManualReview
+                        ? "Needs staff review"
+                        : item.AiScanResult.ToString();
+
+                <div class="collateral-card">
+
+                    <img src="@item.ImagePath"
+                         class="collateral-image"
+                         alt="@item.Description" />
+
+                    <div class="collateral-body">
+
+                        <div class="collateral-name">
+                            @item.Description
+                        </div>
+
+                        <div class="detail">
+                            <strong>Declared value:</strong>
+                            @item.DeclaredValue.ToString("R0.00")
+                        </div>
+
+                        <div class="detail">
+                            <strong>Condition:</strong>
+                            @item.Condition
+                        </div>
+
+                        @if (!string.IsNullOrWhiteSpace(item.SerialNumber))
+                        {
+                            <div class="detail">
+                                <strong>Serial number:</strong>
+                                @item.SerialNumber
+                            </div>
+                        }
+
+                        @if (!string.IsNullOrWhiteSpace(item.AiMatchedCategory))
+                        {
+                            <div class="detail">
+                                <strong>Matched category:</strong>
+                                @item.AiMatchedCategory
+                            </div>
+                        }
+
+                        <span class="badge @badgeClass">
+                            @badgeText
+                        </span>
+
+                        <span class="badge confidence">
+                            AI confidence:
+                            @item.AiConfidencePercent%
+                        </span>
+
+                        <div class="detail" style="margin-top:15px;">
+                            @item.AiScanNotes
+                        </div>
+
+                    </div>
+
+                </div>
+            }
+
+        </div>
+
+        @if (Model.AnyRejected)
+        {
+            <div class="notice warning" style="margin-top:25px;">
+                One or more items were flagged as unacceptable collateral.
+                You can add replacement items or submit the application
+                for staff review.
+            </div>
+        }
+
+        @if (Model.AnyNeedsManualReview)
+        {
+            <div class="notice warning">
+                One or more items could not be confidently scanned.
+                A staff member will review those items manually.
+            </div>
+        }
+
+        <div class="bottom-summary">
+
+            <div class="summary-row">
+                <span>Requested Amount</span>
+                <strong>
+                    @Model.RequestedAmount.ToString("R0.00")
+                </strong>
+            </div>
+
+            <div class="summary-row">
+                <span>Total Declared Collateral</span>
+                <strong>
+                    @Model.TotalDeclaredCollateralValue.ToString("R0.00")
+                </strong>
+            </div>
+
+        </div>
+
+        <div class="actions">
+
+            <a asp-action="UploadCollateral"
+               asp-route-id="@Model.LoanApplicationId"
+               class="add-button">
+
+                ← Add More Items
+
+            </a>
+
+            <form asp-action="Submit"
+                  asp-route-id="@Model.LoanApplicationId"
+                  method="post">
+
+                @Html.AntiForgeryToken()
+
+                <button type="submit"
+                        class="submit-button"
+                    @(Model.AllScansComplete ? "" : "disabled")>
+
+                    Submit Application
+
+                </button>
+
+            </form>
+
+        </div>
+
+    </div>
+
+</div>

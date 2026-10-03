@@ -1,0 +1,471 @@
+﻿@model SkyTech.Models.ViewModels.RepayLoanViewModel
+
+<style>
+    :root {
+        --blue: #5f9ea0;
+        --blue-dark: #2d6b6d;
+        --blue-deep: #1f4f50;
+        --bg: #f0f4fc;
+        --border: #dde6f5;
+        --text: #0e1b35;
+        --text-2: #4a5878;
+        --text-m: #8a96b0;
+        --red: #dc2626;
+        --green: #16a34a;
+    }
+
+    .confirm-wrap {
+        font-family: 'Plus Jakarta Sans', sans-serif;
+        max-width: 720px;
+        margin: 2rem auto;
+        padding: 0 1rem;
+    }
+
+    .confirm-card {
+        background: #fff;
+        border-radius: 28px;
+        border: 1.5px solid var(--border);
+        box-shadow: 0 24px 80px rgba(31,79,80,.12);
+        overflow: hidden;
+        margin-bottom: 1.5rem;
+        animation: confirmFadeUp .45s ease;
+    }
+
+    @@keyframes confirmFadeUp {
+        from {
+            opacity: 0;
+            transform: translateY(16px);
+        }
+
+        to {
+            opacity: 1;
+            transform: translateY(0);
+        }
+    }
+
+    .confirm-chart-head {
+        background-color: cadetblue;
+        padding: 1.75rem 2rem 1.25rem;
+        position: relative;
+        overflow: hidden;
+    }
+
+        .confirm-chart-head::before {
+            content: '';
+            position: absolute;
+            inset: 0;
+            pointer-events: none;
+            background-image: linear-gradient(rgba(255,255,255,.05) 1px, transparent 1px), linear-gradient(90deg, rgba(255,255,255,.05) 1px, transparent 1px);
+            background-size: 30px 30px;
+        }
+
+        .confirm-chart-head h5 {
+            position: relative;
+            z-index: 1;
+            font-family: 'Clash Display', 'Plus Jakarta Sans', sans-serif;
+            font-size: 1.05rem;
+            font-weight: 700;
+            color: #fff;
+            margin: 0;
+        }
+
+    .circle-ring {
+        position: absolute;
+        border-radius: 50%;
+        border: 1px solid rgba(255,255,255,.12);
+        pointer-events: none;
+    }
+
+    .cr-1 {
+        width: 180px;
+        height: 180px;
+        bottom: -50px;
+        right: -40px;
+    }
+
+    .cr-2 {
+        width: 120px;
+        height: 120px;
+        bottom: -20px;
+        right: -10px;
+    }
+
+    .confirm-chart-body {
+        padding: 1.5rem 2rem 1.75rem;
+    }
+
+    .confirm-body {
+        padding: 2.5rem 2.5rem 2.25rem;
+        text-align: center;
+    }
+
+    .status-icon {
+        display: inline-flex;
+        align-items: center;
+        justify-content: center;
+        width: 64px;
+        height: 64px;
+        border-radius: 50%;
+        font-size: 1.6rem;
+        margin-bottom: 1.1rem;
+    }
+
+        .status-icon.settled {
+            background: rgba(22,163,74,.1);
+            color: var(--green);
+        }
+
+        .status-icon.pending {
+            background: rgba(95,158,160,.12);
+            color: var(--blue-dark);
+        }
+
+    .confirm-body h3 {
+        font-family: 'Clash Display', 'Plus Jakarta Sans', sans-serif;
+        font-size: 1.55rem;
+        font-weight: 700;
+        color: var(--text);
+        letter-spacing: -.4px;
+        margin-bottom: .5rem;
+    }
+
+    .confirm-body > p.lead {
+        font-size: .88rem;
+        color: var(--text-m);
+        max-width: 440px;
+        margin: 0 auto 1.75rem;
+        line-height: 1.55;
+    }
+
+    .confirm-stats {
+        display: grid;
+        grid-template-columns: 1fr 1fr;
+        gap: .9rem;
+        text-align: left;
+        margin-bottom: 1.75rem;
+    }
+
+    .stat-chip {
+        background: var(--bg);
+        border: 1px solid var(--border);
+        border-radius: 14px;
+        padding: .9rem 1.1rem;
+    }
+
+        .stat-chip .stat-label {
+            font-size: .72rem;
+            font-weight: 700;
+            color: var(--text-m);
+            text-transform: uppercase;
+            letter-spacing: .4px;
+            margin-bottom: .3rem;
+        }
+
+        .stat-chip .stat-value {
+            font-family: 'Clash Display', 'Plus Jakarta Sans', sans-serif;
+            font-size: 1.15rem;
+            font-weight: 700;
+            color: var(--blue-deep);
+        }
+
+        .stat-chip.collateral .stat-value {
+            font-size: .95rem;
+            color: var(--text);
+        }
+
+    .btn-login {
+        display: inline-flex;
+        align-items: center;
+        justify-content: center;
+        gap: .5rem;
+        padding: .9rem 2.2rem;
+        border: none;
+        border-radius: 50px;
+        background: linear-gradient(135deg, #5f9ea0, #2d6b6d);
+        color: #fff;
+        text-decoration: none;
+        font-family: 'Clash Display', 'Plus Jakarta Sans', sans-serif;
+        font-size: .95rem;
+        font-weight: 700;
+        cursor: pointer;
+        box-shadow: 0 4px 18px rgba(95,158,160,.3);
+        transition: all .2s;
+    }
+
+        .btn-login:hover {
+            box-shadow: 0 6px 24px rgba(95,158,160,.42);
+            transform: translateY(-1px);
+            color: #fff;
+        }
+
+      
+
+    .collateral-section {
+        margin-bottom: 1.75rem;
+        text-align: left;
+    }
+
+    .collateral-grid {
+        display: grid;
+        grid-template-columns: repeat(auto-fill, minmax(140px, 1fr));
+        gap: .9rem;
+    }
+
+    .collateral-card {
+        background: var(--bg);
+        border: 1px solid var(--border);
+        border-radius: 14px;
+        overflow: hidden;
+    }
+
+    .collateral-img {
+        width: 100%;
+        height: 110px;
+        object-fit: cover;
+        display: block;
+        background: #e4eeee;
+    }
+
+    .collateral-info {
+        padding: .6rem .75rem .75rem;
+    }
+
+    .collateral-name {
+        font-size: .82rem;
+        font-weight: 700;
+        color: var(--text);
+        margin-bottom: .15rem;
+    }
+
+    .collateral-meta {
+        font-size: .72rem;
+        color: var(--text-m);
+    }
+
+    .collateral-card {
+        cursor: pointer;
+        transition: transform .15s ease;
+    }
+
+        .collateral-card:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 6px 18px rgba(31,79,80,.1);
+        }
+
+    .lightbox-overlay {
+        display: none;
+        position: fixed;
+        inset: 0;
+        background: rgba(14,27,53,.82);
+        z-index: 999;
+        align-items: center;
+        justify-content: center;
+        padding: 2rem;
+    }
+
+        .lightbox-overlay.active {
+            display: flex;
+        }
+
+    .lightbox-content {
+        position: relative;
+        max-width: 90vw;
+        max-height: 85vh;
+    }
+
+        .lightbox-content img {
+            max-width: 100%;
+            max-height: 80vh;
+            border-radius: 14px;
+            display: block;
+        }
+
+    .lightbox-caption {
+        color: #fff;
+        text-align: center;
+        font-size: .85rem;
+        margin-top: .75rem;
+        font-weight: 600;
+    }
+
+    .lightbox-close {
+        position: absolute;
+        top: -14px;
+        right: -14px;
+        width: 34px;
+        height: 34px;
+        border-radius: 50%;
+        background: #fff;
+        border: none;
+        color: var(--text);
+        font-size: .9rem;
+        cursor: pointer;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        box-shadow: 0 4px 12px rgba(0,0,0,.2);
+    }
+
+    .qr-box {
+    background: var(--bg);
+    border: 1.5px dashed var(--border);
+    border-radius: 16px;
+    padding: 1.5rem;
+    margin: 0 auto 1.75rem;
+    max-width: 260px;
+    text-align: center;
+}
+
+.qr-image {
+    width: 200px;
+    height: 200px;
+    border-radius: 10px;
+}
+
+.qr-hint {
+    font-size: .74rem;
+    color: var(--text-m);
+    margin-top: .8rem;
+    line-height: 1.5;
+}
+
+.qr-code-text {
+    font-family: monospace;
+    font-size: .8rem;
+    font-weight: 700;
+    color: var(--text);
+    background: #fff;
+    border: 1px solid var(--border);
+    border-radius: 8px;
+    padding: .5rem .8rem;
+    margin-top: .8rem;
+    letter-spacing: .5px;
+    word-break: break-all;
+}
+</style>
+
+<div class="confirm-wrap">
+
+    <div class="confirm-card">
+        <div class="confirm-chart-head">
+            <div class="circle-ring cr-1"></div>
+            <div class="circle-ring cr-2"></div>
+            <h5>Balance over time</h5>
+        </div>
+        <div class="confirm-chart-body">
+            <canvas id="balanceChart" height="110"></canvas>
+        </div>
+    </div>
+
+    <div class="confirm-card">
+        <div class="confirm-body">
+           @if (Model.OutstandingBalance <= 0)
+{
+    <div class="status-icon settled"><i class="fa-solid fa-check"></i></div>
+    <h3>Loan settled</h3>
+    <p class="lead">Your loan has been fully paid off. Show the QR code below at the branch to collect your item.</p>
+
+    <div class="qr-box">
+    <img src="@Url.Action("CollectionQr", new { loanId = Model.LoanId })" alt="Collection QR code" class="qr-image" />
+    <div class="qr-code-text">@Model.CollectionToken</div>
+    <div class="qr-hint">Present this at the branch — staff will scan it, or you can read out the code above.</div>
+</div>
+}
+            else
+            {
+                <div class="status-icon pending"><i class="fa-solid fa-clock"></i></div>
+                <h3>Payment received</h3>
+                <p class="lead">Thanks — your payment was processed successfully. You still have a balance remaining.</p>
+            }
+
+            <div class="confirm-stats">
+                <div class="stat-chip">
+                    <div class="stat-label">Amount Paid So Far</div>
+                    <div class="stat-value">R@(Model.AmountPaid.ToString("N2"))</div>
+                </div>
+                <div class="stat-chip">
+                    <div class="stat-label">Outstanding Balance</div>
+                    <div class="stat-value">R@(Model.OutstandingBalance.ToString("N2"))</div>
+                </div>
+            </div>
+
+            <div class="collateral-section">
+                <div class="stat-label" style="margin-bottom: .6rem; text-align:left;">Collateral</div>
+                <div class="collateral-grid">
+                    @foreach (var item in Model.Collateral)
+                    {
+                        <div class="collateral-card" onclick="openCollateralLightbox('@item.ImagePath', '@item.Description')">
+                            <img src="@item.ImagePath" alt="@item.Description" class="collateral-img" />
+                            <div class="collateral-info">
+                                <div class="collateral-name">@item.Description</div>
+                                <div class="collateral-meta">R@(item.DeclaredValue.ToString("N2")) · @item.Condition</div>
+                            </div>
+                        </div>
+                    }
+                </div>
+
+                <!-- Lightbox overlay -->
+                <div id="collateralLightbox" class="lightbox-overlay" onclick="closeCollateralLightbox()">
+                    <div class="lightbox-content" onclick="event.stopPropagation()">
+                        <img id="lightboxImg" src="" alt="" />
+                        <div id="lightboxCaption" class="lightbox-caption"></div>
+                        <button class="lightbox-close" onclick="closeCollateralLightbox()">
+                            <i class="fa-solid fa-xmark"></i>
+                        </button>
+                    </div>
+                </div>
+            </div>
+
+            @if (Model.OutstandingBalance > 0)
+            {
+                <a href="@Url.Action("RepayLoan", new { loanId = Model.LoanId })" class="btn-login">
+                    <i class="fa-solid fa-arrow-right"></i> Make Another Payment
+                </a>
+            }
+        </div>
+    </div>
+
+</div>
+
+<script>
+    function openCollateralLightbox(src, caption) {
+        document.getElementById('lightboxImg').src = src;
+        document.getElementById('lightboxCaption').textContent = caption;
+        document.getElementById('collateralLightbox').classList.add('active');
+    }
+
+    function closeCollateralLightbox() {
+        document.getElementById('collateralLightbox').classList.remove('active');
+    }
+</script>
+
+<script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+<script>
+    const labels = @Html.Raw(Json.Serialize(Model.BalanceHistory.Select(p => p.Date.ToString("dd MMM"))));
+    const balances = @Html.Raw(Json.Serialize(Model.BalanceHistory.Select(p => p.Balance)));
+
+    new Chart(document.getElementById('balanceChart'), {
+        type: 'line',
+        data: {
+            labels: labels,
+            datasets: [{
+                label: 'Outstanding balance (R)',
+                data: balances,
+                borderColor: '#2d6b6d',
+                backgroundColor: 'rgba(95,158,160,0.12)',
+                fill: true,
+                stepped: 'before',
+                tension: 0,
+                pointBackgroundColor: '#1f4f50',
+                pointRadius: 4
+            }]
+        },
+        options: {
+            plugins: { legend: { display: false } },
+            scales: {
+                x: { grid: { display: false } },
+                y: { grid: { color: '#eef2fa' } }
+            }
+        }
+    });
+</script>

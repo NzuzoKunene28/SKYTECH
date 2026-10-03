@@ -1,0 +1,189 @@
+﻿@*
+    For more information on enabling MVC for empty projects, visit https://go.microsoft.com/fwlink/?LinkID=397860
+*@
+@{
+}
+@model SkyTech.ViewModels.AssessmentManagementViewModel
+
+@{
+    ViewData["Title"] = "Manage Assessment";
+}
+
+<link rel="stylesheet" href="~/CSS/HRCSS/ManageAssessment.css" />
+
+<div class="am-main">
+
+    <p class="am-eyebrow">Recruitment</p>
+    <h2 class="am-title">Manage Assessment</h2>
+    <p class="am-sub">Review assessment details, manage its questions, and control publish status.</p>
+
+    <div class="am-summary-card">
+
+        <h3 class="am-summary-title">@Model.Assessment.JobTitle</h3>
+
+        <div class="am-stat-grid">
+            <div>
+                <p class="am-stat-label">Vacancy</p>
+                <p class="am-stat-value">@Model.Assessment.JobPosts?.JobTitle</p>
+            </div>
+
+            <div>
+                <p class="am-stat-label">Questions</p>
+                <p class="am-stat-value">@Model.QuestionCount</p>
+            </div>
+
+            <div>
+                <p class="am-stat-label">Pass Mark</p>
+                <p class="am-stat-value">@($"{Model.Assessment.PassMark}%")</p>
+            </div>
+
+            <div>
+                <p class="am-stat-label">Time Limit</p>
+                <p class="am-stat-value">@Model.Assessment.TimeLimit minutes</p>
+            </div>
+
+            <div>
+                <p class="am-stat-label">Status</p>
+                @if (Model.Assessment.IsPublished)
+                {
+                    <span class="am-badge am-badge-published">Published</span>
+                }
+                else
+                {
+                    <span class="am-badge am-badge-draft">Draft</span>
+                }
+            </div>
+        </div>
+
+    </div>
+
+    @if (Model.Assessment.IsPublished)
+    {
+        <div class="am-banner am-banner-published">
+            <strong>Assessment is published.</strong>
+            Applicants can currently write this assessment. To make changes, unpublish the assessment first.
+        </div>
+
+        <div class="am-actions">
+            <a asp-action="UnpublishAssessment"
+               asp-route-id="@Model.Assessment.AssessmentId"
+               class="am-btn am-btn-warn"
+               onclick="return confirm('Unpublish this assessment? Applicants will no longer be able to write it until it is published again.');">
+                Unpublish Assessment
+            </a>
+        </div>
+    }
+    else
+    {
+        <div class="am-banner am-banner-draft">
+            <strong>Draft assessment.</strong>
+            Applicants cannot access this assessment yet. You can add, edit or delete questions before publishing.
+        </div>
+
+        <div class="am-actions">
+            <a asp-action="EditAssessment"
+               asp-route-id="@Model.Assessment.AssessmentId"
+               class="am-btn am-btn-outline">
+                Edit Assessment Settings
+            </a>
+
+            <a asp-action="AddQuestion"
+               asp-route-id="@Model.Assessment.AssessmentId"
+               class="am-btn am-btn-primary">
+                + Add Question
+            </a>
+
+            @if (Model.QuestionCount > 0)
+            {
+                <a asp-action="PublishAssessment"
+                   asp-route-id="@Model.Assessment.AssessmentId"
+                   class="am-btn am-btn-primary"
+                   onclick="return confirm('Publish this assessment? Applicants will be able to write it after publishing.');">
+                    Publish Assessment
+                </a>
+            }
+        </div>
+    }
+
+    <h4 class="am-section-title">Questions</h4>
+
+    @if (!Model.Assessment.QuizQuestions.Any())
+    {
+        <div class="am-empty">
+            No questions have been added to this assessment yet.
+        </div>
+    }
+    else
+    {
+        <div class="am-table-wrap">
+            <table class="am-table">
+
+                <thead>
+                    <tr>
+                        <th>#</th>
+                        <th>Question</th>
+                        <th>Correct Answer</th>
+                        <th>Actions</th>
+                    </tr>
+                </thead>
+
+                <tbody>
+
+                    @{
+                        int number = 1;
+                    }
+
+                    @foreach (var question in Model.Assessment.QuizQuestions)
+                    {
+                        <tr>
+
+                            <td>
+                                <span class="am-q-number">@number</span>
+                            </td>
+
+                            <td>
+                                @question.QuestionText
+                            </td>
+
+                            <td>
+                                <span class="am-q-answer">@question.CorrectAnswer</span>
+                            </td>
+
+                            <td>
+
+                                @if (!Model.Assessment.IsPublished)
+                                {
+                                    <div class="am-row-actions">
+                                        <a asp-action="EditQuestion"
+                                           asp-route-id="@question.QuestionId"
+                                           class="am-btn am-btn-outline am-btn-sm">
+                                            Edit
+                                        </a>
+
+                                        <a asp-action="DeleteQuestion"
+                                           asp-route-id="@question.QuestionId"
+                                           class="am-btn am-btn-danger am-btn-sm"
+                                           onclick="return confirm('Are you sure you want to delete this question?');">
+                                            Delete
+                                        </a>
+                                    </div>
+                                }
+                                else
+                                {
+                                    <span class="am-locked-note">Unpublish to edit</span>
+                                }
+
+                            </td>
+
+                        </tr>
+
+                        number++;
+                    }
+
+                </tbody>
+
+            </table>
+        </div>
+    }
+
+</div>

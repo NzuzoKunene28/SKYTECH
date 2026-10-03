@@ -1,0 +1,98 @@
+﻿:root {
+    --blue: #5f9ea0;
+    --blue-dark: #2d6b6d;
+    --blue-deep: #1f4f50;
+    --bg: #f0f4fc;
+    --border: #dde6f5;
+    --text: #0e1b35;
+    --text-2: #4a5878;
+    --text-m: #8a96b0;
+    --red: #dc2626;
+}
+
+body {
+    font-family: 'Plus Jakarta Sans', sans-serif;
+    background-color: var(--bg);
+    color: var(--text);
+}
+
+h2 {
+    font-family: 'Clash Display', 'Plus Jakarta Sans', sans-serif;
+    font-weight: 700;
+    color: var(--blue-deep);
+    margin-bottom: 16px;
+}
+
+.alert.alert-success {
+    background: rgba(22, 163, 74, .08);
+    border: 1.5px solid rgba(22, 163, 74, .25);
+    border-radius: 14px;
+    padding: 14px 18px;
+    color: #15803d;
+    font-weight: 600;
+    font-size: .9rem;
+    margin-bottom: 18px;
+}
+
+p {
+    color: var(--text-2);
+    font-size: .92rem;
+}
+
+.table.table-bordered {
+    width: 100%;
+    max-width: 1000px;
+    border-collapse: collapse;
+    background: #fff;
+    border: 1.5px solid var(--border) !important;
+    border-radius: 16px;
+    overflow: hidden;
+    box-shadow: 0 10px 30px rgba(31, 79, 80, .06);
+    font-size: .86rem;
+}
+
+    .table.table-bordered th,
+    .table.table-bordered td {
+        border: 1px solid var(--border) !important;
+        padding: 10px 12px;
+        text-align: left;
+        vertical-align: middle;
+    }
+
+    .table.table-bordered thead th {
+        background: var(--bg);
+        font-size: .72rem;
+        font-weight: 700;
+        text-transform: uppercase;
+        letter-spacing: .04em;
+        color: var(--text-m);
+    }
+
+    .table.table-bordered tbody td {
+        color: var(--text-2);
+    }
+
+    .table.table-bordered tbody tr:hover {
+        background: rgba(95, 158, 160, .05);
+    }
+
+.badge {
+    display: inline-block;
+    padding: 5px 12px;
+    border-radius: 50px;
+    font-weight: 700;
+    font-size: .72rem;
+    color: #fff;
+}
+
+    .badge.bg-success {
+        background: #16a34a !important;
+    }
+
+    .badge.bg-danger {
+        background: var(--red) !important;
+    }
+
+    .badge.bg-secondary {
+        background: var(--text-m) !important;
+    }

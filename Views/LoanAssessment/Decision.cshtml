@@ -1,0 +1,244 @@
+﻿@model SkyTech.Models.ViewModels.AssessmentViewModel
+
+@{
+    ViewData["Title"] = "Final Decision";
+    Layout = "~/Views/Shared/_MinimalLayout.cshtml";
+    var app = Model.LoanApplication;
+}
+
+<style>
+    :root {
+        --blue: #5f9ea0;
+        --blue-dark: #2d6b6d;
+        --blue-deep: #1f4f50;
+        --bg: #f0f4fc;
+        --border: #dde6f5;
+        --text: #0e1b35;
+        --text-2: #4a5878;
+        --text-m: #8a96b0;
+        --red: #dc2626;
+    }
+
+    .assess-page {
+        min-height: 80vh;
+        background: var(--bg);
+        padding: 45px 20px;
+    }
+
+    .assess-container {
+        max-width: 900px;
+        margin: auto;
+    }
+
+    .step-label {
+        color: var(--blue-dark);
+        font-size: 13px;
+        font-weight: 700;
+        text-transform: uppercase;
+        letter-spacing: 1px;
+    }
+
+    .page-title {
+        color: var(--text);
+        font-size: 34px;
+        font-weight: 750;
+        margin: 7px 0;
+    }
+
+    .page-subtitle {
+        color: var(--text-2);
+        margin-bottom: 25px;
+    }
+
+    .result-card {
+        background: white;
+        border: 1px solid var(--border);
+        border-radius: 22px;
+        padding: 35px;
+        box-shadow: 0 12px 35px rgba(31, 79, 80, 0.07);
+    }
+
+    .summary-row {
+        display: flex;
+        justify-content: space-between;
+        padding: 8px 0;
+        color: var(--text-2);
+        border-bottom: 1px solid var(--border);
+    }
+
+        .summary-row:last-child {
+            border-bottom: none;
+        }
+
+        .summary-row strong {
+            color: var(--text);
+        }
+
+    .decision-notes {
+        width: 100%;
+        border: 1px solid var(--border);
+        border-radius: 10px;
+        padding: 12px;
+        margin: 20px 0;
+        font-family: inherit;
+        min-height: 70px;
+        box-sizing: border-box;
+    }
+
+    .decision-actions {
+        display: flex;
+        gap: 12px;
+        flex-wrap: wrap;
+    }
+
+    .decision-button {
+        border: none;
+        padding: 13px 22px;
+        border-radius: 10px;
+        font-weight: 700;
+        cursor: pointer;
+        color: white;
+    }
+
+    .decision-approve {
+        background: #198754;
+    }
+
+    .decision-reject {
+        background: var(--red);
+    }
+
+    .decision-disburse {
+        background: var(--blue-dark);
+    }
+
+    .decision-errors {
+        background: #fde8e8;
+        border: 1px solid #f0b7b7;
+        color: var(--red);
+        border-radius: 12px;
+        padding: 15px;
+        margin-bottom: 15px;
+        font-size: 14px;
+        display: none;
+    }
+
+    .back-btn {
+        display: inline-block;
+        background: white;
+        color: var(--text-2);
+        border: 1px solid var(--border);
+        padding: 13px 24px;
+        border-radius: 11px;
+        font-weight: 600;
+        text-decoration: none;
+        margin-top: 20px;
+    }
+</style>
+
+<div class="assess-page">
+    <div class="assess-container">
+
+        <div class="step-label">Step 3 of 3</div>
+        <h1 class="page-title">Final Decision</h1>
+        <p class="page-subtitle">
+            Application #@app.LoanApplicationId — review the summary below, then record your decision.
+        </p>
+
+        <div class="result-card">
+
+            <div class="summary-row">
+                <span>Still meets credit threshold</span>
+                <strong style="color: @(Model.StillMeetsCreditThreshold ? "#198754" : "var(--red)")">
+                    @(Model.StillMeetsCreditThreshold ? "Yes" : "No")
+                </strong>
+            </div>
+
+            <div class="summary-row">
+                <span>Unresolved critical fraud flags</span>
+                <strong style="color: @(Model.AnyUnresolvedCriticalFlags ? "var(--red)" : "#198754")">
+                    @(Model.AnyUnresolvedCriticalFlags ? "Yes" : "None")
+                </strong>
+            </div>
+
+            @* <div class="summary-row">
+                <span>All collateral verified</span>
+                <strong style="color: @(Model.AllCollateralVerified ? "#198754" : "var(--red)")">
+                    @(Model.AllCollateralVerified ? "Yes" : "No")
+                </strong>
+            </div> *@
+
+            <div class="summary-row">
+                <span>Requested Amount</span>
+                <strong>@app.RequestedAmount.ToString("C")</strong>
+            </div>
+
+            <div class="summary-row">
+                <span>Total Declared Collateral</span>
+                <strong>@app.TotalDeclaredCollateralValue.ToString("C")</strong>
+            </div>
+
+            <div id="decisionErrors" class="decision-errors"></div>
+
+            <textarea id="decisionNotes" class="decision-notes" placeholder="Optional notes about this decision..."></textarea>
+
+            <div class="decision-actions">
+                <button type="button" class="decision-button decision-approve decide-btn" data-decision="Approved">Approve</button>
+                <button type="button" class="decision-button decision-reject decide-btn" data-decision="Rejected">Reject</button>
+            </div>
+
+            <a asp-action="FraudFlags" asp-route-id="@Model.LoanAssessmentId" class="back-btn">← Back</a>
+
+        </div>
+
+    </div>
+</div>
+
+@Html.AntiForgeryToken()
+
+@section Scripts {
+    <script>
+        const loanAssessmentId = @Model.LoanAssessmentId;
+
+        function getAntiForgeryToken() {
+            const input = document.querySelector('input[name="__RequestVerificationToken"]');
+            return input ? input.value : "";
+        }
+
+        document.querySelectorAll(".decide-btn").forEach(function(button) {
+            button.addEventListener("click", async function() {
+                const decision = button.dataset.decision;
+                const notes = document.getElementById("decisionNotes").value;
+                const errorsBox = document.getElementById("decisionErrors");
+                errorsBox.style.display = "none";
+                errorsBox.innerHTML = "";
+
+                if (!confirm(`Confirm decision: ${decision}?`)) return;
+
+                const formData = new FormData();
+                formData.append("loanAssessmentId", loanAssessmentId);
+                formData.append("decision", decision);
+                formData.append("notes", notes);
+
+                const response = await fetch("@Url.Action("Decide", "LoanAssessment")", {
+                    method: "POST",
+                    headers: { "RequestVerificationToken": getAntiForgeryToken() },
+                    body: formData
+                });
+
+                if (response.redirected) {
+                    window.location.href = response.url;
+                    return;
+                }
+
+                const result = await response.json().catch(() => null);
+                if (result && result.errors) {
+                    errorsBox.innerHTML = result.errors.join("<br/>");
+                    errorsBox.style.display = "block";
+                } else {
+                    alert("Could not record the decision.");
+                }
+            });
+        });
+    </script>
+}

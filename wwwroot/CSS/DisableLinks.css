@@ -1,0 +1,5 @@
+﻿.disabled-link {
+    pointer-events: none;
+    color: gray;
+    opacity: 0.6;
+}

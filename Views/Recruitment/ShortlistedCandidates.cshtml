@@ -1,0 +1,112 @@
+﻿@using SkyTech.ViewModels
+@model IEnumerable<ApplicantDashboardViewModel>
+
+@{
+    ViewData["Title"] = "Shortlisted Candidates";
+    Layout = "~/Views/Shared/_MinimalLayout.cshtml";
+}
+@section Styles {
+    <link rel="stylesheet" href="~/CSS/HRCSS/ShortlistedCandidates.css" />
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
+}
+
+<div class="hr-page-wrap">
+
+    <div class="hr-header">
+        <p class="hr-eyebrow">Recruitment</p>
+        <h1 class="hr-title">Shortlisted Candidates</h1>
+        <p class="hr-sub">Candidates who have been evaluated and pre-approved.</p>
+    </div>
+
+    @if (Model.Any())
+    {
+        <div class="sc-grid">
+            @foreach (var applicant in Model)
+            {
+                var initials = (applicant.FirstName?.Length > 0 ? applicant.FirstName[0].ToString() : "?").ToUpper();
+                var score = applicant.EvaluationScore;
+                var scoreTier = score >= 80 ? "sc-score-high" : score >= 60 ? "sc-score-mid" : "sc-score-low";
+
+                <div class="sc-card">
+
+                    <div class="sc-card-top">
+                        <div class="sc-avatar">@initials</div>
+                        <div class="sc-identity">
+                            <div class="sc-name">@applicant.FirstName</div>
+                            <div class="sc-role">@applicant.JobTitle</div>
+                        </div>
+                        <span class="hr-badge hr-badge-success">@applicant.InterviewStat</span>
+                    </div>
+
+                    <div class="sc-meta-row">
+                        <i class="fa-regular fa-envelope"></i>
+                        <span>@applicant.Email</span>
+                    </div>
+
+                    <div class="sc-meta-row">
+                        <i class="fa-regular fa-calendar"></i>
+                        <span>@(applicant.EvaluatedOn?.ToString("dd MMM yyyy") ?? "Not evaluated")</span>
+                    </div>
+
+                    <div class="sc-score-block">
+                        @if (score.HasValue)
+                        {
+                            <div class="sc-score-ring @scoreTier" style="--pct: @score">
+                                <span>@score</span>
+                            </div>
+                        }
+                        else
+                        {
+                            <div class="sc-score-ring sc-score-none">
+                                <span>—</span>
+                            </div>
+                        }
+                        <div class="sc-notes">
+                            @if (!string.IsNullOrWhiteSpace(applicant.EvaluationNotes))
+                            {
+                                @applicant.EvaluationNotes
+                            }
+                            else
+                            {
+                                <span class="sc-notes-empty">No evaluation notes</span>
+                            }
+                        </div>
+                    </div>
+
+                    <div class="sc-card-footer">
+                        @if (applicant.ContractStatus == null)
+                        {
+                            <a asp-action="SendContract"
+                               asp-route-id="@applicant.ApplicationId"
+                               class="hr-btn hr-btn-primary hr-btn-sm">
+                                <i class="fa-solid fa-paper-plane"></i> Send Contract
+                            </a>
+                        }
+                        else if (applicant.ContractStatus == SkyTech.Models.Interviews.ContractStatus.Sent)
+                        {
+                            <button class="sc-btn-waiting" disabled>
+                                <i class="fa-solid fa-hourglass-half"></i> Waiting for signature
+                            </button>
+                        }
+                        else if (applicant.ContractStatus == SkyTech.Models.Interviews.ContractStatus.SignedByCandidate)
+                        {
+                            <button class="sc-btn-signed" disabled>
+                                <i class="fa-solid fa-check"></i> Contract signed
+                            </button>
+                        }
+                    </div>
+
+                </div>
+            }
+        </div>
+    }
+    else
+    {
+        <div class="hr-card">
+            <div class="hr-empty">No pre-approved candidates found.</div>
+        </div>
+    }
+
+</div>

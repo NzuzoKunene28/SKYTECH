@@ -1,0 +1,253 @@
+﻿@using SkyTech.Models
+@model SkyTech.Models.ShopOwner
+@{
+    ViewBag.Title = "Dashboard";
+    Layout = "~/Views/Shared/_MinimalLayout.cshtml";
+    ViewBag.ActivePage = "Dash";
+    bool restricted = ViewBag.ApplicationStatus == ApplicationStat.Pending
+                   || ViewBag.ApplicationStatus == ApplicationStat.Rejected;
+}
+
+@section Styles {
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+    <link href="https://api.fontshare.com/v2/css?f[]=clash-display@400,500,600,700&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="~/CSS/ShopOwnerStyle.css">
+}
+
+@section Scripts {
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <script>
+              var labels    = @Html.Raw(System.Text.Json.JsonSerializer.Serialize(ViewBag.WeeklySalesLabels ?? new string[] { "Mon", "Tue", "Wed", "Thu", "Fri", "Sat", "Sun" }));
+        var salesData = @Html.Raw(System.Text.Json.JsonSerializer.Serialize(ViewBag.WeeklySalesData ?? new int[] { 0, 0, 0, 0, 0, 0, 0 }));
+
+        new Chart(document.getElementById('lineChart'), {
+            type: 'line',
+            data: {
+                labels: labels,
+                datasets: [{
+                    label: 'Sales (R)',
+                    data: salesData,
+                    borderColor: '#1a73e8',
+                    backgroundColor: 'rgba(26,115,232,0.08)',
+                    tension: 0.45, fill: true,
+                    pointBackgroundColor: '#1a73e8',
+                    pointBorderColor: '#fff', pointBorderWidth: 2, pointRadius: 4
+                }]
+            },
+            options: {
+                responsive: true,
+                plugins: { legend: { display: false } },
+                scales: {
+                    y: { beginAtZero: true, grid: { color: 'rgba(221,230,245,.6)' }, ticks: { color: '#8a96b0', font: { family: 'Plus Jakarta Sans', size: 11 } } },
+                    x: { grid: { display: false }, ticks: { color: '#8a96b0', font: { family: 'Plus Jakarta Sans', size: 11 } } }
+                }
+            }
+        });
+
+        new Chart(document.getElementById('donutChart'), {
+            type: 'doughnut',
+            data: {
+                labels: ['Delivered','Pending','Out for Delivery'],
+                datasets: [{ data: [@(ViewBag.CompletedOrders ?? 0), @(ViewBag.PendingOrders ?? 0), 5], backgroundColor: ['#1a73e8','#d97706','#ea580c'], borderWidth: 0, hoverOffset: 6 }]
+            },
+            options: {
+                cutout: '70%', responsive: true,
+                plugins: { legend: { position: 'bottom', labels: { color: '#4a5878', font: { family: 'Plus Jakarta Sans', size: 11 }, boxWidth: 10, padding: 12 } } }
+            }
+        });
+    </script>
+}
+
+<div class="so-wrap">
+
+    <!-- SIDEBAR -->
+    <aside class="so-sidebar">
+        <div class="so-brand">
+            <div class="so-brand-icon"><i class="fas fa-store"></i></div>
+            <div>
+                <div class="so-brand-name">SkyTech</div>
+                <div class="so-brand-sub">Shop Owner Portal</div>
+            </div>
+        </div>
+        <nav class="so-nav">
+            <div class="so-nav-label">OVERVIEW</div>
+
+            <a href="@Url.Action("ShopOwnerDash", "ShopOwner")" class="so-link active"><i class="fas fa-grid-2"></i><span>Dashboard</span></a>
+
+            <div class="so-nav-label" style="margin-top:1rem">INVENTORY</div>
+            <a href="@Url.Action("AddProductPage", "ShopOwner")" class="so-link @(restricted ? "disabled-link" : "")"><i class="fas fa-circle-plus"></i><span>Add Product</span></a>
+            <a href="@Url.Action("TrackStockLevelPage", "ShopOwner")" class="so-link @(restricted ? "disabled-link" : "")"><i class="fas fa-boxes-stacked"></i><span>Track Stock</span></a>
+            <div class="so-nav-label" style="margin-top:1rem">LEASING</div>
+            <a href="@Url.Action("AddLeasableProductPage", "ShopOwner")" class="so-link @(restricted ? "disabled-link" : "")"><i class="fas fa-calendar-check"></i><span>Add Leasable Product</span></a>
+            <a href="@Url.Action("ViewLeasableProducts", "ShopOwner")" class="so-link @(restricted ? "disabled-link" : "")"><i class="fas fa-calendar-check"></i><span>View Leasable Products</span></a>
+            <a href="@Url.Action("ShopOwnerLeaseAgreements", "ShopOwner")" class="so-link @(restricted ? "disabled-link" : "")"><i class="fas fa-calendar-check"></i><span>Track Lease Agreements</span></a>
+            <a href="@Url.Action("PendingReturns", "ShopOwner")" class="so-link @(restricted ? "disabled-link" : "")"><i class="fas fa-calendar-check"></i><span>Pending Returns</span></a>
+
+            <div class="so-nav-label" style="margin-top:1rem">ORDERS & STAFF</div>
+
+            <!-- Received Orders with submenu -->
+            <div class="nav-item-dropdown">
+                <a href="#" class="so-link so-dropdown-toggle @(restricted ? "disabled-link" : "")" id="ordersDropdown">
+                    <i class="fas fa-bag-shopping"></i>
+                    <span>Received Orders</span>
+                    <i class="fas fa-chevron-down dropdown-icon"></i>
+                </a>
+                <div class="so-dropdown-menu" id="ordersSubmenu">
+                    <a href="@Url.Action("DeliveryOrders", "ShopOwner")" class="so-link so-sub-link @(restricted ? "disabled-link" : "")">
+                        <i class="fas fa-truck"></i> Delivery Orders
+                    </a>
+                    <a href="@Url.Action("PickupOrders", "ShopOwner")" class="so-link so-sub-link @(restricted ? "disabled-link" : "")">
+                        <i class="fas fa-store"></i> In-Store Collection
+                    </a>
+                </div>
+            </div>
+
+            <a href="@Url.Action("StaffReg", "ShopOwner")" class="so-link @(restricted ? "disabled-link" : "")"><i class="fas fa-user-plus"></i><span>Register Staff</span></a>
+            <a href="@Url.Action("StaffMembers", "ShopOwner")" class="so-link @(restricted ? "disabled-link" : "")"><i class="fas fa-users"></i><span>Staff Members</span></a>
+            <a href="@Url.Action("EvaluateProposal", "ShopOwner")" class="so-link @(restricted ? "disabled-link" : "")"><i class="fas fa-users"></i><span>Proposals</span></a>
+
+            <a href="@Url.Action("ReturnedItems","ShopOwner")" class="so-link @(restricted?"disabled-link":"")"><i class="fas fa-bag-shopping"></i><span>Returned Items</span></a>
+            <a href="@Url.Action("StaffReg","ShopOwner")" class="so-link @(restricted?"disabled-link":"")"><i class="fas fa-user-plus"></i><span>Register Staff</span></a>
+            <a href="@Url.Action("StaffMembers","ShopOwner")" class="so-link @(restricted?"disabled-link":"")"><i class="fas fa-users"></i><span>Staff Members</span></a>
+            <a href="@Url.Action("Queue","LoanAssessment")" class="so-link @(restricted?"disabled-link":"")"><i class="fas fa-users"></i><span>Loan Applications</span></a>
+            <a href="@Url.Action("SettledLoans", "LoanAssessment")" class="so-link @(restricted ? "disabled-link" : "")"><i class="fas fa-check-circle"></i><span>Settled Loans</span>
+                <a href="@Url.Action("ActiveLoans", "LoanAssessment")" class="so-link @(restricted ? "disabled-link" : "")"><i class="fas fa-hourglass-half"></i><span>Active Loans</span></a>
+               
+            </a> <div class="so-nav-label" style="margin-top:1rem">ACCOUNT</div>
+            <a href="@Url.Action("OwnerProfile", "ShopOwner")" class="so-link"><i class="fas fa-circle-user"></i><span>Profile</span></a>
+        </nav>
+        <div class="so-sidebar-foot">
+            <div class="so-foot-avatar"><i class="fas fa-store"></i></div>
+            <div>
+                <div class="so-foot-role">SkyTech</div>
+            </div>
+        </div>
+
+        <!--Logout button-->
+        <div style="padding:.8rem 1.2rem">
+            @using (Html.BeginForm("Logout", "Authentication", FormMethod.Post))
+            {
+                @Html.AntiForgeryToken()
+                <button type="submit" style="width:100%;background:rgba(239,68,68,.08);
+                     border:1.5px solid rgba(239,68,68,.25);border-radius:8px;
+                     padding:.6rem 1rem;cursor:pointer;color:#ef4444;
+                     font-weight:600;font-size:.85rem;display:flex;
+                     align-items:center;gap:.5rem;justify-content:center">
+                    <i class="fas fa-right-from-bracket"></i> Log Out
+                </button>
+            }
+        </div>
+    </aside>
+
+    <!-- MAIN -->
+    <main class="so-main">
+
+        <!-- Restricted banner -->
+        @if (restricted)
+        {
+            <div class="so-alert so-alert-warning">
+                <i class="fas fa-triangle-exclamation"></i>
+                Your application is <strong>@ViewBag.ApplicationStatus</strong>. Some features are locked until your account is approved.
+            </div>
+        }
+
+        <!-- Topbar -->
+        <div class="so-topbar">
+            <div>
+                <div class="so-page-title">Dashboard</div>
+                <div class="so-page-sub">Welcome back — here's what's happening today.</div>
+            </div>
+            <a href="@Url.Action("Report","ShopOwner")" class="btn btn-primary @(restricted?"disabled-link":"")">
+                <i class="fas fa-download"></i> Generate Report
+            </a>
+        </div>
+
+        <!-- Stat cards -->
+        <div class="so-stat-grid">
+            <div class="so-stat blue">
+                <div class="so-stat-icon"><i class="fas fa-chart-line"></i></div>
+                <div class="so-stat-label">TOTAL SALES</div>
+                <div class="so-stat-value">R @(ViewBag.TotalSales ?? "0")</div>
+                <div class="so-stat-sub">All time revenue</div>
+            </div>
+            <div class="so-stat yellow">
+                <div class="so-stat-icon"><i class="fas fa-clock"></i></div>
+                <div class="so-stat-label">PENDING ORDERS</div>
+                <div class="so-stat-value">@(ViewBag.PendingOrders ?? 0)</div>
+                <div class="so-stat-sub">Awaiting assignment</div>
+            </div>
+            <div class="so-stat green">
+                <div class="so-stat-icon"><i class="fas fa-circle-check"></i></div>
+                <div class="so-stat-label">ORDERS COMPLETED</div>
+                <div class="so-stat-value">@(ViewBag.CompletedOrders ?? 0)</div>
+                <div class="so-stat-sub">Successfully delivered</div>
+            </div>
+            <div class="so-stat orange">
+                <div class="so-stat-icon"><i class="fas fa-truck"></i></div>
+                <div class="so-stat-label">AVAILABLE DRIVERS</div>
+                <div class="so-stat-value">@(ViewBag.AvailableDrivers ?? 0)</div>
+                <div class="so-stat-sub">Ready to dispatch</div>
+            </div>
+        </div>
+
+        <!-- Charts row -->
+        <div style="display:grid;grid-template-columns:2fr 1fr;gap:1.4rem;margin-bottom:1.6rem">
+            <div class="so-card">
+                <div class="so-card-head">
+                    <div class="so-card-title"><i class="fas fa-chart-line" style="color:var(--blue);margin-right:.4rem"></i>Weekly Earnings</div>
+                    <span style="font-size:.75rem;color:var(--text-muted)">Last 7 days</span>
+                </div>
+                <div class="so-card-body" style="padding:1.2rem">
+                    <canvas id="lineChart" height="100"></canvas>
+                </div>
+            </div>
+            <div class="so-card">
+                <div class="so-card-head">
+                    <div class="so-card-title"><i class="fas fa-chart-pie" style="color:var(--blue);margin-right:.4rem"></i>Order Split</div>
+                </div>
+                <div class="so-card-body" style="padding:1.2rem">
+                    <canvas id="donutChart"></canvas>
+                </div>
+            </div>
+        </div>
+
+        <!-- Quick actions -->
+        <div class="so-card">
+            <div class="so-card-head">
+                <div class="so-card-title">Quick Actions</div>
+            </div>
+            <div class="so-card-body" style="display:flex;flex-wrap:wrap;gap:.75rem">
+                <a href="@Url.Action("AddProductPage","ShopOwner")" class="btn btn-outline @(restricted?"disabled-link":"")"><i class="fas fa-circle-plus"></i> Add Product</a>
+                <a href="@Url.Action("ReceivedOrders","ShopOwner")" class="btn btn-outline @(restricted?"disabled-link":"")"><i class="fas fa-bag-shopping"></i> View Orders</a>
+                <a href="@Url.Action("TrackStockLevelPage","ShopOwner")" class="btn btn-outline @(restricted?"disabled-link":"")"><i class="fas fa-boxes-stacked"></i> Track Stock</a>
+                <a href="@Url.Action("StaffReg","ShopOwner")" class="btn btn-outline @(restricted?"disabled-link":"")"><i class="fas fa-user-plus"></i> Add Staff</a>
+            </div>
+        </div>
+
+    </main>
+
+    <script>
+        // Toggle dropdown for Received Orders
+        const dropdownToggle = document.getElementById('ordersDropdown');
+        const dropdownMenu = document.getElementById('ordersSubmenu');
+
+        if (dropdownToggle && dropdownMenu) {
+            dropdownToggle.addEventListener('click', function(e) {
+                e.preventDefault();
+                this.classList.toggle('open');
+                dropdownMenu.classList.toggle('show');
+            });
+
+            // Keep submenu open if a sub-link is active
+            if (window.location.href.includes('DeliveryOrders') || window.location.href.includes('PickupOrders')) {
+                dropdownToggle.classList.add('open');
+                dropdownMenu.classList.add('show');
+            }
+        }
+    </script>
+
+
+
+</div>

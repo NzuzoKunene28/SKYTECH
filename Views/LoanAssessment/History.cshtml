@@ -1,0 +1,268 @@
+﻿@model List<SkyTech.Models.SkytechWorkers.LoanApplication>
+
+@{
+    ViewData["Title"] = "Loan Assessment History";
+    Layout = "~/Views/Shared/_MinimalLayout.cshtml";
+    var selectedStatus = ViewBag.SelectedStatus as SkyTech.Models.SkytechWorkers.LoanApplicationStatus?;
+}
+
+<style>
+    :root {
+        --blue: #5f9ea0;
+        --blue-dark: #2d6b6d;
+        --blue-deep: #1f4f50;
+        --bg: #f0f4fc;
+        --border: #dde6f5;
+        --text: #0e1b35;
+        --text-2: #4a5878;
+        --text-m: #8a96b0;
+        --red: #dc2626;
+    }
+
+    .queue-page {
+        min-height: 80vh;
+        background: var(--bg);
+        padding: 45px 20px;
+    }
+
+    .queue-container {
+        max-width: 1000px;
+        margin: auto;
+    }
+
+    .step-label {
+        color: var(--blue-dark);
+        font-size: 13px;
+        font-weight: 700;
+        text-transform: uppercase;
+        letter-spacing: 1px;
+    }
+
+    .page-title {
+        color: var(--text);
+        font-size: 35px;
+        font-weight: 750;
+        margin: 7px 0;
+    }
+
+    .page-subtitle {
+        color: var(--text-2);
+        margin-bottom: 25px;
+    }
+
+    .filter-row {
+        display: flex;
+        gap: 10px;
+        flex-wrap: wrap;
+        margin-bottom: 25px;
+    }
+
+    .filter-pill {
+        display: inline-block;
+        padding: 9px 18px;
+        border-radius: 20px;
+        font-size: 13px;
+        font-weight: 650;
+        text-decoration: none;
+        border: 1px solid var(--border);
+        background: white;
+        color: var(--text-2);
+    }
+
+        .filter-pill:hover {
+            color: var(--blue-deep);
+        }
+
+        .filter-pill.active {
+            background: var(--blue-dark);
+            color: white;
+            border-color: var(--blue-dark);
+        }
+
+    .empty-card {
+        background: white;
+        border: 1px solid var(--border);
+        border-radius: 22px;
+        padding: 45px;
+        text-align: center;
+        color: var(--text-2);
+        box-shadow: 0 12px 35px rgba(31, 79, 80, 0.07);
+    }
+
+    .queue-card {
+        background: white;
+        border: 1px solid var(--border);
+        border-radius: 20px;
+        padding: 25px 28px;
+        margin-bottom: 18px;
+        box-shadow: 0 8px 25px rgba(31, 79, 80, 0.06);
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        gap: 20px;
+        flex-wrap: wrap;
+    }
+
+    .queue-info {
+        flex: 1;
+        min-width: 220px;
+    }
+
+    .queue-app-number {
+        color: var(--text);
+        font-size: 19px;
+        font-weight: 700;
+        margin-bottom: 6px;
+    }
+
+    .queue-detail {
+        color: var(--text-2);
+        font-size: 14px;
+        margin-bottom: 3px;
+    }
+
+        .queue-detail strong {
+            color: var(--text);
+        }
+
+    .status-badge {
+        display: inline-block;
+        padding: 6px 12px;
+        border-radius: 20px;
+        font-size: 12px;
+        font-weight: 700;
+        margin-top: 8px;
+    }
+
+    .status-approved {
+        background: #e1f4e9;
+        color: #177245;
+    }
+
+    .status-rejected {
+        background: #fde8e8;
+        color: var(--red);
+    }
+
+    .status-disbursed {
+        background: #e6f3f3;
+        color: var(--blue-deep);
+    }
+
+    .view-button {
+        background: white;
+        color: var(--text-2);
+        border: 1px solid var(--border);
+        padding: 12px 22px;
+        border-radius: 10px;
+        font-weight: 650;
+        white-space: nowrap;
+        text-decoration: none;
+    }
+
+        .view-button:hover {
+            border-color: var(--blue);
+            color: var(--blue-deep);
+        }
+
+    .back-link {
+        display: inline-block;
+        margin-bottom: 20px;
+        color: var(--blue-dark);
+        text-decoration: none;
+        font-weight: 600;
+        font-size: 14px;
+    }
+</style>
+
+<div class="queue-page">
+
+    <div class="queue-container">
+
+        <a asp-action="Queue" class="back-link">← Back to Queue</a>
+
+        <div class="step-label">
+            Shop Owner
+        </div>
+
+        <h1 class="page-title">
+            Assessment History
+        </h1>
+
+        <p class="page-subtitle">
+            Applications your branch has already decided on.
+        </p>
+
+        <div class="filter-row">
+
+            <a asp-action="History" class="filter-pill @(selectedStatus == null ? "active" : "")">
+                All
+            </a>
+
+            <a asp-action="History" asp-route-status="Approved" class="filter-pill @(selectedStatus == SkyTech.Models.SkytechWorkers.LoanApplicationStatus.Approved ? "active" : "")">
+                Approved
+            </a>
+
+            <a asp-action="History" asp-route-status="Rejected" class="filter-pill @(selectedStatus == SkyTech.Models.SkytechWorkers.LoanApplicationStatus.Rejected ? "active" : "")">
+                Rejected
+            </a>
+
+            <a asp-action="History" asp-route-status="Disbursed" class="filter-pill @(selectedStatus == SkyTech.Models.SkytechWorkers.LoanApplicationStatus.Disbursed ? "active" : "")">
+                Disbursed
+            </a>
+
+        </div>
+
+        @if (!Model.Any())
+        {
+            <div class="empty-card">
+                No applications match this filter yet.
+            </div>
+        }
+        else
+        {
+            @foreach (var app in Model)
+            {
+                var statusClass = app.Status switch
+                {
+                    SkyTech.Models.SkytechWorkers.LoanApplicationStatus.Approved => "status-approved",
+                    SkyTech.Models.SkytechWorkers.LoanApplicationStatus.Rejected => "status-rejected",
+                    SkyTech.Models.SkytechWorkers.LoanApplicationStatus.Disbursed => "status-disbursed",
+                    _ => ""
+                };
+
+                <div class="queue-card">
+
+                    <div class="queue-info">
+
+                        <div class="queue-app-number">
+                            Application #@app.LoanApplicationId
+                        </div>
+
+                        <div class="queue-detail">
+                            <strong>Requested Amount:</strong>
+                            @app.RequestedAmount.ToString("C")
+                        </div>
+
+                        <div class="queue-detail">
+                            <strong>Submitted:</strong>
+                            @(app.SubmittedOn?.ToLocalTime().ToString("f") ?? "—")
+                        </div>
+
+                        <span class="status-badge @statusClass">
+                            @app.Status
+                        </span>
+
+                    </div>
+
+                    <a asp-action="HistoryDetails" asp-route-id="@app.LoanApplicationId" class="view-button">
+                        View Details →
+                    </a>
+
+                </div>
+            }
+        }
+
+    </div>
+
+</div>

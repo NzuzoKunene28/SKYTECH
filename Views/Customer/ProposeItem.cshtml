@@ -1,0 +1,116 @@
+﻿@using SkyTech.Models
+@model SkyTech.ViewModels.ProposeItemViewModel
+
+@{
+    ViewData["Title"] = "Propose an Item";
+    Layout = "~/Views/Shared/_MinimalLayout.cshtml";
+}
+@section Styles {
+    
+    <link rel="stylesheet" href="~/CSS/ProposeItemStyle.css">
+}
+
+<div class="orb orb-1"></div>
+<div class="orb orb-2"></div>
+
+<div class="propose-wrapper">
+
+    <div class="page-header">
+        <div class="page-header-icon">📦</div>
+        <div class="page-header-text">
+            <h1>Propose an Item</h1>
+            <p>Submit your item for shop review and get an offer</p>
+        </div>
+    </div>
+
+    <div class="propose-card">
+
+        <form asp-action="ProposeItem" asp-controller="Customer" method="post" enctype="multipart/form-data">
+
+            <!-- Product Info -->
+            <div class="card-section">
+                <div class="section-title">📋 Product Information</div>
+
+                <div class="f-group">
+                    <label asp-for="ProdName" class="f-label"></label>
+                    <div class="f-wrap">
+                        <i class="bi bi-tag"></i>
+                        <input asp-for="ProdName" class="f-input" placeholder="e.g. Sony WH-1000XM4" />
+                    </div>
+                    <span asp-validation-for="ProdName" class="text-danger"></span>
+                </div>
+
+                <div class="f-grid-2">
+                    <div class="f-group">
+                        <label asp-for="ProdCategory" class="f-label"></label>
+                        <div class="f-wrap">
+                            <i class="bi bi-grid"></i>
+                            <select asp-for="ProdCategory" class="f-input"
+                                    asp-items="Html.GetEnumSelectList<SelectCategory>()">
+                            </select>
+                        </div>
+                        <span asp-validation-for="ProdCategory" class="text-danger"></span>
+                    </div>
+
+                    <div class="f-group">
+                        <label asp-for="ProdCondition" class="f-label"></label>
+                        <div class="f-wrap">
+                            <i class="bi bi-stars"></i>
+                            <select asp-for="ProdCondition" class="f-input"
+                                    asp-items="Html.GetEnumSelectList<SelectCondition>()">
+                            </select>
+                        </div>
+                        <span asp-validation-for="ProdCondition" class="text-danger"></span>
+                    </div>
+                </div>
+
+                <div class="f-group">
+                    <label asp-for="ProdDescription" class="f-label"></label>
+                    <div class="f-wrap">
+                        <i class="bi bi-card-text" style="top:1rem; transform:none;"></i>
+                        <textarea asp-for="ProdDescription" class="f-input" placeholder="Describe the item, its history, any defects, accessories included…"></textarea>
+                    </div>
+                    <span asp-validation-for="ProdDescription" class="text-danger"></span>
+                </div>
+            </div>
+
+            <!-- Uploads -->
+            <div class="card-section">
+                <div class="section-title">🖼️ Upload Images</div>
+
+                <div class="f-grid-2">
+                    <div class="f-group">
+                        <label class="f-label">Receipt Images</label>
+                        <label class="file-upload-zone">
+                            <span class="file-upload-icon">🧾</span>
+                            <p>Click to upload receipts</p>
+                            <span>PNG, JPG — multiple allowed</span>
+                            <input type="file" name="ReceiptPic" multiple />
+                        </label>
+                    </div>
+
+                    <div class="f-group">
+                        <label class="f-label">Product Images</label>
+                        <label class="file-upload-zone">
+                            <span class="file-upload-icon">📸</span>
+                            <p>Click to upload product photos</p>
+                            <span>PNG, JPG — multiple allowed</span>
+                            <input type="file" name="ProposedProdPic" multiple />
+                        </label>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Actions -->
+            <div class="card-footer-actions">
+                    <a asp-action="CustomerProfile" asp-controller="Customer" class="btn-back-link">
+                    ← Cancel
+                </a>
+                <button type="submit" class="btn-submit">
+                    Submit Proposal ✓
+                </button>
+            </div>
+
+        </form>
+    </div>
+</div>

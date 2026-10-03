@@ -1,0 +1,97 @@
+﻿@model List<SkyTech.Models.SkytechWorkers.Notification>
+
+@{
+    ViewData["Title"] = "Notifications";
+}
+
+<div class="container mt-4">
+
+    <h2>Notifications</h2>
+
+    <p class="text-muted">
+        View updates about your leave requests.
+    </p>
+
+    <hr />
+
+    @if (Model.Any())
+    {
+        @foreach (var notification in Model)
+        {
+            <div class="card mb-3">
+
+                <div class="card-body">
+
+                    <div class="d-flex justify-content-between">
+
+                        <h5 class="card-title">
+                            @notification.Title
+                        </h5>
+
+                        @if (!notification.IsRead)
+                        {
+                            <span class="badge bg-primary">
+                                New
+                            </span>
+                        }
+
+                    </div>
+
+                    <p class="card-text">
+                        @notification.Message
+                    </p>
+
+                    <small class="text-muted">
+                        @notification.CreatedAt.ToString("dd MMM yyyy HH:mm")
+                    </small>
+
+                    @if (!notification.IsRead)
+                    {
+                        <form asp-controller="Notification"
+                              asp-action="MarkAsRead"
+                              method="post"
+                              class="mt-3">
+
+                            @Html.AntiForgeryToken()
+
+                            <input type="hidden"
+                                   name="notificationId"
+                                   value="@notification.NotificationId" />
+
+                            <button type="submit"
+                                    class="btn btn-sm btn-outline-primary">
+                                Mark as Read
+                            </button>
+
+                        </form>
+                    }
+
+                </div>
+
+            </div>
+        }
+    }
+    else
+    {
+        <div class="alert alert-info">
+            You do not have any notifications yet.
+        </div>
+    }
+
+    <div class="mt-3">
+
+        <a asp-controller="LeaveRequest"
+           asp-action="LeaveHistory"
+           class="btn btn-primary">
+            My Leave History
+        </a>
+
+        <a asp-controller="StaffRoster"
+           asp-action="StaffDash"
+           class="btn btn-secondary">
+            Back to Dashboard
+        </a>
+
+    </div>
+
+</div>

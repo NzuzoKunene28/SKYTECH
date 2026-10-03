@@ -1,0 +1,108 @@
+﻿@model SkyTech.Models.LeasePaymentRequest
+@{
+    ViewBag.Title = "Complete Lease Payment";
+    Layout = "~/Views/Shared/_MinimalLayout.cshtml";
+}
+
+@section Styles {
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+    <link href="https://api.fontshare.com/v2/css?f[]=clash-display@400,500,600,700&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="~/CSS/PaymentStyle.css">
+}
+
+<!-- PayStack Inline JS - loaded once -->
+<script src="https://js.paystack.co/v1/inline.js"></script>
+
+<div class="pay-bg">
+    <div class="pay-card">
+
+        <!-- Header -->
+        <div class="pay-card-head">
+            <div class="pay-store-badge"><i class="fas fa-store"></i>SkyTech</div>
+            <h2>Complete Your Lease Payment</h2>
+            <p>You're one step away from activating your lease.</p>
+            <div class="lock-ring"><i class="fas fa-lock"></i></div>
+        </div>
+
+        <!-- Body -->
+        <div class="pay-body">
+
+            <div class="info-row">
+                <span class="key"><i class="fas fa-user"></i> Customer</span>
+                <span class="val">@Model.CustomerName</span>
+            </div>
+            <div class="info-row">
+                <span class="key"><i class="fas fa-envelope"></i> Email</span>
+                <span class="val" style="font-size:.8rem">@Model.CustomerEmail</span>
+            </div>
+            <div class="info-row">
+                <span class="key"><i class="fas fa-hashtag"></i> Lease Agreement</span>
+                <span class="val" style="color:#1a73e8">#@Model.LeaseAgreementId</span>
+            </div>
+
+            <!-- Amount block -->
+            <div class="pay-amount-block">
+                <div class="pay-amount-label">DEPOSIT + FIRST INSTALMENT DUE</div>
+                <div class="pay-amount-value"><span>R</span>@Model.Amount.ToString("N2")</div>
+            </div>
+
+            <!-- Pay button -->
+            <button class="pay-btn" onclick="payWithPaystack(this)" id="payBtn">
+                <i class="fas fa-lock"></i>
+                <span id="btnText">Complete Payment</span>
+                <div class="spinner" id="btnSpinner"></div>
+            </button>
+
+            <!-- Security note -->
+            <div class="secure-strip">
+                <i class="fas fa-shield-halved"></i>
+                256-bit SSL encrypted &nbsp;·&nbsp; Powered by PayStack
+                <i class="fas fa-credit-card"></i>
+                Visa · Mastercard · USSD
+            </div>
+
+            <!-- Cancel -->
+            <a href="@Url.Action("ViewLeaseAgreement", "Customer", new { id = Model.LeaseAgreementId })" class="cancel-link">
+                <i class="fas fa-arrow-left" style="font-size:.7rem"></i> Cancel and go back
+            </a>
+
+        </div>
+    </div>
+</div>
+
+<script>
+    function payWithPaystack(btn) {
+        if (btn.disabled) return;
+
+        btn.disabled = true;
+        document.getElementById('btnText').textContent = 'Opening payment…';
+        document.getElementById('btnSpinner').style.display = 'block';
+
+        setTimeout(function() {
+            var handler = PaystackPop.setup({
+                key: 'pk_test_00e0ace8896dc183d605bed4ae78c29197fa3029',
+                email: '@Model.CustomerEmail',
+                amount:   @(Math.Round(Model.Amount * 100)),
+                ref: 'LEASE-@Model.LeaseAgreementId-' + Date.now(),
+                currency: 'ZAR',
+                metadata: {
+                    lease_agreement_id: '@Model.LeaseAgreementId'
+                },
+                callback: function(response) {
+                    document.getElementById('btnText').textContent = 'Verifying…';
+                    window.location.href = '@Url.Action("VerifyLeasePayment", "Payment")?reference='
+                        + response.reference
+                        + '&leaseAgreementId=@Model.LeaseAgreementId';
+                },
+                onClose: function() {
+                    btn.disabled = false;
+                    document.getElementById('btnText').textContent = 'Complete Payment';
+                    document.getElementById('btnSpinner').style.display = 'none';
+                }
+            });
+            handler.openIframe();
+        }, 100);
+    }
+</script>

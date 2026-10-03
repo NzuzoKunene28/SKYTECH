@@ -1,0 +1,76 @@
+﻿@model List<SkyTech.Models.JobPostServices.JobRoleKnowledge>
+@{
+    ViewData["Title"] = "Job Role Knowledge Base";
+    Layout = "~/Views/Shared/_MinimalLayout.cshtml";
+}
+
+<link rel="stylesheet" href="~/CSS/HRCSS/JobRoleKnowledge.css" />
+
+<div class="hr-page">
+    <div class="hr-container">
+
+        <div class="hr-header">
+            <div class="hr-header-top">
+                <div>
+                    <h1>Job Role Knowledge Base</h1>
+                    <div class="hr-subtitle">Reference information used when generating job posts for each role</div>
+                </div>
+
+                <a href="@Url.Action("Create", "JobRoleKnowledge")" class="btn-hr btn-hr-primary">
+                    + Add New Role
+                </a>
+            </div>
+        </div>
+
+        <div class="hr-table-card">
+            <div class="hr-table-scroll">
+                <table class="hr-table">
+                    <thead>
+                        <tr>
+                            <th>Job Title</th>
+                            <th>Active</th>
+                            <th>Last Updated</th>
+                            <th></th>
+                        </tr>
+                    </thead>
+                    <tbody>
+
+                        @if (!Model.Any())
+                        {
+                            <tr class="hr-empty-row">
+                                <td colspan="4">No job roles have been added yet.</td>
+                            </tr>
+                        }
+                        else
+                        {
+                            @foreach (var role in Model)
+                            {
+                                <tr>
+                                    <td>@role.JobTitle</td>
+                                    <td>
+                                        @if (role.IsActive)
+                                        {
+                                            <span class="pill pill-active">Yes</span>
+                                        }
+                                        else
+                                        {
+                                            <span class="pill pill-inactive">No</span>
+                                        }
+                                    </td>
+                                    <td>@role.UpdatedAt.ToShortDateString()</td>
+                                    <td>
+                                        <a href="@Url.Action("Edit", "JobRoleKnowledge", new { id = role.RoleId })" class="btn-hr-edit">
+                                            Edit
+                                        </a>
+                                    </td>
+                                </tr>
+                            }
+                        }
+
+                    </tbody>
+                </table>
+            </div>
+        </div>
+
+    </div>
+</div>

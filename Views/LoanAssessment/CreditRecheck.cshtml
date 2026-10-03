@@ -1,0 +1,202 @@
+﻿@model SkyTech.Models.ViewModels.AssessmentViewModel
+
+@{
+    ViewData["Title"] = "Credit Re-check";
+    Layout = "~/Views/Shared/_MinimalLayout.cshtml";
+    var app = Model.LoanApplication;
+}
+
+<style>
+    :root {
+        --blue: #5f9ea0;
+        --blue-dark: #2d6b6d;
+        --blue-deep: #1f4f50;
+        --bg: #f0f4fc;
+        --border: #dde6f5;
+        --text: #0e1b35;
+        --text-2: #4a5878;
+        --text-m: #8a96b0;
+        --red: #dc2626;
+    }
+
+    .assess-page {
+        min-height: 80vh;
+        background: var(--bg);
+        padding: 45px 20px;
+    }
+
+    .assess-container {
+        max-width: 900px;
+        margin: auto;
+    }
+
+    .step-label {
+        color: var(--blue-dark);
+        font-size: 13px;
+        font-weight: 700;
+        text-transform: uppercase;
+        letter-spacing: 1px;
+    }
+
+    .page-title {
+        color: var(--text);
+        font-size: 34px;
+        font-weight: 750;
+        margin: 7px 0;
+    }
+
+    .page-subtitle {
+        color: var(--text-2);
+        margin-bottom: 30px;
+    }
+
+    .result-card {
+        background: white;
+        border: 1px solid var(--border);
+        border-radius: 22px;
+        padding: 35px;
+        box-shadow: 0 12px 35px rgba(31, 79, 80, 0.07);
+    }
+
+    .information-grid {
+        display: grid;
+        grid-template-columns: repeat(3, 1fr);
+        gap: 15px;
+        margin-top: 10px;
+    }
+
+    .information-box {
+        border: 1px solid var(--border);
+        border-radius: 15px;
+        padding: 20px;
+        background: #fbfcff;
+    }
+
+    .information-label {
+        color: var(--text-m);
+        font-size: 13px;
+        margin-bottom: 8px;
+    }
+
+    .information-value {
+        color: var(--text);
+        font-size: 21px;
+        font-weight: 700;
+    }
+
+    .clear {
+        color: #198754;
+    }
+
+    .unclear {
+        color: var(--red);
+    }
+
+    .delta-up {
+        color: #198754;
+        font-size: 14px;
+    }
+
+    .delta-down {
+        color: var(--red);
+        font-size: 14px;
+    }
+
+    .continue-btn {
+        display: inline-block;
+        background: var(--blue-dark);
+        color: white;
+        border: none;
+        padding: 13px 24px;
+        border-radius: 11px;
+        font-weight: 600;
+        text-decoration: none;
+        margin-top: 25px;
+    }
+
+        .continue-btn:hover {
+            background: var(--blue-deep);
+            color: white;
+        }
+
+    @@media (max-width: 700px) {
+        .information-grid {
+            grid-template-columns: 1fr;
+        }
+
+        .result-card {
+            padding: 25px;
+        }
+    }
+</style>
+
+<div class="assess-page">
+    <div class="assess-container">
+
+        <div class="step-label">Step 1 of 3</div>
+        <h1 class="page-title">Credit &amp; Clearance Re-check</h1>
+        <p class="page-subtitle">
+            Application #@app.LoanApplicationId — re-checking whether the applicant still qualifies before assessment continues.
+        </p>
+
+        <div class="result-card">
+
+            <div class="information-grid">
+
+                <div class="information-box">
+                    <div class="information-label">Score at Application</div>
+                    <div class="information-value">@Model.CreditScoreAtApplication</div>
+                </div>
+
+                <div class="information-box">
+                    <div class="information-label">Score Now</div>
+                    <div class="information-value">
+                        @Model.CreditScoreAtAssessment
+                        <span class="@(Model.CreditScoreDelta >= 0 ? "delta-up" : "delta-down")">
+                            (@(Model.CreditScoreDelta >= 0 ? "+" : "")@Model.CreditScoreDelta)
+                        </span>
+                    </div>
+                </div>
+
+                <div class="information-box">
+                    <div class="information-label">Still Qualifies?</div>
+                    <div class="information-value @(Model.StillMeetsCreditThreshold ? "clear" : "unclear")">
+                        @(Model.StillMeetsCreditThreshold ? "Yes" : "No")
+                    </div>
+                </div>
+
+                <div class="information-box">
+                    <div class="information-label">Clearance Status</div>
+                    <div class="information-value @(Model.ClearanceStatusAtAssessment == SkyTech.Models.SkytechWorkers.ClearanceStatus.Clear ? "clear" : "unclear")">
+                        @Model.ClearanceStatusAtAssessment
+                    </div>
+                </div>
+
+                <div class="information-box">
+                    <div class="information-label">Requested Amount</div>
+                    <div class="information-value">@app.RequestedAmount.ToString("C")</div>
+                </div>
+
+                <div class="information-box">
+                    <div class="information-label">Total Declared Collateral</div>
+                    <div class="information-value">@app.TotalDeclaredCollateralValue.ToString("C")</div>
+                </div>
+
+            </div>
+
+            @if (!Model.StillMeetsCreditThreshold)
+            {
+                <p style="color: var(--red); margin-top: 20px;">
+                    This applicant no longer meets the credit threshold. You can still continue through assessment,
+                    but this will be flagged again before a final decision can be approved.
+                </p>
+            }
+
+            <a asp-action="FraudFlagsLoading" asp-route-id="@Model.LoanAssessmentId" class="continue-btn">
+                Continue to Fraud Check →
+            </a>
+
+        </div>
+
+    </div>
+</div>

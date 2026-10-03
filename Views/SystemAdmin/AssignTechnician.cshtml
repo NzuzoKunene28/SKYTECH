@@ -1,0 +1,233 @@
+@model Repair_Request
+@{
+    ViewBag.Title = "Assign Technician";
+    Layout = "~/Views/Shared/_MinimalLayout.cshtml";
+}
+
+@section Styles {
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+    <link href="https://api.fontshare.com/v2/css?f[]=clash-display@400,500,600,700&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="~/CSS/DashboardStyle.css">
+    <style>
+        .form-group {
+            margin-bottom: 1.5rem;
+        }
+        .form-label {
+            display: block;
+            margin-bottom: 0.5rem;
+            font-weight: 600;
+            color: var(--text);
+        }
+        .form-control {
+            width: 100%;
+            padding: 0.75rem 1rem;
+            border: 1px solid var(--border);
+            border-radius: var(--radius-sm);
+            font-family: var(--font-body);
+            font-size: 0.95rem;
+            transition: all 0.3s;
+        }
+        .form-control:focus {
+            outline: none;
+            border-color: var(--blue);
+            box-shadow: 0 0 0 3px rgba(95,158,160,.1);
+        }
+        .form-control-static {
+            background: var(--blue-soft);
+            color: var(--text);
+        }
+        .btn-group {
+            display: flex;
+            gap: 1rem;
+            margin-top: 2rem;
+        }
+        .btn {
+            flex: 1;
+            padding: 0.75rem 1.5rem;
+            border-radius: var(--radius-sm);
+            border: none;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.3s;
+        }
+        .btn-primary {
+            background: var(--blue);
+            color: white;
+        }
+        .btn-primary:hover {
+            background: var(--blue-dark);
+            transform: translateY(-2px);
+            box-shadow: var(--shadow-md);
+        }
+        .btn-secondary {
+            background: transparent;
+            color: var(--blue);
+            border: 1px solid var(--blue);
+        }
+        .btn-secondary:hover {
+            background: var(--blue-soft);
+        }
+        .tech-card {
+            padding: 1rem;
+            border: 2px solid var(--border);
+            border-radius: var(--radius-sm);
+            cursor: pointer;
+            transition: all 0.3s;
+        }
+        .tech-card:hover {
+            border-color: var(--blue);
+            background: var(--blue-soft);
+        }
+        .tech-card input[type="radio"] {
+            margin-right: 0.75rem;
+        }
+        .tech-card label {
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+        }
+        .info-box {
+            background: var(--blue-soft);
+            border-left: 4px solid var(--blue);
+            padding: 1rem;
+            border-radius: var(--radius-sm);
+            margin-bottom: 1.5rem;
+        }
+    </style>
+}
+
+<div class="dash-wrap">
+    <!-- ══ SIDEBAR ══ -->
+    <aside class="dash-sidebar">
+        <div class="dash-brand">
+            <div class="dash-brand-icon"><i class="fas fa-lock-open"></i></div>
+            <div>
+                <div class="dash-brand-name">SkyTech</div>
+                <div class="dash-brand-sub">Admin Portal</div>
+            </div>
+        </div>
+        <nav class="dash-nav">
+            <div class="dash-nav-label">REPAIR MANAGEMENT</div>
+            <a href="@Url.Action("PendingRepairRequests", "SystemAdmin")" class="dash-link">
+                <i class="fas fa-clock"></i><span>Pending Requests</span>
+            </a>
+        </nav>
+
+        <div class="dash-sidebar-foot">
+            <div class="dash-foot-avatar"><i class="fas fa-shield"></i></div>
+            <div>
+                <div class="dash-foot-name">System Admin</div>
+                <div class="dash-foot-role">Administrator</div>
+            </div>
+        </div>
+    </aside>
+
+    <!-- ══ MAIN ══ -->
+    <main class="dash-main">
+        <div class="dash-header">
+            <div>
+                <h1 class="dash-title">Assign Technician</h1>
+                <p class="dash-subtitle">Assign a qualified technician to repair request #@Model.RequestId</p>
+            </div>
+            <a href="@Url.Action("PendingRepairRequests", "SystemAdmin")" class="dash-btn-secondary">
+                <i class="fas fa-arrow-left"></i> Back
+            </a>
+        </div>
+
+        <div class="dash-content">
+            <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 2rem;">
+                <!-- Request Details -->
+                <div>
+                    <div class="dash-card">
+                        <h2 style="margin-bottom: 1.5rem; color: var(--text); font-size: 1.1rem;">Request Details</h2>
+
+                        <div class="form-group">
+                            <label class="form-label">Item Name</label>
+                            <input type="text" class="form-control form-control-static" value="@Model.ItemName" disabled>
+                        </div>
+
+                        <div class="form-group">
+                            <label class="form-label">Issue Description</label>
+                            <textarea class="form-control form-control-static" rows="3" disabled>@Model.IssueDescription</textarea>
+                        </div>
+
+                        <div class="form-group">
+                            <label class="form-label">Customer</label>
+                            <input type="text" class="form-control form-control-static" 
+                                   value="@Model.Customers?.FirstName @Model.Customers?.LastName" disabled>
+                        </div>
+
+                        <div class="form-group">
+                            <label class="form-label">Category</label>
+                            <input type="text" class="form-control form-control-static" 
+                                   value="@Model.Category?.CategoryName" disabled>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Technician Selection -->
+                <div>
+                    <form method="post" action="@Url.Action("AssignTechnician", "SystemAdmin", new { id = Model.RequestId })">
+                        @Html.AntiForgeryToken()
+
+                        @if (TempData["Debug"] != null)
+                        {
+                            <div style="background:red;color:white;padding:1rem;margin-bottom:1rem">
+                                @TempData["Debug"]
+                            </div>
+                        }
+                        <div class="dash-card">
+                            <h2 style="margin-bottom: 1.5rem; color: var(--text); font-size: 1.1rem;">Select Technician</h2>
+
+                            @if (((List<Technician>)ViewData["Technicians"]).Count == 0)
+                            {
+                                <div class="info-box">
+                                    <p style="margin: 0;"><i class="fas fa-info-circle"></i> No available technicians for this category at this time.</p>
+                                </div>
+                            }
+                            else
+                            {
+                                <div class="form-group">
+                                    <label class="form-label">Available Technicians</label>
+                                    @foreach (var tech in (List<Technician>)ViewData["Technicians"])
+                                    {
+                                        <div class="tech-card">
+                                            <label>
+                                                <input type="radio" name="TechnicianId" value="@tech.TechnicianId" required>
+                                                <strong>@tech.TechnicianFirstName @tech.TechnicianLastName</strong>
+                                            </label>
+                                            <div style="margin-left: 1.5rem; font-size: 0.85rem; color: var(--text-muted); margin-top: 0.5rem;">
+                                                Specialization: @tech.Category?.CategoryName
+                                            </div>
+                                        </div>
+                                    }
+                                </div>
+
+                                <div class="form-group">
+                                    <label class="form-label">Assignment Notes (Optional)</label>
+                                    <textarea name="AssignmentNotes" class="form-control" rows="3" 
+                                              placeholder="Add any special instructions for the technician..."></textarea>
+                                </div>
+
+                                <div class="btn-group">
+                                    <button type="submit" class="btn btn-primary">
+                                        <i class="fas fa-check"></i> Assign Technician
+                                    </button>
+                                    <a href="@Url.Action("PendingRepairRequests", "SystemAdmin")" class="btn btn-secondary">
+                                        <i class="fas fa-times"></i> Cancel
+                                    </a>
+                                </div>
+                            }
+                        </div>
+                    </form>
+                </div>
+            </div>
+        </div>
+    </main>
+</div>
+
+@section Scripts {
+    <script src="~/JS/DashboardScript.js"></script>
+}

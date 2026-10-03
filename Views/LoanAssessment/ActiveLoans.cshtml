@@ -1,0 +1,177 @@
+﻿@model List<SkyTech.Models.SkytechWorkers.Loan>
+
+<style>
+    :root {
+        --blue: #5f9ea0;
+        --blue-dark: #2d6b6d;
+        --blue-deep: #1f4f50;
+        --bg: #f0f4fc;
+        --border: #dde6f5;
+        --text: #0e1b35;
+        --text-m: #8a96b0;
+        --green: #16a34a;
+        --amber: #d97706;
+    }
+
+    .active-wrap {
+        font-family: 'Plus Jakarta Sans', sans-serif;
+        max-width: 960px;
+        margin: 2rem auto;
+        padding: 0 1rem;
+    }
+
+    .active-head h2 {
+        font-family: 'Clash Display', 'Plus Jakarta Sans', sans-serif;
+        font-size: 1.6rem;
+        font-weight: 700;
+        color: var(--text);
+        margin-bottom: .3rem;
+    }
+
+    .active-head p {
+        font-size: .85rem;
+        color: var(--text-m);
+        margin-bottom: 1.75rem;
+    }
+
+    .loan-card {
+        background: #fff;
+        border: 1.5px solid var(--border);
+        border-radius: 18px;
+        padding: 1.4rem 1.6rem;
+        margin-bottom: 1rem;
+        box-shadow: 0 8px 28px rgba(31,79,80,.06);
+    }
+
+    .loan-card-top {
+        display: flex;
+        justify-content: space-between;
+        align-items: flex-start;
+        margin-bottom: 1rem;
+    }
+
+    .loan-customer {
+        font-weight: 700;
+        color: var(--text);
+        font-size: .95rem;
+    }
+
+    .loan-meta {
+        font-size: .78rem;
+        color: var(--text-m);
+        margin-top: .2rem;
+    }
+
+    .loan-due-badge {
+        font-size: .72rem;
+        font-weight: 700;
+        padding: .3rem .7rem;
+        border-radius: 20px;
+        background: rgba(217,119,6,.1);
+        color: var(--amber);
+    }
+
+    .loan-figures {
+        display: grid;
+        grid-template-columns: 1fr 1fr 1fr;
+        gap: .9rem;
+        margin-bottom: .9rem;
+    }
+
+    .figure-label {
+        font-size: .7rem;
+        font-weight: 700;
+        color: var(--text-m);
+        text-transform: uppercase;
+        letter-spacing: .3px;
+        margin-bottom: .2rem;
+    }
+
+    .figure-value {
+        font-family: 'Clash Display', 'Plus Jakarta Sans', sans-serif;
+        font-weight: 700;
+        color: var(--blue-deep);
+        font-size: 1.05rem;
+    }
+
+    .progress-track {
+        height: 8px;
+        background: var(--bg);
+        border-radius: 5px;
+        overflow: hidden;
+    }
+
+    .progress-fill {
+        height: 100%;
+        background: linear-gradient(90deg, var(--blue), var(--blue-dark));
+        border-radius: 5px;
+    }
+
+    .progress-pct {
+        font-size: .72rem;
+        color: var(--text-m);
+        margin-top: .35rem;
+        text-align: right;
+    }
+
+    .empty-state {
+        text-align: center;
+        padding: 3rem 1rem;
+        color: var(--text-m);
+        font-size: .9rem;
+        background: #fff;
+        border: 1.5px solid var(--border);
+        border-radius: 18px;
+    }
+</style>
+
+<div class="active-wrap">
+    <div class="active-head">
+        <h2>Active Loans</h2>
+        <p>Loans currently being repaid at your branch, with progress so far.</p>
+    </div>
+
+    @if (!Model.Any())
+    {
+        <div class="empty-state">No active loans right now.</div>
+    }
+    else
+    {
+        @foreach (var loan in Model)
+        {
+            var percentPaid = loan.TotalRepayable > 0
+                ? (int)Math.Round((loan.AmountPaid / loan.TotalRepayable) * 100)
+                : 0;
+
+            <div class="loan-card">
+                <div class="loan-card-top">
+                    <div>
+                        <div class="loan-customer">@loan.LoanApplication.Customer.FirstName @loan.LoanApplication.Customer.LastName</div>
+                        <div class="loan-meta">Loan #@loan.LoanId · @loan.Payments.Count payment(s) made</div>
+                    </div>
+                    <div class="loan-due-badge">Due @loan.DueDate.ToString("dd MMM yyyy")</div>
+                </div>
+
+                <div class="loan-figures">
+                    <div>
+                        <div class="figure-label">Total Owed</div>
+                        <div class="figure-value">R@(loan.TotalRepayable.ToString("N2"))</div>
+                    </div>
+                    <div>
+                        <div class="figure-label">Paid So Far</div>
+                        <div class="figure-value">R@(loan.AmountPaid.ToString("N2"))</div>
+                    </div>
+                    <div>
+                        <div class="figure-label">Remaining</div>
+                        <div class="figure-value">R@(loan.OutstandingBalance.ToString("N2"))</div>
+                    </div>
+                </div>
+
+                <div class="progress-track">
+                    <div class="progress-fill" style="width: @percentPaid%"></div>
+                </div>
+                <div class="progress-pct">@percentPaid% paid</div>
+            </div>
+        }
+    }
+</div>

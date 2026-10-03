@@ -1,0 +1,196 @@
+﻿:root {
+    --blue: #5f9ea0;
+    --blue-dark: #2d6b6d;
+    --blue-deep: #1f4f50;
+    --bg: #f0f4fc;
+    --border: #dde6f5;
+    --text: #0e1b35;
+    --text-2: #4a5878;
+    --text-m: #8a96b0;
+    --red: #dc2626;
+    --green: #16a34a;
+}
+
+.confirm-wrap {
+    font-family: 'Plus Jakarta Sans', sans-serif;
+    max-width: 720px;
+    margin: 2rem auto;
+    padding: 0 1rem;
+}
+
+.confirm-card {
+    background: #fff;
+    border-radius: 28px;
+    border: 1.5px solid var(--border);
+    box-shadow: 0 24px 80px rgba(31,79,80,.12);
+    overflow: hidden;
+    margin-bottom: 1.5rem;
+    animation: confirmFadeUp .45s ease;
+}
+
+@@keyframes confirmFadeUp {
+    from {
+        opacity: 0;
+        transform: translateY(16px);
+    }
+
+    to {
+        opacity: 1;
+        transform: translateY(0);
+    }
+}
+
+.confirm-chart-head {
+    background-color: cadetblue;
+    padding: 1.75rem 2rem 1.25rem;
+    position: relative;
+    overflow: hidden;
+}
+
+    .confirm-chart-head::before {
+        content: '';
+        position: absolute;
+        inset: 0;
+        pointer-events: none;
+        background-image: linear-gradient(rgba(255,255,255,.05) 1px, transparent 1px), linear-gradient(90deg, rgba(255,255,255,.05) 1px, transparent 1px);
+        background-size: 30px 30px;
+    }
+
+    .confirm-chart-head h5 {
+        position: relative;
+        z-index: 1;
+        font-family: 'Clash Display', 'Plus Jakarta Sans', sans-serif;
+        font-size: 1.05rem;
+        font-weight: 700;
+        color: #fff;
+        margin: 0;
+    }
+
+.circle-ring {
+    position: absolute;
+    border-radius: 50%;
+    border: 1px solid rgba(255,255,255,.12);
+    pointer-events: none;
+}
+
+.cr-1 {
+    width: 180px;
+    height: 180px;
+    bottom: -50px;
+    right: -40px;
+}
+
+.cr-2 {
+    width: 120px;
+    height: 120px;
+    bottom: -20px;
+    right: -10px;
+}
+
+.confirm-chart-body {
+    padding: 1.5rem 2rem 1.75rem;
+}
+
+.confirm-body {
+    padding: 2.5rem 2.5rem 2.25rem;
+    text-align: center;
+}
+
+.status-icon {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    width: 64px;
+    height: 64px;
+    border-radius: 50%;
+    font-size: 1.6rem;
+    margin-bottom: 1.1rem;
+}
+
+    .status-icon.settled {
+        background: rgba(22,163,74,.1);
+        color: var(--green);
+    }
+
+    .status-icon.pending {
+        background: rgba(95,158,160,.12);
+        color: var(--blue-dark);
+    }
+
+.confirm-body h3 {
+    font-family: 'Clash Display', 'Plus Jakarta Sans', sans-serif;
+    font-size: 1.55rem;
+    font-weight: 700;
+    color: var(--text);
+    letter-spacing: -.4px;
+    margin-bottom: .5rem;
+}
+
+.confirm-body > p.lead {
+    font-size: .88rem;
+    color: var(--text-m);
+    max-width: 440px;
+    margin: 0 auto 1.75rem;
+    line-height: 1.55;
+}
+
+.confirm-stats {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: .9rem;
+    text-align: left;
+    margin-bottom: 1.75rem;
+}
+
+.stat-chip {
+    background: var(--bg);
+    border: 1px solid var(--border);
+    border-radius: 14px;
+    padding: .9rem 1.1rem;
+}
+
+    .stat-chip .stat-label {
+        font-size: .72rem;
+        font-weight: 700;
+        color: var(--text-m);
+        text-transform: uppercase;
+        letter-spacing: .4px;
+        margin-bottom: .3rem;
+    }
+
+    .stat-chip .stat-value {
+        font-family: 'Clash Display', 'Plus Jakarta Sans', sans-serif;
+        font-size: 1.15rem;
+        font-weight: 700;
+        color: var(--blue-deep);
+    }
+
+    .stat-chip.collateral .stat-value {
+        font-size: .95rem;
+        color: var(--text);
+    }
+
+.btn-login {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    gap: .5rem;
+    padding: .9rem 2.2rem;
+    border: none;
+    border-radius: 50px;
+    background: linear-gradient(135deg, #5f9ea0, #2d6b6d);
+    color: #fff;
+    text-decoration: none;
+    font-family: 'Clash Display', 'Plus Jakarta Sans', sans-serif;
+    font-size: .95rem;
+    font-weight: 700;
+    cursor: pointer;
+    box-shadow: 0 4px 18px rgba(95,158,160,.3);
+    transition: all .2s;
+}
+
+    .btn-login:hover {
+        box-shadow: 0 6px 24px rgba(95,158,160,.42);
+        transform: translateY(-1px);
+        color: #fff;
+    }

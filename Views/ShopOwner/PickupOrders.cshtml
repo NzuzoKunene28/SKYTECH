@@ -1,0 +1,545 @@
+﻿@using SkyTech.Models
+@model IEnumerable<SkyTech.Models.PickupOrder>
+@{
+    ViewBag.Title = "In-Store Collection";
+    Layout = "~/Views/Shared/_MinimalLayout.cshtml";
+    ViewBag.ActivePage = "PickupOrders";
+    bool restricted = ViewBag.ApplicationStatus == ApplicationStat.Pending
+                  || ViewBag.ApplicationStatus == ApplicationStat.Rejected;
+    var incomingTransfers = ViewBag.IncomingTransfers as IEnumerable<InterBranchTransfer> ?? new List<InterBranchTransfer>();
+    int total = Model.Count();
+    int pending = Model.Count(p => p.Status == PickupStatus.Pending);
+    int ready = Model.Count(p => p.Status == PickupStatus.ReadyForPickup);
+    int collected = Model.Count(p => p.Status == PickupStatus.Collected);
+}
+
+@section Styles {
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+    <link href="https://api.fontshare.com/v2/css?f[]=clash-display@400,500,600,700&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="~/CSS/ShopOwnerStyle.css">
+    <style>
+        .chip-row {
+            display: flex;
+            flex-wrap: wrap;
+            gap: .75rem;
+            margin-bottom: 1.6rem
+        }
+
+        .chip {
+            background: var(--white);
+            border: 1.5px solid var(--border);
+            border-radius: var(--radius-sm);
+            padding: .65rem 1.1rem;
+            font-size: .82rem;
+            font-weight: 700;
+            color: var(--text-2);
+            box-shadow: var(--shadow-sm);
+            display: flex;
+            align-items: center;
+            gap: .5rem
+        }
+
+            .chip .num {
+                font-family: var(--font-display);
+                font-size: 1.3rem;
+                font-weight: 700;
+                color: var(--text);
+                margin-right: .3rem
+            }
+
+            .chip.blue {
+                border-color: rgba(26,115,232,.28)
+            }
+
+                .chip.blue .num {
+                    color: var(--blue)
+                }
+
+            .chip.yellow {
+                border-color: rgba(217,119,6,.28)
+            }
+
+                .chip.yellow .num {
+                    color: var(--yellow)
+                }
+
+            .chip.green {
+                border-color: rgba(22,163,74,.28)
+            }
+
+                .chip.green .num {
+                    color: var(--green)
+                }
+
+            .chip.orange {
+                border-color: rgba(234,88,12,.28)
+            }
+
+                .chip.orange .num {
+                    color: var(--orange)
+                }
+
+            .chip.purple {
+                border-color: rgba(147,51,234,.28)
+            }
+
+                .chip.purple .num {
+                    color: #9333ea
+                }
+
+        .items-list {
+            list-style: none;
+            display: flex;
+            flex-direction: column;
+            gap: .2rem
+        }
+
+            .items-list li {
+                font-size: .78rem;
+                color: var(--text-3);
+                display: flex;
+                align-items: center;
+                gap: .35rem
+            }
+
+                .items-list li::before {
+                    content: '•';
+                    color: var(--blue);
+                    font-size: .85rem
+                }
+
+        .tab-row {
+            display: flex;
+            gap: .5rem;
+            margin-bottom: 1.4rem;
+            border-bottom: 2px solid var(--border);
+            padding-bottom: 0
+        }
+
+        .tab-btn {
+            background: none;
+            border: none;
+            padding: .65rem 1.2rem;
+            font-size: .88rem;
+            font-weight: 700;
+            color: var(--text-3);
+            cursor: pointer;
+            border-bottom: 3px solid transparent;
+            margin-bottom: -2px;
+            transition: .15s
+        }
+
+            .tab-btn.active {
+                color: var(--blue);
+                border-bottom-color: var(--blue)
+            }
+
+        .tab-panel {
+            display: none
+        }
+
+            .tab-panel.active {
+                display: block
+            }
+
+        .pickup-card {
+            background: var(--white);
+            border: 1.5px solid var(--border);
+            border-radius: var(--radius);
+            padding: 1.2rem 1.4rem;
+            margin-bottom: 1rem;
+            box-shadow: var(--shadow-sm)
+        }
+
+        .pickup-card-head {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            margin-bottom: .8rem;
+            flex-wrap: wrap;
+            gap: .5rem
+        }
+
+        .pickup-reference {
+            font-family: monospace;
+            font-size: 1.1rem;
+            font-weight: 800;
+            color: #1a73e8;
+            background: #e8f0fe;
+            border-radius: var(--radius-sm);
+            padding: .35rem .8rem;
+            letter-spacing: .1em
+        }
+
+        .incoming-card {
+            background: #fefce8;
+            border: 1.5px solid #fde047;
+            border-radius: var(--radius);
+            padding: 1rem 1.2rem;
+            margin-bottom: .8rem
+        }
+
+        .delivered-badge {
+            background: #dcfce7;
+            color: #166534;
+            font-size: .7rem;
+            padding: .2rem .6rem;
+            border-radius: 999px
+        }
+
+        .btn-mark-collected {
+            background: var(--green);
+            color: white
+        }
+
+        .nav-item-dropdown {
+            position: relative;
+        }
+
+        .so-dropdown-toggle {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            cursor: pointer;
+        }
+
+            .so-dropdown-toggle .dropdown-icon {
+                margin-left: auto;
+                transition: transform 0.3s ease;
+                font-size: 12px;
+            }
+
+            .so-dropdown-toggle.open .dropdown-icon {
+                transform: rotate(180deg);
+            }
+
+        .so-dropdown-menu {
+            margin-left: 1.5rem;
+            margin-top: 0.5rem;
+            margin-bottom: 0.5rem;
+        }
+
+        .so-sub-link {
+            padding: 0.6rem 1rem 0.6rem 2.5rem !important;
+            font-size: 0.85rem;
+        }
+
+            .so-sub-link i {
+                margin-right: 0.5rem;
+                font-size: 0.8rem;
+            }
+
+        .so-link.active {
+            background: rgba(26,115,232,.12);
+            color: var(--blue);
+            border-radius: var(--radius-sm);
+        }
+
+
+    </style>
+}
+@section Scripts {
+   
+    <script>
+        // Toggle dropdown for Received Orders
+        const dropdownToggle = document.getElementById('ordersDropdown');
+        const dropdownMenu = document.getElementById('ordersSubmenu');
+
+        if (dropdownToggle && dropdownMenu) {
+            dropdownToggle.addEventListener('click', function(e) {
+                e.preventDefault();
+                this.classList.toggle('open');
+                dropdownMenu.classList.toggle('show');
+            });
+
+            // Keep submenu open if a sub-link is active
+            if (window.location.href.includes('DeliveryOrders') || window.location.href.includes('PickupOrders')) {
+                dropdownToggle.classList.add('open');
+                dropdownMenu.classList.add('show');
+            }
+        }
+    </script>
+
+}
+<div class="so-wrap">
+    <!-- SIDEBAR -->
+    <aside class="so-sidebar">
+        <div class="so-brand">
+            <div class="so-brand-icon"><i class="fas fa-store"></i></div>
+            <div>
+                <div class="so-brand-name">SkyTech</div>
+                <div class="so-brand-sub">Shop Owner Portal</div>
+            </div>
+        </div>
+        <nav class="so-nav">
+            <div class="so-nav-label">OVERVIEW</div>
+
+            <a href="@Url.Action("ShopOwnerDash", "ShopOwner")" class="so-link active"><i class="fas fa-grid-2"></i><span>Dashboard</span></a>
+
+            <div class="so-nav-label" style="margin-top:1rem">INVENTORY</div>
+            <a href="@Url.Action("AddProductPage", "ShopOwner")" class="so-link @(restricted ? "disabled-link" : "")"><i class="fas fa-circle-plus"></i><span>Add Product</span></a>
+            <a href="@Url.Action("TrackStockLevelPage", "ShopOwner")" class="so-link @(restricted ? "disabled-link" : "")"><i class="fas fa-boxes-stacked"></i><span>Track Stock</span></a>
+
+            <div class="so-nav-label" style="margin-top:1rem">ORDERS & STAFF</div>
+
+            <!-- Received Orders with submenu -->
+            <div class="nav-item-dropdown">
+                <a href="#" class="so-link so-dropdown-toggle @(restricted ? "disabled-link" : "")" id="ordersDropdown">
+                    <i class="fas fa-bag-shopping"></i>
+                    <span>Received Orders</span>
+                    <i class="fas fa-chevron-down dropdown-icon"></i>
+                </a>
+                <div class="so-dropdown-menu" id="ordersSubmenu">
+                    <a href="@Url.Action("DeliveryOrders", "ShopOwner")" class="so-link so-sub-link @(restricted ? "disabled-link" : "")">
+                        <i class="fas fa-truck"></i> Delivery Orders
+                    </a>
+                    <a href="@Url.Action("PickupOrders", "ShopOwner")" class="so-link so-sub-link @(restricted ? "disabled-link" : "")">
+                        <i class="fas fa-store"></i> In-Store Collection
+                    </a>
+                </div>
+            </div>
+
+            <a href="@Url.Action("StaffReg", "ShopOwner")" class="so-link @(restricted ? "disabled-link" : "")"><i class="fas fa-user-plus"></i><span>Register Staff</span></a>
+            <a href="@Url.Action("StaffMembers", "ShopOwner")" class="so-link @(restricted ? "disabled-link" : "")"><i class="fas fa-users"></i><span>Staff Members</span></a>
+
+            <a href="@Url.Action("ReturnedItems", "ShopOwner")" class="so-link @(restricted ? "disabled-link" : "")"><i class="fas fa-bag-shopping"></i><span>Returned Items</span></a>
+            <a href="@Url.Action("StaffReg", "ShopOwner")" class="so-link @(restricted ? "disabled-link" : "")"><i class="fas fa-user-plus"></i><span>Register Staff</span></a>
+            <a href="@Url.Action("StaffMembers", "ShopOwner")" class="so-link @(restricted ? "disabled-link" : "")"><i class="fas fa-users"></i><span>Staff Members</span></a>
+            <div class="so-nav-label" style="margin-top:1rem">ACCOUNT</div>
+            <a href="@Url.Action("OwnerProfile", "ShopOwner")" class="so-link"><i class="fas fa-circle-user"></i><span>Profile</span></a>
+        </nav>
+        <div class="so-sidebar-foot">
+            <div class="so-foot-avatar"><i class="fas fa-store"></i></div>
+            <div>
+                <div class="so-foot-role">SkyTech</div>
+            </div>
+        </div>
+
+        <!--Logout button-->
+        <div style="padding:.8rem 1.2rem">
+            @using (Html.BeginForm("Logout", "Authentication", FormMethod.Post))
+            {
+                @Html.AntiForgeryToken()
+                <button type="submit" style="width:100%;background:rgba(239,68,68,.08);
+                    border:1.5px solid rgba(239,68,68,.25);border-radius:8px;
+                    padding:.6rem 1rem;cursor:pointer;color:#ef4444;
+                    font-weight:600;font-size:.85rem;display:flex;
+                    align-items:center;gap:.5rem;justify-content:center">
+                    <i class="fas fa-right-from-bracket"></i> Log Out
+                </button>
+            }
+        </div>
+    </aside>
+
+    <main class="so-main">
+        <div class="so-topbar">
+            <div>
+                <div class="so-page-title">In-Store Collection</div>
+                <div class="so-page-sub">Orders to be collected from this branch. Customer reference required for pickup.</div>
+            </div>
+            <button class="btn btn-outline" onclick="window.print()"><i class="fas fa-print"></i> Print</button>
+        </div>
+
+        @if (TempData["Success"] != null)
+        {
+            <div style="background:#dcfce7;border:1px solid #86efac;color:#166534;padding:.8rem 1.2rem;border-radius:var(--radius-sm);margin-bottom:1rem;font-size:.88rem;font-weight:600">
+                <i class="fas fa-circle-check"></i> @TempData["Success"]
+            </div>
+        }
+        @if (TempData["Error"] != null)
+        {
+            <div style="background:#fee2e2;border:1px solid #fca5a5;color:#991b1b;padding:.8rem 1.2rem;border-radius:var(--radius-sm);margin-bottom:1rem;font-size:.88rem;font-weight:600">
+                <i class="fas fa-circle-exclamation"></i> @TempData["Error"]
+            </div>
+        }
+
+        <div class="chip-row">
+            <div class="chip blue"><span class="num">@total</span> Pickup Orders</div>
+            <div class="chip yellow"><span class="num">@pending</span> Pending</div>
+            <div class="chip orange"><span class="num">@ready</span> Ready for Pickup</div>
+            <div class="chip green"><span class="num">@collected</span> Collected</div>
+            <div class="chip purple"><span class="num">@incomingTransfers.Count()</span> Incoming Items</div>
+        </div>
+
+        <!-- Tabs -->
+        <div class="tab-row">
+            <button class="tab-btn active" onclick="switchTab('pickup',this)"><i class="fas fa-store"></i> Pickup Orders</button>
+            <button class="tab-btn" onclick="switchTab('incoming',this)">
+                <i class="fas fa-arrow-right-arrow-left"></i> Incoming Transfers
+                @if (incomingTransfers.Any())
+                {
+                    <span style="background:#9333ea;color:#fff;border-radius:999px;padding:.1rem .5rem;font-size:.7rem;margin-left:.3rem">@incomingTransfers.Count()</span>
+                }
+            </button>
+        </div>
+
+        <!-- TAB: Pickup Orders -->
+        <div id="tab-pickup" class="tab-panel active">
+            <div class="so-card">
+                <div class="so-card-head">
+                    <div class="so-card-title"><i class="fas fa-store" style="color:var(--blue);margin-right:.4rem"></i>Orders to Collect</div>
+                    <div class="so-search">
+                        <i class="fas fa-magnifying-glass"></i>
+                        <input type="text" id="pickupSearch" placeholder="Search by reference or customer..." oninput="filterPickupRows(this.value)">
+                    </div>
+                </div>
+                <div class="so-table-wrap">
+                    <table class="so-table" id="pickupTable">
+                        <thead>
+                            <tr>
+                                <th>Pickup Ref</th>
+                                <th>Order ID</th>
+                                <th>Customer</th>
+                                <th>Items</th>
+                                <th>Amount</th>
+                                <th>Status</th>
+                                <th>Pickup Date</th>
+                                <th>Action</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            @foreach (var pickup in Model)
+                            {
+                                string statusClass = pickup.Status == PickupStatus.Pending ? "badge-pending"
+                                : pickup.Status == PickupStatus.ReadyForPickup ? "badge-assigned"
+                                : "badge-delivered";
+                                <tr data-search="@($"{pickup.PickupReference} {pickup.Order?.Customers?.FirstName} {pickup.Order?.Customers?.LastName}".ToLower())">
+                                    <td>
+                                        <span class="pickup-reference" style="font-size:.85rem;background:#e8f0fe">@pickup.PickupReference</span>
+                                    </td>
+                                    <td>
+                                        <span style="font-family:var(--font-display);font-weight:700;color:var(--blue)">#@pickup.OrderId</span>
+                                    </td>
+                                    <td>
+                                        @pickup.Order?.Customers?.FirstName @pickup.Order?.Customers?.LastName
+                                    </td>
+                                    <td>
+                                        <ul class="items-list">
+                                            @foreach (var item in pickup.Order?.OrderItems ?? new List<OrderItem>())
+                                            {
+                                                <li>@item.ProdName <span style="color:var(--blue);font-weight:700">×@item.Quantity</span></li>
+                                            }
+                                        </ul>
+                                    </td>
+                                    <td>
+                                        <span style="font-family:var(--font-display);font-weight:700">R @(pickup.Order?.TotalAmount ?? 0).ToString("N2")</span>
+                                    </td>
+                                    <td><span class="badge @statusClass">@pickup.Status</span></td>
+                                    <td style="font-size:.8rem">@pickup.ScheduledPickupDate.ToString("dd MMM yyyy")</td>
+                                    <td>
+                                        @if (pickup.Status == PickupStatus.Pending || pickup.Status == PickupStatus.ReadyForPickup)
+                                        {
+                                            <form method="post" action="@Url.Action("MarkOrderCollected", "ShopOwner")" style="display:inline">
+                                                @Html.AntiForgeryToken()
+                                                <input type="hidden" name="pickupOrderId" value="@pickup.PickupOrderId" />
+                                                <button type="submit" class="btn btn-sm btn-mark-collected" onclick="return confirm('Confirm customer has collected this order?')">
+                                                    <i class="fas fa-check-circle"></i> Mark Collected
+                                                </button>
+                                            </form>
+                                        }
+                                        else
+                                        {
+                                            <span style="font-size:.75rem;color:var(--green)"><i class="fas fa-check-double"></i> Collected</span>
+                                        }
+                                    </td>
+                                </tr>
+                            }
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+        </div>
+
+        <!-- TAB: Incoming Transfers (Items from other branches) -->
+        <div id="tab-incoming" class="tab-panel">
+            <div style="background:#fefce8;border-left:4px solid #eab308;padding:.8rem 1rem;margin-bottom:1.2rem;font-size:.85rem;border-radius:var(--radius-sm)">
+                <i class="fas fa-info-circle"></i> These items are being transported from other branches. Use the transfer code to verify when the driver delivers them. Each item must be marked as delivered.
+            </div>
+            
+            @if (!incomingTransfers.Any())
+            {
+                <div style="text-align:center;padding:4rem 2rem;color:var(--text-muted)">
+                    <i class="fas fa-boxes" style="font-size:3rem;opacity:.18;display:block;margin-bottom:.9rem"></i>
+                    <p style="font-weight:600">No incoming transfers at this time.</p>
+                </div>
+            }
+            else
+            {
+                @foreach (var t in incomingTransfers)
+                {
+                    <div class="incoming-card">
+                        <div style="display:flex;justify-content:space-between;align-items:center;flex-wrap:wrap;gap:.5rem;margin-bottom:.8rem">
+                            <div>
+                                <span style="font-family:monospace;font-weight:800;background:#fef9c3;padding:.3rem .7rem;border-radius:8px;font-size:.85rem">
+                                    Code: @t.TransferCode
+                                </span>
+                            </div>
+                            <div>
+                                @if (t.IsDelivered)
+                                {
+                                    <span class="delivered-badge"><i class="fas fa-check-circle"></i> Delivered</span>
+                                }
+                                else
+                                {
+                                    <span class="badge-pending-transfer"><i class="fas fa-clock"></i> Awaiting Delivery</span>
+                                }
+                            </div>
+                        </div>
+                        <div style="display:grid;grid-template-columns:repeat(auto-fit,minmax(150px,1fr));gap:.6rem;margin-bottom:.8rem">
+                            <div><strong>Item:</strong> @t.OrderItem?.ProdName × @t.OrderItem?.Quantity</div>
+                            <div><strong>From Branch:</strong> @t.SourceBranch?.ShopAddress</div>
+                            <div><strong>Order ID:</strong> #@t.OrderItem?.OrderId</div>
+                            <div><strong>Customer:</strong> @t.OrderItem?.Order?.Customers?.FirstName @t.OrderItem?.Order?.Customers?.LastName</div>
+                        </div>
+                        @if (!t.IsDelivered)
+                        {
+                            <form method="post" action="@Url.Action("MarkTransferDelivered", "ShopOwner")" onsubmit="return confirm('Confirm this item has been delivered to your branch?')">
+                                @Html.AntiForgeryToken()
+                                <input type="hidden" name="transferId" value="@t.TransferId" />
+                                <button type="submit" class="btn btn-primary btn-sm">
+                                    <i class="fas fa-check-double"></i> Mark Item Delivered
+                                </button>
+                            </form>
+                        }
+                    </div>
+                }
+            }
+        </div>
+    </main>
+    <script>
+        function switchTab(name, btn) {
+            document.querySelectorAll('.tab-panel').forEach(p => p.classList.remove('active'));
+            document.querySelectorAll('.tab-btn').forEach(b => b.classList.remove('active'));
+            document.getElementById('tab-' + name).classList.add('active');
+            btn.classList.add('active');
+        }
+        function filterPickupRows(q) {
+            var rows = document.querySelectorAll('#pickupTable tbody tr');
+            var term = q.toLowerCase();
+            rows.forEach(function(r) { r.style.display = r.dataset.search.includes(term) ? '' : 'none'; });
+        }
+    </script>
+
+    <script>
+        document.addEventListener('DOMContentLoaded', function() {
+            const dropdownToggle = document.getElementById('ordersDropdown');
+            const dropdownMenu = document.querySelector('.so-dropdown-menu');
+
+            if (dropdownToggle && dropdownMenu) {
+                dropdownToggle.addEventListener('click', function(e) {
+                    e.preventDefault();
+                    e.stopPropagation();
+                    this.classList.toggle('open');
+                    if (dropdownMenu.style.display === 'none') {
+                        dropdownMenu.style.display = 'block';
+                    } else {
+                        dropdownMenu.style.display = 'none';
+                    }
+                });
+            }
+        });
+    </script>
+</div>
+

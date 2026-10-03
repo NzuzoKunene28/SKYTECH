@@ -1,0 +1,1012 @@
+﻿@{
+    ViewData["Title"] = "Staff Dashboard";
+    Layout = "~/Views/Shared/_Layout.cshtml";
+
+    bool hasShiftToday =
+        ViewBag.HasShiftToday != null &&
+        Convert.ToBoolean(ViewBag.HasShiftToday);
+
+    bool isCheckedIn =
+        ViewBag.IsCheckedIn != null &&
+        Convert.ToBoolean(ViewBag.IsCheckedIn);
+
+    DateTime? checkInTime =
+        ViewBag.TodayCheckInTime as DateTime?;
+
+    DateTime? checkOutTime =
+        ViewBag.TodayCheckOutTime as DateTime?;
+
+    int daysAttended =
+        ViewBag.DaysAttendedThisWeek == null
+            ? 0
+            : Convert.ToInt32(ViewBag.DaysAttendedThisWeek);
+
+    double hoursThisWeek =
+        ViewBag.HoursThisWeek == null
+            ? 0
+            : Convert.ToDouble(ViewBag.HoursThisWeek);
+
+    string staffName =
+        Context.Session.GetString("StaffName") ?? "Staff Member";
+}
+
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap"
+      rel="stylesheet">
+
+<link rel="stylesheet"
+      href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.2/css/all.min.css">
+
+<style>
+    :root {
+        --primary: #16888b;
+        --primary-dark: #0e6d70;
+        --primary-light: #e7f7f7;
+        --navy: #14213a;
+        --text: #39465c;
+        --muted: #7a879b;
+        --border: #e1e8ef;
+        --background: #f4f7fa;
+        --white: #ffffff;
+        --success: #18a56b;
+        --success-light: #e9faf2;
+        --warning: #e69924;
+        --warning-light: #fff6e5;
+        --danger: #e34c5b;
+        --shadow: 0 15px 40px rgba(24, 48, 76, .08);
+    }
+
+    * {
+        box-sizing: border-box;
+    }
+
+    body {
+        background: radial-gradient(circle at top left, rgba(22, 136, 139, .09), transparent 28rem), var(--background);
+        color: var(--text);
+        font-family: "Inter", sans-serif;
+    }
+
+    .staff-dashboard {
+        width: min(1200px, calc(100% - 32px));
+        margin: 35px auto 60px;
+    }
+
+    .dashboard-hero {
+        position: relative;
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+        gap: 25px;
+        min-height: 210px;
+        padding: 38px;
+        margin-bottom: 25px;
+        overflow: hidden;
+        color: white;
+        background: linear-gradient(135deg, #106f73, #27999b);
+        border-radius: 25px;
+        box-shadow: 0 20px 45px rgba(16, 111, 115, .22);
+    }
+
+        .dashboard-hero::before,
+        .dashboard-hero::after {
+            position: absolute;
+            content: "";
+            border: 1px solid rgba(255, 255, 255, .13);
+            border-radius: 50%;
+        }
+
+        .dashboard-hero::before {
+            width: 320px;
+            height: 320px;
+            top: -210px;
+            right: -50px;
+        }
+
+        .dashboard-hero::after {
+            width: 210px;
+            height: 210px;
+            right: 130px;
+            bottom: -170px;
+        }
+
+    .hero-content {
+        position: relative;
+        z-index: 2;
+    }
+
+    .hero-label {
+        display: inline-flex;
+        align-items: center;
+        gap: 8px;
+        padding: 7px 12px;
+        margin-bottom: 15px;
+        background: rgba(255, 255, 255, .14);
+        border: 1px solid rgba(255, 255, 255, .2);
+        border-radius: 30px;
+        font-size: 12px;
+        font-weight: 700;
+        letter-spacing: .06em;
+        text-transform: uppercase;
+    }
+
+    .hero-content h1 {
+        margin: 0 0 10px;
+        font-size: clamp(28px, 4vw, 42px);
+        font-weight: 800;
+        letter-spacing: -.04em;
+    }
+
+    .hero-content p {
+        max-width: 640px;
+        margin: 0;
+        color: rgba(255, 255, 255, .82);
+        font-size: 14px;
+        line-height: 1.7;
+    }
+
+    .hero-date {
+        position: relative;
+        z-index: 2;
+        min-width: 190px;
+        padding: 19px;
+        text-align: center;
+        background: rgba(255, 255, 255, .13);
+        border: 1px solid rgba(255, 255, 255, .2);
+        border-radius: 18px;
+        backdrop-filter: blur(8px);
+    }
+
+        .hero-date i {
+            margin-bottom: 10px;
+            font-size: 27px;
+        }
+
+        .hero-date strong {
+            display: block;
+            margin-bottom: 4px;
+            font-size: 15px;
+        }
+
+        .hero-date span {
+            color: rgba(255, 255, 255, .75);
+            font-size: 12px;
+        }
+
+    .section-header {
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+        gap: 20px;
+        margin: 30px 0 16px;
+    }
+
+        .section-header h2 {
+            margin: 0;
+            color: var(--navy);
+            font-size: 20px;
+            font-weight: 800;
+        }
+
+        .section-header p {
+            margin: 5px 0 0;
+            color: var(--muted);
+            font-size: 13px;
+        }
+
+    .quick-actions {
+        display: grid;
+        grid-template-columns: repeat(4, minmax(0, 1fr));
+        gap: 15px;
+    }
+
+    .action-card {
+        position: relative;
+        display: flex;
+        align-items: center;
+        gap: 14px;
+        min-height: 105px;
+        padding: 18px;
+        overflow: hidden;
+        color: var(--text);
+        background: var(--white);
+        border: 1px solid var(--border);
+        border-radius: 17px;
+        box-shadow: 0 8px 25px rgba(28, 52, 78, .05);
+        text-decoration: none;
+        transition: .22s ease;
+    }
+
+        .action-card::after {
+            position: absolute;
+            content: "";
+            width: 65px;
+            height: 65px;
+            right: -30px;
+            bottom: -30px;
+            background: var(--primary-light);
+            border-radius: 50%;
+            transition: .22s ease;
+        }
+
+        .action-card:hover {
+            color: var(--text);
+            border-color: rgba(22, 136, 139, .42);
+            box-shadow: 0 14px 34px rgba(25, 58, 86, .1);
+            text-decoration: none;
+            transform: translateY(-4px);
+        }
+
+            .action-card:hover::after {
+                width: 95px;
+                height: 95px;
+            }
+
+    .action-icon {
+        position: relative;
+        z-index: 2;
+        display: grid;
+        width: 48px;
+        min-width: 48px;
+        height: 48px;
+        place-items: center;
+        color: var(--primary);
+        background: var(--primary-light);
+        border-radius: 13px;
+        font-size: 18px;
+    }
+
+    .action-content {
+        position: relative;
+        z-index: 2;
+    }
+
+        .action-content strong {
+            display: block;
+            margin-bottom: 5px;
+            color: var(--navy);
+            font-size: 13px;
+            font-weight: 800;
+        }
+
+        .action-content span {
+            display: block;
+            color: var(--muted);
+            font-size: 11px;
+            line-height: 1.45;
+        }
+
+    .dashboard-grid {
+        display: grid;
+        grid-template-columns: minmax(0, 1.45fr) minmax(280px, .75fr);
+        gap: 20px;
+    }
+
+    .dashboard-card {
+        overflow: hidden;
+        background: var(--white);
+        border: 1px solid var(--border);
+        border-radius: 20px;
+        box-shadow: var(--shadow);
+    }
+
+    .card-heading {
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+        gap: 15px;
+        padding: 22px 24px;
+        border-bottom: 1px solid #edf1f5;
+    }
+
+    .card-title {
+        display: flex;
+        align-items: center;
+        gap: 12px;
+    }
+
+    .card-title-icon {
+        display: grid;
+        width: 43px;
+        min-width: 43px;
+        height: 43px;
+        place-items: center;
+        color: var(--primary);
+        background: var(--primary-light);
+        border-radius: 12px;
+    }
+
+    .card-title h3 {
+        margin: 0 0 3px;
+        color: var(--navy);
+        font-size: 16px;
+        font-weight: 800;
+    }
+
+    .card-title p {
+        margin: 0;
+        color: var(--muted);
+        font-size: 11px;
+    }
+
+    .status-badge {
+        display: inline-flex;
+        align-items: center;
+        gap: 6px;
+        padding: 7px 11px;
+        border-radius: 30px;
+        font-size: 11px;
+        font-weight: 800;
+    }
+
+    .status-success {
+        color: #08754a;
+        background: var(--success-light);
+    }
+
+    .status-warning {
+        color: #9b620f;
+        background: var(--warning-light);
+    }
+
+    .status-muted {
+        color: #687488;
+        background: #eef2f6;
+    }
+
+    .status-completed {
+        color: #23639a;
+        background: #eaf4fc;
+    }
+
+    .status-dot {
+        width: 7px;
+        height: 7px;
+        background: currentColor;
+        border-radius: 50%;
+    }
+
+    .shift-content {
+        padding: 25px;
+    }
+
+    .shift-state {
+        display: flex;
+        align-items: center;
+        gap: 17px;
+        padding: 20px;
+        background: #f8fafc;
+        border: 1px solid var(--border);
+        border-radius: 16px;
+    }
+
+    .shift-state-icon {
+        display: grid;
+        width: 56px;
+        min-width: 56px;
+        height: 56px;
+        place-items: center;
+        border-radius: 15px;
+        font-size: 22px;
+    }
+
+        .shift-state-icon.success {
+            color: var(--success);
+            background: var(--success-light);
+        }
+
+        .shift-state-icon.warning {
+            color: var(--warning);
+            background: var(--warning-light);
+        }
+
+        .shift-state-icon.muted {
+            color: #768398;
+            background: #eaf0f5;
+        }
+
+        .shift-state-icon.completed {
+            color: #2871a8;
+            background: #e9f4fc;
+        }
+
+    .shift-state h4 {
+        margin: 0 0 6px;
+        color: var(--navy);
+        font-size: 16px;
+        font-weight: 800;
+    }
+
+    .shift-state p {
+        margin: 0;
+        color: var(--muted);
+        font-size: 12px;
+        line-height: 1.6;
+    }
+
+    .shift-state strong {
+        color: var(--navy);
+    }
+
+    .week-statistics {
+        display: grid;
+        grid-template-columns: repeat(2, minmax(0, 1fr));
+        gap: 14px;
+        margin-top: 17px;
+    }
+
+    .stat-box {
+        display: flex;
+        align-items: center;
+        gap: 13px;
+        padding: 17px;
+        background: white;
+        border: 1px solid var(--border);
+        border-radius: 14px;
+    }
+
+    .stat-icon {
+        display: grid;
+        width: 42px;
+        min-width: 42px;
+        height: 42px;
+        place-items: center;
+        color: var(--primary);
+        background: var(--primary-light);
+        border-radius: 11px;
+    }
+
+    .stat-value {
+        display: block;
+        color: var(--navy);
+        font-size: 20px;
+        font-weight: 800;
+    }
+
+    .stat-label {
+        display: block;
+        margin-top: 2px;
+        color: var(--muted);
+        font-size: 11px;
+    }
+
+    .side-links {
+        padding: 12px;
+    }
+
+    .side-link {
+        display: flex;
+        align-items: center;
+        gap: 12px;
+        padding: 14px;
+        color: var(--text);
+        border-radius: 12px;
+        text-decoration: none;
+        transition: .2s ease;
+    }
+
+        .side-link:hover {
+            color: var(--primary-dark);
+            background: var(--primary-light);
+            text-decoration: none;
+        }
+
+    .side-link-icon {
+        display: grid;
+        width: 38px;
+        min-width: 38px;
+        height: 38px;
+        place-items: center;
+        color: var(--primary);
+        background: #f0f8f8;
+        border-radius: 10px;
+    }
+
+    .side-link-content {
+        flex: 1;
+    }
+
+        .side-link-content strong {
+            display: block;
+            margin-bottom: 3px;
+            color: var(--navy);
+            font-size: 12px;
+        }
+
+        .side-link-content span {
+            color: var(--muted);
+            font-size: 10px;
+        }
+
+    .side-link-arrow {
+        color: #a6b0bd;
+        font-size: 11px;
+    }
+
+    @@media (max-width: 1000px) {
+        .quick-actions {
+            grid-template-columns: repeat(2, minmax(0, 1fr));
+        }
+
+        .dashboard-grid {
+            grid-template-columns: 1fr;
+        }
+    }
+
+    @@media (max-width: 700px) {
+        .staff-dashboard {
+            width: min(100% - 20px, 1200px);
+            margin-top: 18px;
+        }
+
+        .dashboard-hero {
+            min-height: auto;
+            padding: 28px 23px;
+        }
+
+        .hero-date {
+            display: none;
+        }
+
+        .quick-actions,
+        .week-statistics {
+            grid-template-columns: 1fr;
+        }
+    }
+
+    @@media (max-width: 450px) {
+        .quick-actions {
+            grid-template-columns: 1fr;
+        }
+
+        .card-heading {
+            align-items: flex-start;
+            flex-direction: column;
+        }
+
+        .shift-state {
+            align-items: flex-start;
+        }
+    }
+</style>
+
+<div class="staff-dashboard">
+
+    <!-- Welcome hero -->
+    <header class="dashboard-hero">
+        <div class="hero-content">
+            <div class="hero-label">
+                <i class="fa-solid fa-user-shield"></i>
+                Staff Portal
+            </div>
+
+            <h1>Welcome, @staffName</h1>
+
+            <p>
+                View your roster, monitor attendance, manage leave and
+                keep track of important work notifications.
+            </p>
+        </div>
+
+        <div class="hero-date">
+            <i class="fa-regular fa-calendar-check"></i>
+            <strong>@DateTime.Now.ToString("dddd")</strong>
+            <span>@DateTime.Now.ToString("dd MMMM yyyy")</span>
+        </div>
+    </header>
+
+    <!-- Quick actions -->
+    <div class="section-header">
+        <div>
+            <h2>Quick Actions</h2>
+            <p>Access your most frequently used staff services.</p>
+        </div>
+    </div>
+
+    <section class="quick-actions">
+        <a href="@Url.Action("MyRoster", "StaffRoster")"
+           class="action-card">
+            <div class="action-icon">
+                <i class="fa-regular fa-calendar-days"></i>
+            </div>
+
+            <div class="action-content">
+                <strong>My Roster</strong>
+                <span>View your weekly work schedule.</span>
+            </div>
+        </a>
+
+        <a href="@Url.Action("MyAttendance", "Attendance")"
+           class="action-card">
+            <div class="action-icon">
+                <i class="fa-solid fa-clipboard-user"></i>
+            </div>
+
+            <div class="action-content">
+                <strong>My Attendance</strong>
+                <span>Track your attendance and hours.</span>
+            </div>
+        </a>
+
+        <a href="@Url.Action("EnrollFace", "StaffRoster")"
+           class="action-card">
+            <div class="action-icon">
+                <i class="fa-solid fa-face-smile"></i>
+            </div>
+
+            <div class="action-content">
+                <strong>Enroll My Face</strong>
+                <span>Set up secure facial attendance.</span>
+            </div>
+        </a>
+
+        <a href="@Url.Action("MyRequests", "ShiftChange")"
+           class="action-card">
+            <div class="action-icon">
+                <i class="fa-solid fa-arrow-right-arrow-left"></i>
+            </div>
+
+            <div class="action-content">
+                <strong>Shift Requests</strong>
+                <span>Review your shift-change requests.</span>
+            </div>
+        </a>
+    </section>
+
+    <!-- Main dashboard information -->
+    <div class="section-header">
+        <div>
+            <h2>Work Overview</h2>
+            <p>Your shift status and weekly attendance summary.</p>
+        </div>
+    </div>
+
+    <section class="dashboard-grid">
+
+        <!-- Today's shift -->
+        <div class="dashboard-card">
+            <div class="card-heading">
+                <div class="card-title">
+                    <div class="card-title-icon">
+                        <i class="fa-solid fa-business-time"></i>
+                    </div>
+
+                    <div>
+                        <h3>Today's Shift</h3>
+                        <p>Your current attendance status</p>
+                    </div>
+                </div>
+
+                @if (!hasShiftToday)
+                {
+                    <div class="status-badge status-muted">
+                        <span class="status-dot"></span>
+                        Not Scheduled
+                    </div>
+                }
+                else if (checkOutTime.HasValue)
+                {
+                    <div class="status-badge status-completed">
+                        <span class="status-dot"></span>
+                        Completed
+                    </div>
+                }
+                else if (isCheckedIn)
+                {
+                    <div class="status-badge status-success">
+                        <span class="status-dot"></span>
+                        Checked In
+                    </div>
+                }
+                else
+                {
+                    <div class="status-badge status-warning">
+                        <span class="status-dot"></span>
+                        Awaiting Check-In
+                    </div>
+                }
+            </div>
+
+            <div class="shift-content">
+
+                @if (!hasShiftToday)
+                {
+                    <div class="shift-state">
+                        <div class="shift-state-icon muted">
+                            <i class="fa-solid fa-calendar-xmark"></i>
+                        </div>
+
+                        <div>
+                            <h4>No shift scheduled today</h4>
+                            <p>
+                                You do not have a scheduled shift for today.
+                                Check your weekly roster for upcoming shifts.
+                            </p>
+                        </div>
+                    </div>
+                }
+                else if (checkOutTime.HasValue)
+                {
+                    <div class="shift-state">
+                        <div class="shift-state-icon completed">
+                            <i class="fa-solid fa-circle-check"></i>
+                        </div>
+
+                        <div>
+                            <h4>Shift completed</h4>
+                            <p>
+                                You checked out at
+                                <strong>
+                                    @checkOutTime.Value.ToString("HH:mm")
+                                </strong>.
+                            </p>
+                        </div>
+                    </div>
+                }
+                else if (isCheckedIn)
+                {
+                    <div class="shift-state">
+                        <div class="shift-state-icon success">
+                            <i class="fa-solid fa-user-check"></i>
+                        </div>
+
+                        <div>
+                            <h4>You are currently checked in</h4>
+                            <p>
+                                Your attendance started at
+                                <strong>
+                                    @(checkInTime?.ToString("HH:mm") ?? "Recorded")
+                                </strong>.
+                            </p>
+                        </div>
+                    </div>
+                }
+                else
+                {
+                    <div class="shift-state">
+                        <div class="shift-state-icon warning">
+                            <i class="fa-solid fa-clock"></i>
+                        </div>
+
+                        <div>
+                            <h4>Not checked in yet</h4>
+                            <p>
+                                You have a scheduled shift today.
+                                Complete attendance verification when you arrive.
+                            </p>
+                        </div>
+                    </div>
+                }
+
+                <div class="week-statistics">
+                    <div class="stat-box">
+                        <div class="stat-icon">
+                            <i class="fa-solid fa-calendar-check"></i>
+                        </div>
+
+                        <div>
+                            <span class="stat-value">@daysAttended</span>
+                            <span class="stat-label">
+                                Day(s) attended this week
+                            </span>
+                        </div>
+                    </div>
+
+                    <div class="stat-box">
+                        <div class="stat-icon">
+                            <i class="fa-solid fa-hourglass-half"></i>
+                        </div>
+
+                        <div>
+                            <span class="stat-value">
+                                @hoursThisWeek.ToString("0.0")
+                            </span>
+                            <span class="stat-label">
+                                Hours logged this week
+                            </span>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Staff services -->
+        <aside class="dashboard-card">
+            <div class="card-heading">
+                <div class="card-title">
+                    <div class="card-title-icon">
+                        <i class="fa-solid fa-layer-group"></i>
+                    </div>
+
+                    <div>
+                        <h3>Staff Services</h3>
+                        <p>Requests and notifications</p>
+                    </div>
+                </div>
+            </div>
+
+            <div class="side-links">
+                <a href="@Url.Action("RequestLeave", "LeaveRequest")"
+                   class="side-link">
+                    <div class="side-link-icon">
+                        <i class="fa-solid fa-calendar-plus"></i>
+                    </div>
+
+                    <div class="side-link-content">
+                        <strong>Request Leave</strong>
+                        <span>Submit a new leave request</span>
+                    </div>
+
+                    <i class="fa-solid fa-chevron-right side-link-arrow"></i>
+                </a>
+
+                <a href="@Url.Action("LeaveHistory", "LeaveRequest")"
+                   class="side-link">
+                    <div class="side-link-icon">
+                        <i class="fa-solid fa-clock-rotate-left"></i>
+                    </div>
+
+                    <div class="side-link-content">
+                        <strong>Leave History</strong>
+                        <span>View previous leave applications</span>
+                    </div>
+
+                    <i class="fa-solid fa-chevron-right side-link-arrow"></i>
+                </a>
+
+                <a href="@Url.Action("MyRequests", "ShiftChange")"
+                   class="side-link">
+                    <div class="side-link-icon">
+                        <i class="fa-solid fa-repeat"></i>
+                    </div>
+
+                    <div class="side-link-content">
+                        <strong>My Requests</strong>
+                        <span>Track shift-change requests</span>
+                    </div>
+
+                    <i class="fa-solid fa-chevron-right side-link-arrow"></i>
+                </a>
+
+                <a href="@Url.Action("Index", "Notification")"
+                   class="side-link">
+                    <div class="side-link-icon">
+                        <i class="fa-regular fa-bell"></i>
+                    </div>
+
+                    <div class="side-link-content">
+                        <strong>Notifications</strong>
+                        <span>View important staff updates</span>
+                    </div>
+
+                    <i class="fa-solid fa-chevron-right side-link-arrow"></i>
+                </a>
+            </div>
+        </aside>
+    </section>
+</div>
+
+@* @{
+    ViewData["Title"] = "";
+    Layout = "~/Views/Shared/_MinimalLayout.cshtml";
+}
+
+@section Styles {
+    <link rel="stylesheet" href="~/CSS/STAFFCSS/StaffDash.css" />
+}
+
+<div class="staff-wrap">
+    <nav class="staff-sidebar">
+        <div class="staff-brand">
+            <div class="staff-brand-icon">
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                    <path d="M3 9.5 12 3l9 6.5" />
+                    <path d="M5 9.5V21h14V9.5" />
+                </svg>
+            </div>
+            <div>
+                <div class="staff-brand-name">SkyTech</div>
+                <div class="staff-brand-sub">Staff Portal</div>
+            </div>
+        </div>
+
+        <div class="staff-nav">
+            <div class="staff-nav-label">Menu</div>
+
+            <a class="staff-link active" href="@Url.Action("StaffDash", "StaffRoster")">
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                    <path d="M3 9.5 12 3l9 6.5" />
+                    <path d="M5 9.5V21h14V9.5" />
+                </svg>
+                Dashboard
+            </a>
+
+            <a class="staff-link" href="@Url.Action("MyRoster", "StaffRoster")">
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                    <rect x="3" y="4" width="18" height="17" rx="2" />
+                    <path d="M3 9h18M8 2v4M16 2v4" />
+                </svg>
+                My Roster
+            </a>
+
+            <a class="staff-link" href="@Url.Action("MyAttendance", "Attendance")">
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                    <circle cx="12" cy="12" r="9" />
+                    <path d="M12 7v5l3 3" />
+                </svg>
+                My Attendance
+            </a>
+
+            <a class="staff-link" href="@Url.Action("EnrollFace", "StaffRoster")">
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                    <path d="M4 8V6a2 2 0 0 1 2-2h2M4 16v2a2 2 0 0 0 2 2h2M20 8V6a2 2 0 0 0-2-2h-2M20 16v2a2 2 0 0 1-2 2h-2" />
+                    <circle cx="12" cy="12" r="3" />
+                </svg>
+                Enroll My Face
+            </a>
+
+            <a class="staff-link" href="@Url.Action("MyRequests", "ShiftChange")">
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                    <path d="M17 2.1 21 6l-4 4M3 12v-2a4 4 0 0 1 4-4h14M7 21.9 3 18l4-4M21 12v2a4 4 0 0 1-4 4H3" />
+                </svg>
+                My Requests
+            </a>
+        </div>
+    </nav>
+
+    <main class="staff-main">
+        <p class="staff-eyebrow">Dashboard</p>
+        <h1 class="staff-title">Welcome back</h1>
+        <p class="staff-sub">Here's your shift status for today.</p>
+
+        <div class="shift-card">
+            <h3>Today's Shift</h3>
+            @if (!(bool)ViewBag.HasShiftToday)
+            {
+                <p>No shift scheduled for today.</p>
+            }
+            else if ((bool)ViewBag.IsCheckedIn)
+            {
+                <p>Checked in at <strong>@(((DateTime)ViewBag.TodayCheckInTime).ToString("HH:mm"))</strong></p>
+            }
+            else if (ViewBag.TodayCheckOutTime != null)
+            {
+                <p>Shift completed — checked out at <strong>@(((DateTime)ViewBag.TodayCheckOutTime).ToString("HH:mm"))</strong></p>
+            }
+            else
+            {
+                <p>Not checked in yet today.</p>
+            }
+            <p class="shift-meta">@ViewBag.DaysAttendedThisWeek day(s) attended this week &middot; @(((double)ViewBag.HoursThisWeek).ToString("0.0")) hours logged</p>
+        </div>
+    </main>
+</div>
+
+
+<!-- Staff dashboard -->
+@* <a href="@Url.Action("MyRoster", "StaffRoster")">My Roster</a>
+<a href="@Url.Action("MyAttendance", "Attendance")">My Attendance</a>
+<a href="@Url.Action("EnrollFace", "StaffRoster")">Enroll My Face</a>
+<a href="@Url.Action("MyRequests", "ShiftChange")">My Requests</a>
+<div>
+    <h3>Today's Shift</h3>
+    @if (!(bool)ViewBag.HasShiftToday)
+    {
+        <p>No shift scheduled for today.</p>
+    }
+    else if ((bool)ViewBag.IsCheckedIn)
+    {
+        <p>Checked in at <strong>@(((DateTime)ViewBag.TodayCheckInTime).ToString("HH:mm"))</strong></p>
+    }
+    else if (ViewBag.TodayCheckOutTime != null)
+    {
+        <p>Shift completed — checked out at <strong>@(((DateTime)ViewBag.TodayCheckOutTime).ToString("HH:mm"))</strong></p>
+    }
+    else
+    {
+        <p>Not checked in yet today.</p>
+    }
+    <p>@ViewBag.DaysAttendedThisWeek day(s) attended this week &middot; @(((double)ViewBag.HoursThisWeek).ToString("0.0")) hours logged</p>
+</div> *@
+  

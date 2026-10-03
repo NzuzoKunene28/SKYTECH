@@ -1,0 +1,387 @@
+﻿@model IEnumerable<SkyTech.Models.LeaseProduct>
+@using SkyTech.Models
+@{
+    ViewBag.Title = "SkyTech • Leasing";
+    Layout = "~/Views/Shared/_MinimalLayout.cshtml";
+}
+
+@section Styles {
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+    <link href="https://api.fontshare.com/v2/css?f[]=clash-display@400,500,600,700&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="~/CSS/ShoppingPageStyle.css">
+    <style>
+        /* ShoppingPageStyle.css has no lease-specific badge/price styling —
+           scoped additions here, same font stack as the rest of the page. */
+        .p-rate { font-size: 1rem; font-weight: 700; color: #16344a; }
+        .p-rate span { font-size: .72rem; font-weight: 500; color: #8a94a6; }
+        .p-avail-chip { font-size: .72rem; font-weight: 600; padding: .2rem .55rem; border-radius: 999px; }
+        .p-avail-chip.available { background: #e3f6ec; color: #17845a; }
+        .p-avail-chip.unavailable { background: #fdeaea; color: #c0392b; }
+        .lease-btn { background: #17845a; }
+        .lease-btn.oos { background: #cfd6dd; color: #667085; }
+    </style>
+}
+
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>SkyTech • Leasing</title>
+</head>
+<body>
+
+    <div class="page-wrap">
+
+        <!-- ══ HEADER ══ -->
+        <header class="header">
+            <a href="@Url.Action("ShoppingPage", "Customer")" class="logo">
+                <span class="logo-l">S</span>kyTech
+            </a>
+
+            <div class="search-bar">
+                <form method="get" action="@Url.Action("LeasingPage", "Customer")">
+                    <button type="submit" class="fas fa-search search-icon"></button>
+                    <input type="text" name="search" value="@ViewBag.Search" placeholder="Search leasable equipment…" aria-label="Search">
+                </form>
+            </div>
+
+            <a href="@Url.Action("ViewCart", "Customer")" class="cart-btn" aria-label="Cart">
+                <i class="fas fa-bag-shopping"></i>
+                <span class="cart-count" id="cartCount">@ViewBag.NumberOfCartItems</span>
+            </a>
+        </header>
+
+        <!-- CATEGORIES strip -->
+        <div class="cat-strip-wrap">
+            <div class="cat-strip">
+                <a href="@Url.Action("LeasingPage", "Customer")" class="cat-pill @(ViewBag.SelectedCategory == null ? "active" : "")">
+                    <i class="fas fa-border-all"></i> All
+                </a>
+                @foreach (SelectCategory cat in Enum.GetValues(typeof(SelectCategory)))
+                {
+                    <a href="@Url.Action("LeasingPage", "Customer", new { category = cat })" class="cat-pill @(ViewBag.SelectedCategory != null && ViewBag.SelectedCategory.Equals(cat) ? "active" : "")">
+                        @cat
+                    </a>
+                }
+            </div>
+        </div>
+
+        <!-- ══ HERO ══ -->
+        <section class="hero">
+            <div class="hero-inner">
+                <div class="hero-tag"><i class="fas fa-calendar-check"></i> Lease Instead of Buy</div>
+                <h1 class="hero-title">Flexible<br /><span>Leasing</span></h1>
+                <p class="hero-sub">Monthly plans on quality equipment · no big upfront cost</p>
+            </div>
+            <div class="hero-art">
+                <div class="hero-circle c1"></div>
+                <div class="hero-circle c2"></div>
+                <div class="hero-circle c3"></div>
+                <div class="hero-discount">
+                    <span class="disc-num">3+</span>
+                    <span class="disc-pct">MO<br />TERMS</span>
+                </div>
+            </div>
+        </section>
+
+        <!-- ========== AVAILABLE FOR LEASE (Main list) ========== -->
+        <div class="section-hdr">
+            <div class="section-hdr-left">
+                <span class="section-icon"><i class="fas fa-calendar-check"></i></span>
+                <span class="section-title">Available for Lease</span>
+            </div>
+            <span class="section-tag">@Model.Count() items</span>
+        </div>
+
+        @if (!Model.Any())
+        {
+            <div class="cart-empty" style="margin: 2rem 0;">
+                <i class="fas fa-search"></i>
+                <h2>No leasable products found</h2>
+                <p>Try a different search term or browse all categories.</p>
+                <a href="@Url.Action("LeasingPage", "Customer")" class="btn-shop">
+                    <i class="fas fa-arrow-left"></i> View all leasable products
+                </a>
+            </div>
+        }
+        else
+        {
+            <div class="product-grid">
+                @{
+                    int cardIdx = 0;
+                }
+                @foreach (var item in Model)
+                {
+                    int available = item.LeaseUnits?.Count(u => u.Status == LeaseUnitStatus.Available) ?? 0;
+                    bool inStock = available > 0;
+                    <div class="p-card" style="animation-delay:@(cardIdx * 60)ms">
+                        <div class="p-img-wrap">
+                            @if (item.LeaseProductPictures != null && item.LeaseProductPictures.Any())
+                            {
+                                var pic = item.LeaseProductPictures.First();
+                                <a href="@Url.Action("RequestLease", "Customer", new { id = item.LeaseProdId })">
+                                    <img src="@pic.FilePath" alt="@pic.FileName" class="p-img" />
+                                </a>
+                            }
+                            else
+                            {
+                                <div class="p-img-placeholder"><i class="fas fa-image"></i></div>
+                            }
+                            @if (!inStock)
+                            {
+                                <div class="p-oos-badge">Unavailable</div>
+                            }
+                            <div class="p-img-shine"></div>
+                        </div>
+
+                        <div class="p-body">
+                            <div class="p-name">@item.LeaseProdName</div>
+                            <div class="p-meta-row">
+                                <div class="p-rate">R&nbsp;@item.MonthlyRate<span>/mo</span></div>
+                                <div class="p-avail-chip @(inStock ? "available" : "unavailable")">
+                                    @(inStock ? $"{available} available" : "Unavailable")
+                                </div>
+                            </div>
+
+                            <div class="add-row">
+                                @if (inStock)
+                                {
+                                    <a href="@Url.Action("RequestLease", "Customer", new { id = item.LeaseProdId })" class="add-btn lease-btn">
+                                        <i class="fas fa-calendar-check"></i> Request Lease
+                                    </a>
+                                }
+                                else
+                                {
+                                    <button class="add-btn lease-btn oos" disabled>Notify me</button>
+                                }
+                            </div>
+                        </div>
+                    </div>
+                    cardIdx++;
+                }
+            </div>
+        }
+
+        <!-- ══ BANNER ══ -->
+        <div class="scan-banner">
+            <div class="scan-banner-left">
+                <div>
+                    <div class="scan-banner-sub">Quality Equipment, Flexible Monthly Terms</div>
+                </div>
+            </div>
+        </div>
+
+        <!-- ========== POPULAR LEASES ========== -->
+        <div class="section-hdr">
+            <div class="section-hdr-left">
+                <span class="section-icon fire"><i class="fas fa-fire"></i></span>
+                <span class="section-title">Popular Leases</span>
+            </div>
+        </div>
+
+        @if (ViewBag.PopularLeasePicks == null || !((IEnumerable<SkyTech.Models.LeaseProduct>)ViewBag.PopularLeasePicks).Any())
+        {
+            <div class="cart-empty" style="margin: 1rem 0 2rem;">
+                <i class="fas fa-fire"></i>
+                <h3>No popular leases yet</h3>
+                <p>Check back soon for trending equipment.</p>
+            </div>
+        }
+        else
+        {
+            <div class="product-grid">
+                @{
+                    int cardIdx = 0;
+                }
+                @foreach (SkyTech.Models.LeaseProduct item in ViewBag.PopularLeasePicks)
+                {
+                    int available = item.LeaseUnits?.Count(u => u.Status == LeaseUnitStatus.Available) ?? 0;
+                    bool inStock = available > 0;
+                    <div class="p-card" style="animation-delay:@(cardIdx * 60)ms">
+                        <div class="p-img-wrap">
+                            @if (item.LeaseProductPictures != null && item.LeaseProductPictures.Any())
+                            {
+                                var pic = item.LeaseProductPictures.First();
+                                <a href="@Url.Action("RequestLease", "Customer", new { id = item.LeaseProdId })">
+                                    <img src="@pic.FilePath" alt="@pic.FileName" class="p-img" />
+                                </a>
+                            }
+                            else
+                            {
+                                <div class="p-img-placeholder"><i class="fas fa-image"></i></div>
+                            }
+                            @if (!inStock)
+                            {
+                                <div class="p-oos-badge">Unavailable</div>
+                            }
+                            <div class="p-img-shine"></div>
+                        </div>
+
+                        <div class="p-body">
+                            <div class="p-name">@item.LeaseProdName</div>
+                            <div class="p-meta-row">
+                                <div class="p-rate">R&nbsp;@item.MonthlyRate<span>/mo</span></div>
+                                <div class="p-avail-chip @(inStock ? "available" : "unavailable")">
+                                    @(inStock ? $"{available} available" : "Unavailable")
+                                </div>
+                            </div>
+
+                            <div class="add-row">
+                                @if (inStock)
+                                {
+                                    <a href="@Url.Action("RequestLease", "Customer", new { id = item.LeaseProdId })" class="add-btn lease-btn">
+                                        <i class="fas fa-calendar-check"></i> Request Lease
+                                    </a>
+                                }
+                                else
+                                {
+                                    <button class="add-btn lease-btn oos" disabled>Notify me</button>
+                                }
+                            </div>
+                        </div>
+                    </div>
+                    cardIdx++;
+                }
+            </div>
+        }
+
+        <!-- ══ BANNER ══ -->
+        <div class="scan-banner">
+            <div class="scan-banner-left">
+                <div>
+                    <div class="scan-banner-sub">Quality Equipment, Flexible Monthly Terms</div>
+                </div>
+            </div>
+        </div>
+
+        <!-- ========== APPLIANCES ========== -->
+        <div class="section-hdr">
+            <div class="section-hdr-left">
+                <span class="section-icon fire"><i class="fas fa-fire"></i></span>
+                <span class="section-title">Appliances for Lease</span>
+            </div>
+        </div>
+
+        @if (ViewBag.LeaseAppliances == null || !((IEnumerable<SkyTech.Models.LeaseProduct>)ViewBag.LeaseAppliances).Any())
+        {
+            <div class="cart-empty" style="margin: 1rem 0 2rem;">
+                <i class="fas fa-blender-phone"></i>
+                <h3>No appliances available to lease</h3>
+                <p>Check back later for new arrivals.</p>
+            </div>
+        }
+        else
+        {
+            <div class="product-grid">
+                @{
+                    int cardIdx = 0;
+                }
+                @foreach (SkyTech.Models.LeaseProduct item in ViewBag.LeaseAppliances)
+                {
+                    int available = item.LeaseUnits?.Count(u => u.Status == LeaseUnitStatus.Available) ?? 0;
+                    bool inStock = available > 0;
+                    <div class="p-card" style="animation-delay:@(cardIdx * 60)ms">
+                        <div class="p-img-wrap">
+                            @if (item.LeaseProductPictures != null && item.LeaseProductPictures.Any())
+                            {
+                                var pic = item.LeaseProductPictures.First();
+                                <a href="@Url.Action("RequestLease", "Customer", new { id = item.LeaseProdId })">
+                                    <img src="@pic.FilePath" alt="@pic.FileName" class="p-img" />
+                                </a>
+                            }
+                            else
+                            {
+                                <div class="p-img-placeholder"><i class="fas fa-image"></i></div>
+                            }
+                            @if (!inStock)
+                            {
+                                <div class="p-oos-badge">Unavailable</div>
+                            }
+                            <div class="p-img-shine"></div>
+                        </div>
+
+                        <div class="p-body">
+                            <div class="p-name">@item.LeaseProdName</div>
+                            <div class="p-meta-row">
+                                <div class="p-rate">R&nbsp;@item.MonthlyRate<span>/mo</span></div>
+                                <div class="p-avail-chip @(inStock ? "available" : "unavailable")">
+                                    @(inStock ? $"{available} available" : "Unavailable")
+                                </div>
+                            </div>
+
+                            <div class="add-row">
+                                @if (inStock)
+                                {
+                                    <a href="@Url.Action("RequestLease", "Customer", new { id = item.LeaseProdId })" class="add-btn lease-btn">
+                                        <i class="fas fa-calendar-check"></i> Request Lease
+                                    </a>
+                                }
+                                else
+                                {
+                                    <button class="add-btn lease-btn oos" disabled>Notify me</button>
+                                }
+                            </div>
+                        </div>
+                    </div>
+                    cardIdx++;
+                }
+            </div>
+        }
+
+        <div style="height:90px"></div>
+    </div>
+
+    <!-- ══ BOTTOM NAV ══ -->
+    <nav class="bottom-nav">
+        <a href="@Url.Action("ShoppingPage", "Customer")" class="bn-item">
+            <div class="bn-icon"><i class="fas fa-house"></i></div>
+            <span>Home</span>
+        </a>
+        <a href="@Url.Action("LeasingPage", "Customer")" class="bn-item active">
+            <div class="bn-icon"><i class="fas fa-calendar-check"></i></div>
+            <span>Leasing</span>
+        </a>
+        <a href="@Url.Action("ViewCart", "Customer")" class="bn-item">
+            <div class="bn-icon cart-nav-wrap">
+                <i class="fas fa-bag-shopping"></i>
+                <span class="bn-badge">@ViewBag.NumberOfCartItems</span>
+            </div>
+            <span>Cart</span>
+        </a>
+        @if (Context.Session.GetInt32("UserId") != null)
+        {
+            <a href="@Url.Action("CustomerProfile", "Customer")" class="bn-item">
+                <div class="bn-icon"><i class="far fa-user-circle"></i></div>
+                <span>Account</span>
+            </a>
+        }
+        else
+        {
+            <a href="@Url.Action("LogIn", "Authentication")" class="bn-item">
+                <div class="bn-icon"><i class="far fa-user-circle"></i></div>
+                <span>Account</span>
+            </a>
+        }
+    </nav>
+
+    <script>
+        // Staggered card entrance animation — same as ShoppingPage
+        document.querySelectorAll('.p-card').forEach(c => {
+            c.style.opacity = '0';
+            c.style.transform = 'translateY(20px)';
+        });
+        window.addEventListener('load', () => {
+            document.querySelectorAll('.p-card').forEach((c, i) => {
+                setTimeout(() => {
+                    c.style.transition = 'opacity 0.4s ease, transform 0.4s ease';
+                    c.style.opacity = '1';
+                    c.style.transform = 'translateY(0)';
+                }, 60 + i * 55);
+            });
+        });
+    </script>
+</body>
+</html>

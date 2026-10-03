@@ -1,0 +1,87 @@
+﻿@model List<SkyTech.Models.SkytechWorkers.StaffPosition>
+@{
+    ViewData["Title"] = "Generate Weekly Roster";
+}
+
+<link rel="stylesheet" href="~/CSS/HRCSS/GenerateWeekly.css" />
+
+<div class="rw-main">
+
+    <p class="rw-eyebrow">Roster</p>
+    <h1 class="rw-title">Generate Weekly Roster</h1>
+    <p class="rw-sub">Set the shift window and staffing needs, then generate the roster for the week.</p>
+
+    @if (!ViewData.ModelState.IsValid)
+    {
+        <div class="rw-alert">
+            @Html.ValidationSummary()
+        </div>
+    }
+
+    <div class="rw-card">
+        <form asp-controller="Roster" asp-action="GenerateWeekly" method="post">
+
+            <p class="rw-section-label">Schedule Details</p>
+            <div class="rw-grid">
+                <div class="rw-group">
+                    <label class="rw-label">Branch</label>
+                    <select name="branchId" asp-items="ViewBag.Branches" class="rw-select">
+                        <option value="">--Select Branch--</option>
+                    </select>
+                </div>
+
+                <div class="rw-group">
+                    <label class="rw-label">Week Starting (Monday)</label>
+                    <input type="date" name="weekStartDate" class="rw-input" required />
+                    <p class="rw-hint">The roster will cover this Monday through the following Sunday.</p>
+                </div>
+
+                <div class="rw-group">
+                    <label class="rw-label">Shift Start Time</label>
+                    <input type="time" name="startTime" class="rw-input" required />
+                </div>
+
+                <div class="rw-group">
+                    <label class="rw-label">Shift End Time</label>
+                    <input type="time" name="endTime" class="rw-input" required />
+                </div>
+            </div>
+
+            <hr class="rw-divider" />
+
+            <p class="rw-section-label">Staff Needed Per Day, By Position</p>
+            <p class="rw-hint" style="margin-bottom: 1rem;">Leave at 0 to skip a position entirely for this roster.</p>
+
+            <div class="rw-table-wrap">
+                <table class="rw-table">
+                    <thead>
+                        <tr>
+                            <th>Position</th>
+                            <th>Staff Needed Per Day</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        @foreach (var position in Model)
+                        {
+                            <tr>
+                                <td>
+                                    <span class="rw-position-name">@position.PositionName</span>
+                                    <input type="hidden" name="positionIds" value="@position.PositionId" />
+                                </td>
+                                <td>
+                                    <input type="number" name="staffNeeded" min="0" value="0" class="rw-qty-input" />
+                                </td>
+                            </tr>
+                        }
+                    </tbody>
+                </table>
+            </div>
+
+            <div class="rw-actions">
+                <button type="submit" class="rw-submit">Generate Roster</button>
+            </div>
+
+        </form>
+    </div>
+
+</div>

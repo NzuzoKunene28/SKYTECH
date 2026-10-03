@@ -1,0 +1,49 @@
+﻿@model SkyTech.Models.Interviews.Interview
+@{
+    ViewData["Title"] = "Evaluate interview";
+    Layout = "~/Views/Shared/_MinimalLayout.cshtml";
+}
+
+<link rel="stylesheet" href="~/CSS/HRCSS/Evaluate.css" />
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
+
+<div class="hr-page-wrap ev-wrap">
+
+    <div class="hr-header">
+        <p class="hr-eyebrow">Recruitment / Interviews</p>
+        <h1 class="hr-title">Evaluate: @Model.Customer.FirstName @Model.Customer.LastName</h1>
+        <p class="hr-sub">Score the interview and decide whether to shortlist this candidate.</p>
+    </div>
+
+    <div class="hr-card">
+        <form asp-action="Evaluate" method="post">
+            <input type="hidden" name="interviewId" value="@Model.InterviewId" />
+
+            <div class="hr-form-group">
+                <label class="hr-label" for="score">Score (0–100)</label>
+                <div class="ev-score-wrap">
+                    <input type="number" id="score" name="score" class="hr-input" min="0" max="100" required />
+                    <span class="ev-score-suffix">/ 100</span>
+                </div>
+            </div>
+
+            <div class="hr-form-group">
+                <label class="hr-label" for="notes">Notes</label>
+                <textarea id="notes" name="notes" class="hr-textarea" rows="4"></textarea>
+            </div>
+
+            <div class="ev-checkbox-row">
+                <input type="checkbox" name="shortlist" value="true" id="shortlistCheck" />
+                <label for="shortlistCheck">Shortlist this candidate</label>
+            </div>
+
+            <div class="ev-form-actions">
+                <button type="submit" class="hr-btn hr-btn-primary">
+                    <i class="fa-solid fa-check"></i> Submit evaluation
+                </button>
+            </div>
+        </form>
+    </div>
+</div>

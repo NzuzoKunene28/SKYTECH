@@ -1,0 +1,753 @@
+﻿@model List<SkyTech.ViewModels.AssessLeaveViewModel>
+
+@using SkyTech.Models.SkytechWorkers
+
+@{
+    ViewData["Title"] = "Assess Leave Requests";
+    Layout = "~/Views/Shared/_Layout.cshtml";
+
+    var requests = Model
+        ?? new List<SkyTech.ViewModels.AssessLeaveViewModel>();
+
+    int totalWorkingDays =
+        requests.Sum(request => request.WorkingDaysRequested);
+
+    int affectedDepartments =
+        requests
+            .Where(request =>
+                !string.IsNullOrWhiteSpace(request.DepartmentName))
+            .Select(request => request.DepartmentName)
+            .Distinct()
+            .Count();
+}
+
+@section Styles {
+    <style>
+        .requests-page {
+            width: min(1180px, calc(100% - 32px));
+            margin: 35px auto 60px;
+        }
+
+        /* Header */
+        .requests-header {
+            position: relative;
+            display: flex;
+            min-height: 190px;
+            padding: 35px;
+            margin-bottom: 22px;
+            overflow: hidden;
+            align-items: center;
+            justify-content: space-between;
+            gap: 25px;
+            color: white;
+            background: linear-gradient(135deg, #126f73, #23989a);
+            border-radius: 24px;
+            box-shadow: 0 18px 45px rgba(18, 111, 115, .22);
+        }
+
+            .requests-header::before,
+            .requests-header::after {
+                position: absolute;
+                content: "";
+                border: 1px solid rgba(255, 255, 255, .12);
+                border-radius: 50%;
+            }
+
+            .requests-header::before {
+                width: 270px;
+                height: 270px;
+                top: -175px;
+                right: -65px;
+            }
+
+            .requests-header::after {
+                width: 170px;
+                height: 170px;
+                right: 105px;
+                bottom: -135px;
+            }
+
+        .header-content,
+        .header-summary {
+            position: relative;
+            z-index: 2;
+        }
+
+        .header-label {
+            display: inline-flex;
+            padding: 7px 12px;
+            margin-bottom: 14px;
+            align-items: center;
+            gap: 8px;
+            background: rgba(255, 255, 255, .13);
+            border: 1px solid rgba(255, 255, 255, .18);
+            border-radius: 30px;
+            font-size: 11px;
+            font-weight: 700;
+            letter-spacing: .08em;
+            text-transform: uppercase;
+        }
+
+        .requests-header h1 {
+            margin: 0 0 9px;
+            font-size: clamp(28px, 4vw, 40px);
+            font-weight: 800;
+            letter-spacing: -.04em;
+        }
+
+        .requests-header p {
+            max-width: 650px;
+            margin: 0;
+            color: rgba(255, 255, 255, .82);
+            font-size: 14px;
+            line-height: 1.7;
+        }
+
+        .header-summary {
+            display: grid;
+            min-width: 105px;
+            height: 90px;
+            padding: 13px;
+            text-align: center;
+            background: rgba(255, 255, 255, .14);
+            border: 1px solid rgba(255, 255, 255, .2);
+            border-radius: 19px;
+            backdrop-filter: blur(8px);
+            place-items: center;
+        }
+
+            .header-summary strong {
+                display: block;
+                font-size: 29px;
+                font-weight: 800;
+            }
+
+            .header-summary span {
+                display: block;
+                color: rgba(255, 255, 255, .76);
+                font-size: 9px;
+                font-weight: 700;
+                letter-spacing: .06em;
+                text-transform: uppercase;
+            }
+
+        /* Summary */
+        .summary-grid {
+            display: grid;
+            grid-template-columns: repeat(3, minmax(0, 1fr));
+            gap: 14px;
+            margin-bottom: 22px;
+        }
+
+        .summary-card {
+            display: flex;
+            padding: 18px;
+            align-items: center;
+            gap: 14px;
+            background: white;
+            border: 1px solid #dfe7ef;
+            border-radius: 16px;
+            box-shadow: 0 8px 24px rgba(25, 50, 80, .05);
+        }
+
+        .summary-icon {
+            display: grid;
+            width: 45px;
+            min-width: 45px;
+            height: 45px;
+            border-radius: 12px;
+            place-items: center;
+        }
+
+            .summary-icon.pending {
+                color: #9b620f;
+                background: #fff6e5;
+            }
+
+            .summary-icon.days {
+                color: #23639a;
+                background: #eaf4fc;
+            }
+
+            .summary-icon.departments {
+                color: #16888b;
+                background: #e9f8f8;
+            }
+
+        .summary-value {
+            display: block;
+            color: #15233d;
+            font-size: 21px;
+            font-weight: 800;
+        }
+
+        .summary-label {
+            display: block;
+            margin-top: 2px;
+            color: #748199;
+            font-size: 10px;
+            font-weight: 600;
+        }
+
+        /* Main card */
+        .requests-card {
+            overflow: hidden;
+            background: white;
+            border: 1px solid #dfe7ef;
+            border-radius: 21px;
+            box-shadow: 0 14px 40px rgba(25, 50, 80, .08);
+        }
+
+        .card-heading {
+            display: flex;
+            padding: 23px 25px;
+            align-items: center;
+            justify-content: space-between;
+            gap: 15px;
+            border-bottom: 1px solid #edf1f5;
+        }
+
+        .card-title {
+            display: flex;
+            align-items: center;
+            gap: 12px;
+        }
+
+        .card-title-icon {
+            display: grid;
+            width: 43px;
+            min-width: 43px;
+            height: 43px;
+            color: #16888b;
+            background: #e9f8f8;
+            border-radius: 12px;
+            place-items: center;
+        }
+
+        .card-title h2 {
+            margin: 0 0 3px;
+            color: #15233d;
+            font-size: 17px;
+            font-weight: 800;
+        }
+
+        .card-title p {
+            margin: 0;
+            color: #748199;
+            font-size: 11px;
+        }
+
+        .pending-count {
+            display: inline-flex;
+            padding: 7px 11px;
+            align-items: center;
+            gap: 6px;
+            color: #9b620f;
+            background: #fff6e5;
+            border-radius: 30px;
+            font-size: 10px;
+            font-weight: 800;
+        }
+
+        .pending-dot {
+            width: 7px;
+            height: 7px;
+            background: currentColor;
+            border-radius: 50%;
+        }
+
+        /* Table */
+        .table-container {
+            overflow-x: auto;
+        }
+
+        .requests-table {
+            width: 100%;
+            margin: 0;
+            border-collapse: collapse;
+        }
+
+            .requests-table thead {
+                background: #f7fafc;
+            }
+
+            .requests-table th {
+                padding: 14px 14px;
+                color: #6b778c;
+                border-bottom: 1px solid #dfe7ef;
+                font-size: 9px;
+                font-weight: 800;
+                letter-spacing: .05em;
+                text-align: left;
+                text-transform: uppercase;
+                white-space: nowrap;
+            }
+
+            .requests-table td {
+                padding: 17px 14px;
+                color: #354158;
+                border-bottom: 1px solid #edf1f5;
+                font-size: 10px;
+                line-height: 1.55;
+                vertical-align: middle;
+            }
+
+            .requests-table tbody tr {
+                transition: .2s ease;
+            }
+
+                .requests-table tbody tr:hover {
+                    background: #fbfdfd;
+                }
+
+                .requests-table tbody tr:last-child td {
+                    border-bottom: 0;
+                }
+
+        /* Employee */
+        .employee {
+            display: flex;
+            min-width: 155px;
+            align-items: center;
+            gap: 10px;
+        }
+
+        .employee-avatar {
+            display: grid;
+            width: 40px;
+            min-width: 40px;
+            height: 40px;
+            color: #16888b;
+            background: #e9f8f8;
+            border-radius: 11px;
+            place-items: center;
+        }
+
+        .employee-name {
+            display: block;
+            color: #15233d;
+            font-size: 11px;
+            font-weight: 800;
+        }
+
+        .employee-label {
+            display: block;
+            margin-top: 3px;
+            color: #8793a5;
+            font-size: 8px;
+        }
+
+        .department {
+            min-width: 125px;
+        }
+
+            .department strong {
+                display: block;
+                color: #15233d;
+                font-size: 10px;
+            }
+
+            .department span {
+                display: block;
+                margin-top: 3px;
+                color: #7c8899;
+                font-size: 9px;
+            }
+
+        .leave-type {
+            display: inline-flex;
+            padding: 7px 10px;
+            align-items: center;
+            gap: 6px;
+            color: #7550a5;
+            background: #f3ecfc;
+            border-radius: 20px;
+            font-size: 9px;
+            font-weight: 800;
+            white-space: nowrap;
+        }
+
+        .date-value {
+            color: #4d596d;
+            white-space: nowrap;
+        }
+
+            .date-value i {
+                margin-right: 5px;
+                color: #16888b;
+            }
+
+        .working-days {
+            display: inline-flex;
+            padding: 7px 10px;
+            align-items: center;
+            gap: 6px;
+            color: #23639a;
+            background: #eaf4fc;
+            border-radius: 20px;
+            font-size: 9px;
+            font-weight: 800;
+            white-space: nowrap;
+        }
+
+        .status-badge {
+            display: inline-flex;
+            padding: 7px 10px;
+            align-items: center;
+            gap: 6px;
+            border-radius: 20px;
+            font-size: 9px;
+            font-weight: 800;
+            white-space: nowrap;
+        }
+
+        .status-dot {
+            width: 7px;
+            height: 7px;
+            background: currentColor;
+            border-radius: 50%;
+        }
+
+        .status-pending {
+            color: #9b620f;
+            background: #fff6e5;
+        }
+
+        .status-approved {
+            color: #08754a;
+            background: #e9faf2;
+        }
+
+        .status-rejected {
+            color: #c63d4d;
+            background: #fff0f2;
+        }
+
+        .assess-button {
+            display: inline-flex;
+            min-height: 37px;
+            padding: 0 13px;
+            align-items: center;
+            justify-content: center;
+            gap: 6px;
+            color: white;
+            background: linear-gradient(135deg, #16888b, #106c70);
+            border-radius: 9px;
+            box-shadow: 0 7px 16px rgba(22, 136, 139, .2);
+            font-size: 9px;
+            font-weight: 800;
+            text-decoration: none;
+            white-space: nowrap;
+            transition: .2s ease;
+        }
+
+            .assess-button:hover {
+                color: white;
+                text-decoration: none;
+                box-shadow: 0 10px 20px rgba(22, 136, 139, .28);
+                transform: translateY(-2px);
+            }
+
+        /* Empty state */
+        .empty-state {
+            padding: 70px 25px;
+            text-align: center;
+        }
+
+        .empty-icon {
+            display: grid;
+            width: 75px;
+            height: 75px;
+            margin: 0 auto 18px;
+            color: #16888b;
+            background: #e9f8f8;
+            border-radius: 22px;
+            font-size: 29px;
+            place-items: center;
+        }
+
+        .empty-state h3 {
+            margin: 0 0 8px;
+            color: #15233d;
+            font-size: 18px;
+            font-weight: 800;
+        }
+
+        .empty-state p {
+            max-width: 440px;
+            margin: 0 auto;
+            color: #748199;
+            font-size: 12px;
+            line-height: 1.7;
+        }
+
+        @@media (max-width: 900px) {
+            .summary-grid {
+                grid-template-columns: 1fr;
+            }
+        }
+
+        @@media (max-width: 650px) {
+            .requests-page {
+                width: min(100% - 20px, 1180px);
+                margin-top: 18px;
+            }
+
+            .requests-header {
+                min-height: auto;
+                padding: 28px 23px;
+            }
+
+            .header-summary {
+                display: none;
+            }
+
+            .card-heading {
+                align-items: flex-start;
+                flex-direction: column;
+            }
+        }
+    </style>
+}
+
+<div class="requests-page">
+
+    <header class="requests-header">
+        <div class="header-content">
+            <div class="header-label">
+                <i class="fa-solid fa-clipboard-check"></i>
+                HR Leave Management
+            </div>
+
+            <h1>Assess Leave Requests</h1>
+
+            <p>
+                Review pending employee leave requests, their requested dates
+                and staffing impact before recording an HR decision.
+            </p>
+        </div>
+
+        <div class="header-summary">
+            <div>
+                <strong>@requests.Count</strong>
+                <span>Awaiting Review</span>
+            </div>
+        </div>
+    </header>
+
+    <!-- Summary -->
+    <section class="summary-grid">
+        <article class="summary-card">
+            <div class="summary-icon pending">
+                <i class="fa-solid fa-hourglass-half"></i>
+            </div>
+
+            <div>
+                <span class="summary-value">@requests.Count</span>
+                <span class="summary-label">Pending requests</span>
+            </div>
+        </article>
+
+        <article class="summary-card">
+            <div class="summary-icon days">
+                <i class="fa-solid fa-business-time"></i>
+            </div>
+
+            <div>
+                <span class="summary-value">@totalWorkingDays</span>
+                <span class="summary-label">
+                    Total working days requested
+                </span>
+            </div>
+        </article>
+
+        <article class="summary-card">
+            <div class="summary-icon departments">
+                <i class="fa-solid fa-building-user"></i>
+            </div>
+
+            <div>
+                <span class="summary-value">@affectedDepartments</span>
+                <span class="summary-label">
+                    Departments affected
+                </span>
+            </div>
+        </article>
+    </section>
+
+    <!-- Requests -->
+    <section class="requests-card">
+        <div class="card-heading">
+            <div class="card-title">
+                <div class="card-title-icon">
+                    <i class="fa-solid fa-list-check"></i>
+                </div>
+
+                <div>
+                    <h2>Requests Awaiting Assessment</h2>
+                    <p>
+                        Open a request to review staffing availability.
+                    </p>
+                </div>
+            </div>
+
+            <div class="pending-count">
+                <span class="pending-dot"></span>
+                @requests.Count Pending
+            </div>
+        </div>
+
+        @if (requests.Any())
+        {
+            <div class="table-container">
+                <table class="requests-table">
+                    <thead>
+                        <tr>
+                            <th>Employee</th>
+                            <th>Department / position</th>
+                            <th>Leave type</th>
+                            <th>Start date</th>
+                            <th>End date</th>
+                            <th>Working days</th>
+                            <th>Submitted</th>
+                            <th>Status</th>
+                            <th>Action</th>
+                        </tr>
+                    </thead>
+
+                    <tbody>
+                        @foreach (var request in requests)
+                        {
+                            <tr>
+                                <td>
+                                    <div class="employee">
+                                        <div class="employee-avatar">
+                                            <i class="fa-solid fa-user"></i>
+                                        </div>
+
+                                        <div>
+                                            <span class="employee-name">
+                                                @request.StaffName
+                                            </span>
+
+                                            <span class="employee-label">
+                                                Employee
+                                            </span>
+                                        </div>
+                                    </div>
+                                </td>
+
+                                <td>
+                                    <div class="department">
+                                        <strong>
+                                            @request.DepartmentName
+                                        </strong>
+
+                                        <span>
+                                            @request.PositionName
+                                        </span>
+                                    </div>
+                                </td>
+
+                                <td>
+                                    <span class="leave-type">
+                                        <i class="fa-regular fa-calendar-check"></i>
+                                        @request.LeaveTypeName
+                                    </span>
+                                </td>
+
+                                <td>
+                                    <span class="date-value">
+                                        <i class="fa-regular fa-calendar"></i>
+
+                                        @request.StartDate
+                                       
+                                    </span>
+                                </td>
+
+                                <td>
+                                    <span class="date-value">
+                                        <i class="fa-regular fa-calendar"></i>
+
+                                        @request.EndDate
+                                        
+                                    </span>
+                                </td>
+
+                                <td>
+                                    <span class="working-days">
+                                        <i class="fa-solid fa-business-time"></i>
+
+                                        @request.WorkingDaysRequested
+                                        day(s)
+                                    </span>
+                                </td>
+
+                                <td>
+                                    <span class="date-value">
+                                        <i class="fa-regular fa-clock"></i>
+
+                                        @request.SubmittedAt
+                                       
+                                    </span>
+                                </td>
+
+                                <td>
+                                    @switch (request.Status)
+                                    {
+                                        case LeaveRequestStatus.Approved:
+                                            <span class="status-badge status-approved">
+                                                <span class="status-dot"></span>
+                                                Approved
+                                            </span>
+                                            break;
+
+                                        case LeaveRequestStatus.Rejected:
+                                            <span class="status-badge status-rejected">
+                                                <span class="status-dot"></span>
+                                                Rejected
+                                            </span>
+                                            break;
+
+                                        default:
+                                            <span class="status-badge status-pending">
+                                                <span class="status-dot"></span>
+                                                Pending
+                                            </span>
+                                            break;
+                                    }
+                                </td>
+
+                                <td>
+                                    <a asp-controller="LeaveAssessment"
+                                       asp-action="Assess"
+                                       asp-route-id="@request.LeaveRequestId"
+                                       class="assess-button">
+
+                                        <i class="fa-solid fa-magnifying-glass"></i>
+                                        Assess
+                                    </a>
+                                </td>
+                            </tr>
+                        }
+                    </tbody>
+                </table>
+            </div>
+        }
+        else
+        {
+            <div class="empty-state">
+                <div class="empty-icon">
+                    <i class="fa-solid fa-calendar-check"></i>
+                </div>
+
+                <h3>No pending leave requests</h3>
+
+                <p>
+                    All leave requests have been assessed. New employee
+                    requests will appear here automatically.
+                </p>
+            </div>
+        }
+    </section>
+</div>

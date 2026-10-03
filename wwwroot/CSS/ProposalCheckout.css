@@ -1,0 +1,394 @@
+﻿@import url('https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&display=swap');
+
+:root {
+    --blue: #5f9ea0;
+    --blue-dark: #2d6b6d;
+    --blue-deep: #1f4f50;
+    --bg: #f0f4fc;
+    --border: #dde6f5;
+    --text: #0e1b35;
+    --text-2: #4a5878;
+    --text-m: #8a96b0;
+    --red: #dc2626;
+}
+
+*, *::before, *::after {
+    box-sizing: border-box;
+    margin: 0;
+    padding: 0;
+}
+
+body {
+    font-family: 'Plus Jakarta Sans', sans-serif;
+    min-height: 100vh;
+    background-color: cadetblue;
+    display: flex;
+    align-items: flex-start;
+    justify-content: center;
+    padding: 2rem 1rem;
+    position: relative;
+    overflow-x: hidden;
+}
+
+    body::before {
+        content: '';
+        position: fixed;
+        inset: 0;
+        pointer-events: none;
+        background-image: linear-gradient(rgba(255,255,255,.04) 1px, transparent 1px), linear-gradient(90deg, rgba(255,255,255,.04) 1px, transparent 1px);
+        background-size: 40px 40px;
+    }
+
+.orb {
+    position: fixed;
+    border-radius: 50%;
+    pointer-events: none;
+    filter: blur(90px);
+    opacity: .15;
+}
+
+.orb-1 {
+    width: 420px;
+    height: 420px;
+    background: #7dbcbe;
+    top: -100px;
+    right: -80px;
+}
+
+.orb-2 {
+    width: 300px;
+    height: 300px;
+    background: #7c3aed;
+    bottom: -60px;
+    left: -60px;
+}
+
+/* ── Wrapper ── */
+.checkout-wrapper {
+    position: relative;
+    z-index: 1;
+    width: 100%;
+    max-width: 660px;
+    animation: fadeUp .45s ease;
+}
+
+@keyframes fadeUp {
+    from {
+        opacity: 0;
+        transform: translateY(20px);
+    }
+
+    to {
+        opacity: 1;
+        transform: translateY(0);
+    }
+}
+
+/* ── Page header ── */
+.page-header {
+    display: flex;
+    align-items: center;
+    gap: .75rem;
+    margin-bottom: 1.4rem;
+}
+
+.page-header-icon {
+    width: 46px;
+    height: 46px;
+    border-radius: 14px;
+    background: rgba(255,255,255,.18);
+    border: 1.5px solid rgba(255,255,255,.28);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 1.2rem;
+    color: #fff;
+    flex-shrink: 0;
+}
+
+.page-header-text h1 {
+    font-size: 1.45rem;
+    font-weight: 800;
+    color: #fff;
+    letter-spacing: -.4px;
+    line-height: 1.2;
+}
+
+.page-header-text p {
+    font-size: .83rem;
+    color: rgba(255,255,255,.65);
+    margin-top: .2rem;
+}
+
+/* ── Offer banner ── */
+.offer-banner {
+    background: rgba(255,255,255,.15);
+    border: 1px solid rgba(255,255,255,.22);
+    border-radius: 14px;
+    padding: .9rem 1.2rem;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    flex-wrap: wrap;
+    gap: .6rem;
+    margin-bottom: 1.4rem;
+}
+
+.offer-banner-item {
+    display: flex;
+    align-items: center;
+    gap: .5rem;
+    font-size: .85rem;
+    color: rgba(255,255,255,.85);
+    font-weight: 600;
+}
+
+    .offer-banner-item .label {
+        color: rgba(255,255,255,.55);
+        font-weight: 500;
+    }
+
+.offer-amount {
+    font-size: 1.3rem;
+    font-weight: 800;
+    color: #fff;
+    letter-spacing: -.5px;
+}
+
+/* ── Main card ── */
+.checkout-card {
+    background: #fff;
+    border-radius: 24px;
+    box-shadow: 0 24px 80px rgba(31,79,80,.25);
+    overflow: hidden;
+}
+
+/* ── Card sections ── */
+.card-section {
+    padding: 1.5rem 1.8rem;
+    border-bottom: 1px solid var(--border);
+}
+
+    .card-section:last-of-type {
+        border-bottom: none;
+    }
+
+.section-title {
+    font-size: .7rem;
+    font-weight: 800;
+    color: var(--blue-dark);
+    letter-spacing: 1.2px;
+    text-transform: uppercase;
+    display: flex;
+    align-items: center;
+    gap: .5rem;
+    margin-bottom: 1.1rem;
+}
+
+    .section-title::after {
+        content: '';
+        flex: 1;
+        height: 1px;
+        background: var(--border);
+    }
+
+/* ── Form elements ── */
+.f-group {
+    margin-bottom: 1rem;
+}
+
+    .f-group:last-child {
+        margin-bottom: 0;
+    }
+
+.f-label {
+    font-size: .78rem;
+    font-weight: 700;
+    color: var(--text-2);
+    display: block;
+    margin-bottom: .42rem;
+}
+
+.f-wrap {
+    position: relative;
+}
+
+    .f-wrap i {
+        position: absolute;
+        left: 1rem;
+        top: 50%;
+        transform: translateY(-50%);
+        color: var(--text-m);
+        font-size: .85rem;
+        pointer-events: none;
+    }
+
+.f-input {
+    width: 100%;
+    padding: .78rem 1rem .78rem 2.55rem;
+    background: var(--bg);
+    border: 1.5px solid var(--border);
+    border-radius: 50px;
+    font-family: 'Plus Jakarta Sans', sans-serif;
+    font-size: .9rem;
+    color: var(--text);
+    outline: none;
+    transition: border-color .2s, box-shadow .2s;
+    appearance: none;
+}
+
+    .f-input:focus {
+        border-color: var(--blue);
+        background: #fff;
+        box-shadow: 0 0 0 3px rgba(95,158,160,.12);
+    }
+
+select.f-input {
+    cursor: pointer;
+}
+
+.text-danger {
+    font-size: .75rem;
+    color: var(--red);
+    margin-top: .3rem;
+    font-weight: 600;
+    display: block;
+    padding-left: .5rem;
+}
+
+/* ── Radio delivery options ── */
+.delivery-options {
+    display: flex;
+    flex-direction: column;
+    gap: .6rem;
+    margin-top: .3rem;
+}
+
+.delivery-option {
+    display: flex;
+    align-items: center;
+    gap: .85rem;
+    padding: .85rem 1.1rem;
+    border: 1.5px solid var(--border);
+    border-radius: 14px;
+    cursor: pointer;
+    transition: border-color .2s, background .2s;
+    background: var(--bg);
+}
+
+    .delivery-option:hover {
+        border-color: var(--blue);
+        background: rgba(95,158,160,.04);
+    }
+
+    .delivery-option input[type="radio"] {
+        width: 18px;
+        height: 18px;
+        accent-color: var(--blue);
+        flex-shrink: 0;
+        cursor: pointer;
+    }
+
+        .delivery-option input[type="radio"]:checked + .delivery-label-wrap {
+            color: var(--blue-dark);
+        }
+
+    .delivery-option:has(input:checked) {
+        border-color: var(--blue);
+        background: rgba(95,158,160,.06);
+    }
+
+.delivery-label-wrap {
+    display: flex;
+    flex-direction: column;
+}
+
+.delivery-label-main {
+    font-size: .9rem;
+    font-weight: 700;
+    color: var(--text);
+}
+
+.delivery-label-sub {
+    font-size: .75rem;
+    color: var(--text-m);
+    margin-top: .1rem;
+}
+
+/* ── Two-col grid ── */
+.f-grid-2 {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 1rem;
+}
+
+@media (max-width: 520px) {
+    .f-grid-2 {
+        grid-template-columns: 1fr;
+    }
+}
+
+/* ── Card footer ── */
+.card-footer-actions {
+    padding: 1.3rem 1.8rem;
+    background: var(--bg);
+    border-top: 1px solid var(--border);
+    display: flex;
+    gap: .75rem;
+    align-items: center;
+    justify-content: flex-end;
+}
+
+.btn-submit {
+    padding: .8rem 2rem;
+    border: none;
+    border-radius: 50px;
+    background: linear-gradient(135deg, #5f9ea0, #2d6b6d);
+    color: #fff;
+    font-family: 'Plus Jakarta Sans', sans-serif;
+    font-size: .92rem;
+    font-weight: 700;
+    cursor: pointer;
+    box-shadow: 0 4px 18px rgba(95,158,160,.32);
+    transition: all .2s;
+    display: inline-flex;
+    align-items: center;
+    gap: .5rem;
+}
+
+    .btn-submit:hover {
+        transform: translateY(-1px);
+        box-shadow: 0 6px 24px rgba(95,158,160,.45);
+    }
+
+.btn-back {
+    padding: .8rem 1.5rem;
+    border: 1.5px solid var(--border);
+    border-radius: 50px;
+    background: transparent;
+    color: var(--text-2);
+    text-decoration: none;
+    font-family: 'Plus Jakarta Sans', sans-serif;
+    font-size: .88rem;
+    font-weight: 600;
+    cursor: pointer;
+    display: inline-flex;
+    align-items: center;
+    gap: .4rem;
+    transition: all .2s;
+}
+
+    .btn-back:hover {
+        border-color: var(--blue);
+        color: var(--blue);
+    }
+
+/* ── Bank error ── */
+#bankError {
+    font-size: .75rem;
+    font-weight: 600;
+    color: var(--red);
+    margin-top: .3rem;
+    padding-left: .5rem;
+    display: none;
+}

@@ -1,0 +1,143 @@
+﻿@model IEnumerable<SkyTech.Models.Repair_Item_Services.Repair_Request>
+
+@{
+    ViewData["Title"] = "My Repair Requests";
+    Layout = "~/Views/Shared/_MinimalLayout.cshtml";
+    ViewBag.ActivePage = "MyRepairs";
+}
+
+@section Styles {
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+    <link href="https://api.fontshare.com/v2/css?f[]=clash-display@400,500,600,700&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="~/CSS/DashboardStyle.css">
+}
+
+<div class="dash-wrap">
+    <aside class="dash-sidebar">
+        {{-- paste your sidebar here --}}
+    </aside>
+
+    <main class="dash-main">
+
+        <div class="dash-topbar" style="display:flex;justify-content:space-between;align-items:flex-start">
+            <div>
+                <div class="dash-page-title">My Repair Requests</div>
+                <div class="dash-page-sub">Track and manage all your submitted repair jobs.</div>
+            </div>
+            <a asp-action="Create" class="dash-btn dash-btn-primary">
+                <i class="fas fa-plus"></i> New Repair Request
+            </a>
+        </div>
+
+        @if (Model.Any())
+        {
+            <div class="dash-card">
+                <div class="dash-card-head">
+                    <div class="dash-card-title">
+                        <i class="fas fa-tools" style="color:var(--orange);margin-right:0.5rem"></i>
+                        All Requests
+                    </div>
+                    <span class="dash-card-badge">@Model.Count() total</span>
+                </div>
+
+                <div style="overflow-x:auto">
+                    <table class="dash-table">
+                        <thead>
+                            <tr>
+                                <th>Customer</th>
+                                <th>Item</th>
+                                <th>Issue</th>
+                                <th>Category</th>
+                                <th>Status</th>
+                                <th>Date</th>
+                                <th>Actions</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            @foreach (var item in Model)
+                            {
+                                var (sColor, sBg) = item.Status switch
+                                {
+                                    SkyTech.Models.Repair_Item_Services.RepairStatus.Pending    => ("var(--yellow)",  "rgba(217,119,6,.1)"),
+                                    SkyTech.Models.Repair_Item_Services.RepairStatus.Assigned   => ("#3b82f6",        "rgba(59,130,246,.1)"),
+                                    SkyTech.Models.Repair_Item_Services.RepairStatus.Qouted     => ("var(--text-3)",  "rgba(74,88,120,.1)"),
+                                    SkyTech.Models.Repair_Item_Services.RepairStatus.InProgress => ("var(--blue)",    "rgba(95,158,160,.1)"),
+                                    SkyTech.Models.Repair_Item_Services.RepairStatus.Completed  => ("var(--green)",   "rgba(22,163,74,.1)"),
+                                    SkyTech.Models.Repair_Item_Services.RepairStatus.Cancelled  => ("var(--red)",     "rgba(220,38,38,.1)"),
+                                    _ => ("var(--text-muted)", "rgba(138,150,176,.1)")
+                                };
+
+                                <tr>
+                                    <td>
+                                        <div style="font-weight:600;color:var(--text)">
+                                            @Html.DisplayFor(m => item.Customers.FirstName)
+                                        </div>
+                                    </td>
+                                    <td>
+                                        <div style="font-weight:500;color:var(--text-2)">
+                                            @Html.DisplayFor(m => item.ItemName)
+                                        </div>
+                                    </td>
+                                    <td>
+                                        <div style="color:var(--text-3);max-width:220px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap"
+                                             title="@item.IssueDescription">
+                                            @Html.DisplayFor(m => item.IssueDescription)
+                                        </div>
+                                    </td>
+                                    <td>
+                                        <span class="dash-badge dash-badge-info">
+                                            @Html.DisplayFor(m => item.Category.CategoryName)
+                                        </span>
+                                    </td>
+                                    <td>
+                                        <span class="dash-badge" style="color:@sColor;background:@sBg">
+                                            @Html.DisplayFor(m => item.Status)
+                                        </span>
+                                    </td>
+                                    <td style="color:var(--text-muted);font-size:0.9rem;white-space:nowrap">
+                                        @item.DateCreated.ToString("dd MMM yyyy")
+                                    </td>
+                                    <td>
+                                        <div style="display:flex;gap:0.4rem">
+                                            <a asp-action="Details" asp-route-id="@item.RequestId"
+                                               class="dash-btn dash-btn-secondary dash-btn-icon"
+                                               title="View Details">
+                                                <i class="fas fa-eye"></i>
+                                            </a>
+                                            
+                                            <a asp-action="Delete" asp-route-id="@item.RequestId"
+                                               class="dash-btn dash-btn-danger dash-btn-icon"
+                                               title="Delete">
+                                                <i class="fas fa-trash"></i>
+                                            </a>
+                                        </div>
+                                    </td>
+                                </tr>
+                            }
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+        }
+        else
+        {
+            <div class="dash-card" style="text-align:center;padding:3rem 2rem">
+                <div style="font-size:3rem;color:var(--border);margin-bottom:1rem">
+                    <i class="fas fa-tools"></i>
+                </div>
+                <div style="font-size:1.1rem;font-weight:600;color:var(--text);margin-bottom:0.5rem">
+                    No Repair Requests Yet
+                </div>
+                <div style="color:var(--text-muted);margin-bottom:1.6rem">
+                    You haven't submitted any repair requests. Get started by creating one.
+                </div>
+                <a asp-action="Create" class="dash-btn dash-btn-primary">
+                    <i class="fas fa-plus"></i> New Repair Request
+                </a>
+            </div>
+        }
+
+    </main>
+</div>

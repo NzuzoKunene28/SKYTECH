@@ -1,0 +1,80 @@
+﻿:root {
+    --blue: #5f9ea0;
+    --blue-dark: #2d6b6d;
+    --blue-deep: #1f4f50;
+    --bg: #f0f4fc;
+    --border: #dde6f5;
+    --text: #0e1b35;
+    --text-2: #4a5878;
+    --text-m: #8a96b0;
+    --red: #dc2626;
+}
+
+body {
+    font-family: 'Plus Jakarta Sans', sans-serif;
+    background-color: var(--bg);
+    color: var(--text);
+}
+
+h1 {
+    font-family: 'Clash Display', 'Plus Jakarta Sans', sans-serif;
+    font-weight: 700;
+    color: var(--blue-deep);
+    margin-bottom: 8px;
+}
+
+p {
+    color: var(--text-2);
+    font-size: .92rem;
+    line-height: 1.6;
+    max-width: 480px;
+}
+
+form {
+    max-width: 480px;
+    margin-top: 22px;
+    background: #fff;
+    border: 1.5px solid var(--border);
+    border-radius: 20px;
+    padding: 28px;
+    box-shadow: 0 10px 30px rgba(31, 79, 80, .06);
+}
+
+input[type="file"] {
+    display: block;
+    width: 100%;
+    padding: .9rem 1rem;
+    background: var(--bg);
+    border: 1.5px dashed var(--border);
+    border-radius: 12px;
+    font-family: 'Plus Jakarta Sans', sans-serif;
+    font-size: .88rem;
+    color: var(--text-2);
+    cursor: pointer;
+}
+
+    input[type="file"]:focus {
+        outline: none;
+        border-color: var(--blue);
+    }
+
+button[type="submit"] {
+    margin-top: 18px;
+    width: 100%;
+    padding: .9rem;
+    border: none;
+    border-radius: 50px;
+    background: linear-gradient(135deg, var(--blue), var(--blue-dark));
+    color: #fff;
+    font-family: 'Clash Display', 'Plus Jakarta Sans', sans-serif;
+    font-size: 1rem;
+    font-weight: 700;
+    cursor: pointer;
+    box-shadow: 0 4px 18px rgba(95, 158, 160, .3);
+    transition: box-shadow .2s, transform .2s;
+}
+
+    button[type="submit"]:hover {
+        box-shadow: 0 6px 24px rgba(95, 158, 160, .42);
+        transform: translateY(-1px);
+    }

@@ -1,0 +1,30 @@
+﻿@model SkyTech.ViewModels.TestResultViewModel
+
+@{
+    ViewData["Title"] = "Test Result";
+}
+
+<h2>Recruitment Test Result</h2>
+
+<hr />
+
+<h3>Your Score</h3>
+
+<h1>@Model.Score / @Model.TotalQuestions</h1>
+
+@if (Model.Passed)
+{
+    <h3 style="color:green;">PASS</h3>
+}
+else
+{
+    <h3 style="color:red;">FAIL</h3>
+}
+
+<p>@Model.Message</p>
+
+<a asp-controller="Customer"
+   asp-action="CustomerDash"
+   class="btn btn-primary">
+    Return to Dashboard
+</a>

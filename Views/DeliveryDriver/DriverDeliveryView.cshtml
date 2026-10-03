@@ -1,0 +1,276 @@
+﻿@using SkyTech.Models
+@model SkyTech.Models.Order
+@{
+    ViewBag.Title = "Delivery #" + Model.OrderId;
+    Layout = "~/Views/Shared/_MinimalLayout.cshtml";
+}
+
+@section Styles {
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+    <link href="https://api.fontshare.com/v2/css?f[]=clash-display@400,500,600,700&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="~/CSS/DriverStyle.css">
+    <link rel="stylesheet" href="https://unpkg.com/leaflet/dist/leaflet.css" />
+    <style>
+        .leaflet-top, .leaflet-bottom {
+            z-index: 400
+        }
+
+        .map-container #map {
+            height: 460px
+        }
+    </style>
+}
+
+@section Scripts{
+    <script src="https://unpkg.com/leaflet/dist/leaflet.js"></script>
+    <script src="~/MyScripts/DriverDeliveryJS.js"></script>
+}
+
+<div class="d-wrap">
+
+   
+    <!-- ══ SIDEBAR ══ -->
+    <<aside class="d-sidebar">
+        <div class="d-brand">
+            <div class="d-brand-icon"><i class="fas fa-truck-fast"></i></div>
+            <div>
+                <div class="d-brand-name">SkyTech</div>
+                <div class="d-brand-sub">Driver Portal</div>
+            </div>
+        </div>
+        <nav class="d-nav">
+            <div class="d-nav-label">NAVIGATION</div>
+            <a href="@Url.Action("DriverDash", "DeliveryDriver")" class="d-link @(ViewBag.ActivePage == "Dashboard" ? "active" : "")">
+                <i class="fas fa-grid-2"></i><span>Dashboard</span>
+            </a>
+
+            <!-- My Deliveries with dropdown -->
+            <div class="nav-item-dropdown">
+                <a href="#" class="d-link d-dropdown-toggle @(ViewBag.ActivePage == "HomeDeliveries" || ViewBag.ActivePage == "BranchTransfers" ? "open" : "")" id="deliveriesDropdown">
+                    <i class="fas fa-bag-shopping"></i>
+                    <span>My Deliveries</span>
+                    <i class="fas fa-chevron-down dropdown-icon"></i>
+                </a>
+                <div class="d-dropdown-menu" id="deliveriesSubmenu" style="display: @(ViewBag.ActivePage == "HomeDeliveries" || ViewBag.ActivePage == "BranchTransfers" ? "block" : "none")">
+                    <a href="@Url.Action("HomeDeliveries", "DeliveryDriver")" class="d-link d-sub-link @(ViewBag.ActivePage == "HomeDeliveries" ? "active" : "")">
+                        <i class="fas fa-truck"></i> Home Deliveries
+                    </a>
+                    <a href="@Url.Action("BranchTransfers", "DeliveryDriver")" class="d-link d-sub-link @(ViewBag.ActivePage == "BranchTransfers" ? "active" : "")">
+                        <i class="fas fa-arrow-right-arrow-left"></i> Branch Transfers
+                    </a>
+                </div>
+            </div>
+            @* <a href="@Url.Action("MyDeliveries", "DeliveryDriver")" class="d-link">
+                <i class="fas fa-bag-shopping"></i><span>My Deliveries</span>
+            </a> *@
+            <a href="@Url.Action("MyTasks", "DeliveryDriver")" class="d-link">
+                <i class="fas fa-bag-shopping"></i><span>Returned Order Items</span>
+            </a>
+
+            <div class="d-nav-label" style="margin-top:1rem">ACCOUNT</div>
+            <a href="@Url.Action("DriverProfile", "DeliveryDriver")" class="d-link @(ViewBag.ActivePage == "Profile" ? "active" : "")">
+                <i class="fas fa-circle-user"></i><span>Profile</span>
+            </a>
+        </nav>
+        <div class="d-sidebar-foot">
+            <div class="d-foot-avatar"><i class="fas fa-user-tie"></i></div>
+            <div>
+                <div class="d-foot-name">@(ViewBag.DriverName ?? "Delivery Driver")</div>
+                <div class="d-foot-role">Delivery Driver</div>
+            </div>
+        </div>
+        <div style="padding:.8rem 1.2rem">
+            @using (Html.BeginForm("Logout", "Authentication", FormMethod.Post))
+            {
+                @Html.AntiForgeryToken()
+                <button type="submit" style="width:100%;background:rgba(239,68,68,.08);
+                    border:1.5px solid rgba(239,68,68,.25);border-radius:8px;
+                    padding:.6rem 1rem;cursor:pointer;color:#ef4444;
+                    font-weight:600;font-size:.85rem;display:flex;
+                    align-items:center;gap:.5rem;justify-content:center">
+                    <i class="fas fa-right-from-bracket"></i> Log Out
+                </button>
+            }
+        </div>
+    </aside>
+
+    <!-- ══ MAIN ══ -->
+    <main class="d-main">
+
+        <!-- Hidden fields for JS to read — replaces inline script variables -->
+        <input type="hidden" id="js-order-id" value="@Model.OrderId" />
+        <input type="hidden" id="js-driver-id" value="@(Model.DriverId ?? 0)" />
+        <input type="hidden" id="js-order-status" value="@Model.Status.ToString()" />
+        <input type="hidden" id="js-delivery-address" value="@(Model.DeliveryAddress ?? "")" />
+        <input type="hidden" id="js-antiforgery" value="@Html.AntiForgeryToken()" />
+        <input type="hidden" id="js-scheduled-date" value="@Model.ScheduledDeliveryDate.ToString("yyyy-MM-dd")" />
+        @Html.AntiForgeryToken()
+
+        <div class="d-topbar">
+            <div>
+                <div class="d-page-title">Delivery #@Model.OrderId</div>
+                <div class="d-page-sub">
+                    Status: <span id="order-status" style="font-weight:700;color:var(--blue)">@Model.Status</span>
+                </div>
+            </div>
+            <a href="@Url.Action("MyDeliveries", "DeliveryDriver")" class="btn btn-outline">
+                <i class="fas fa-arrow-left"></i> Back
+            </a>
+        </div>
+
+        <!-- Order info card -->
+        <div class="d-card" style="margin-bottom:1.3rem">
+            <div class="d-card-head">
+                <div class="d-card-title">
+                    <i class="fas fa-receipt" style="color:var(--blue);margin-right:.4rem"></i>Order Details
+                </div>
+                @{
+                    string sc = Model.Status == OrderStatus.Pending ? "badge-pending"
+                    : Model.Status == OrderStatus.Assigned ? "badge-assigned"
+                    : Model.Status == OrderStatus.OutForDelivery ? "badge-out"
+                    : "badge-delivered";
+                }
+                <span class="badge @sc" id="statusBadge">@Model.Status</span>
+            </div>
+
+            <div class="d-card-body">
+                <div class="order-meta-grid">
+
+                    <div class="meta-block">
+                        <div class="mk"><i class="fas fa-location-dot" style="color:var(--blue)"></i> DELIVERY ADDRESS</div>
+                        <div class="mv">@(Model.DeliveryAddress ?? "—")</div>
+                    </div>
+
+                    <div class="meta-block">
+                        <div class="mk"><i class="fas fa-clock" style="color:var(--blue)"></i> ORDERED ON</div>
+                        <div class="mv">@Model.OrderedOn.ToString("dd MMM yyyy · HH:mm")</div>
+                    </div>
+
+                    <div class="meta-block">
+                        <div class="mk"><i class="fas fa-money-bill" style="color:var(--blue)"></i> ORDER TOTAL</div>
+                        <div class="mv" style="font-family:var(--font-display);font-size:1.1rem;font-weight:700;color:var(--blue-deep)">
+                            R @Model.TotalAmount.ToString("N2")
+                        </div>
+                    </div>
+
+                    <div class="meta-block">
+                        <div class="mk"><i class="fas fa-box" style="color:var(--blue)"></i> ITEMS ORDERED</div>
+                        <div class="mv" style="font-family:var(--font-display);font-size:1.1rem;font-weight:700;color:var(--blue-deep)">
+                            @(Model.OrderItems?.Sum(i => i.Quantity) ?? 0) items
+                        </div>
+                    </div>
+
+                </div>
+
+                <!-- Items table -->
+                <div class="d-card" style="margin-top:1rem">
+                    <div class="d-card-head">
+                        <div class="d-card-title">
+                            <i class="fas fa-box-open" style="color:var(--blue);margin-right:.4rem"></i>
+                            Items in this Order
+                        </div>
+                    </div>
+                    <div class="d-card-body">
+                        <table class="table">
+                            <tbody>
+                                @if (Model.OrderItems != null && Model.OrderItems.Any())
+                                {
+                                    @foreach (var item in Model.OrderItems)
+                                    {
+                                        <tr>
+                                            <td>
+                                                &bull; @(item.Products?.ProdName ?? item.ProdName)
+                                                &nbsp;&nbsp;&bull; @item.Quantity (qty)
+                                                &nbsp;&nbsp;&bull; R @item.PriceAtTimeOfPurchase.ToString("N2")
+                                            </td>
+                                        </tr>
+                                    }
+                                }
+                                else
+                                {
+                                    <tr><td style="color:var(--text-muted)">No items found.</td></tr>
+                                }
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+
+                <!-- Pin input — only shows when delivery is OutForDelivery -->
+                <div id="pinSection" style="display:none;margin-top:1rem">
+                    <div class="d-card" style="padding:1rem">
+                        <div class="d-card-title" style="margin-bottom:.8rem">
+                            <i class="fas fa-shield-halved" style="color:var(--blue)"></i>
+                            Enter Customer Pin
+                        </div>
+                        <p style="color:#6b7280;font-size:.85rem;margin-bottom:.8rem">
+                            Ask the customer for their 4-digit delivery pin to complete this delivery.
+                        </p>
+                        <div style="display:flex;gap:.5rem;align-items:center;flex-wrap:wrap">
+                            <input type="text" id="pinInput" maxlength="4"
+                                   placeholder="_ _ _ _ _"
+                                   style="width:120px;font-size:1.5rem;font-weight:700;
+                          letter-spacing:.4rem;text-align:center;
+                          padding:.5rem;border:2px solid #e5e7eb;
+                          border-radius:8px;font-family:monospace" />
+                            <button type="button" class="btn btn-primary" onclick="verifyPin()">
+                                <i class="fas fa-check"></i> Verify Pin
+                            </button>
+                        </div>
+                        <div id="pinError" style="display:none;color:#ef4444;
+                          margin-top:.5rem;font-size:.85rem">
+                            <i class="fas fa-circle-xmark"></i> Incorrect pin. Please try again.
+                        </div>
+                    </div>
+                </div>
+
+
+
+                <!-- Action buttons — now plain buttons, JS handles the POST -->
+                <div class="delivery-btn-row">
+                    <button type="button" id="startBtn"
+                            onclick="startDelivery()"
+                            class="btn btn-primary">
+                        <i class="fas fa-play"></i> Start Delivery
+                    </button>
+
+                    <button type="button" id="completeBtn"
+                            onclick="completeDelivery()"
+                            class="btn btn-success">
+                        <i class="fas fa-circle-check"></i> Mark as Delivered
+                    </button>
+                </div>
+
+                <!-- Delivered banner (hidden until delivery is complete) -->
+                <div id="deliveredBanner" style="display:none;align-items:center;gap:.6rem;
+                     margin-top:1rem;padding:.8rem 1rem;background:#dcfce7;
+                     border-radius:8px;color:#16a34a;font-weight:600;">
+                    <i class="fas fa-circle-check"></i> Delivery completed successfully!
+                </div>
+
+            </div>
+        </div>
+
+        <!-- Route info bar -->
+        <div class="route-info-bar" id="route-info" style="display:none">
+            <i class="fas fa-route"></i>
+            <span id="routeInfoText"></span>
+        </div>
+
+        <!-- MAP -->
+        <div class="map-container d-card" style="margin-top:.9rem">
+            <div class="d-card-head">
+                <div class="d-card-title">
+                    <i class="fas fa-map-location-dot" style="color:var(--blue);margin-right:.4rem"></i>Route Map
+                </div>
+                <!-- Show Route button — only loads route on demand -->
+                <button class="btn btn-outline btn-sm" onclick="loadRoute()">
+                    <i class="fas fa-arrows-rotate"></i> Show Route
+                </button>
+            </div>
+            <div id="map"></div>
+        </div>
+
+    </main>
+</div>
