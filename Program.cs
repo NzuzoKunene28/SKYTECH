@@ -82,6 +82,7 @@ builder.Services.AddScoped<JitsiService>();
 builder.Services.AddHttpClient<ICollateralImageAnalysisService, OpenRouterCollateralImageAnalysisService>();
 builder.Services.AddScoped<ICollateralVerificationService, OpenRouterCollateralVerificationService>();
 builder.Services.AddScoped<IFraudDetectionService, FraudDetectionService>();
+builder.Services.AddScoped<IPushNotificationService, PushNotificationService>();
 
 
 builder.Services.AddScoped<WorkingDayCalculator>();

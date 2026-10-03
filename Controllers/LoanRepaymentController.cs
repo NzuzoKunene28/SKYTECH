@@ -111,10 +111,14 @@ namespace SkyTech.Controllers
                 loan.Status = LoanRepaymentStatus.Settled;
                 loan.SettledOn = DateTime.UtcNow;
 
+                Console.WriteLine($"DEBUG: Loan {loan.LoanId} fully settled, attempting to send email.");
+
                 var collectionDate = DateTime.UtcNow.AddDays(3);
                 try
                 {
                     var customer = await db.Customers.FindAsync(loan.LoanApplication.CustomerId);
+                    Console.WriteLine($"DEBUG: customer null? {customer == null}, email = '{customer?.Email}'");
+
                     if (customer != null && !string.IsNullOrWhiteSpace(customer.Email))
                     {
                         _emailServices.LoanSettled(
@@ -124,6 +128,12 @@ namespace SkyTech.Controllers
                                 ? string.Join(", ", loan.LoanApplication.CollateralItems.Select(c => c.Description))
                                 : "your item",
                             collectionDate);
+
+                        Console.WriteLine("DEBUG: LoanSettled call completed without throwing.");
+                    }
+                    else
+                    {
+                        Console.WriteLine("DEBUG: Skipped — customer null or no email.");
                     }
                 }
                 catch (Exception ex)
@@ -198,6 +208,25 @@ namespace SkyTech.Controllers
             var bytes = qrCode.GetGraphic(20);
 
             return File(bytes, "image/png");
+        }
+
+        [HttpGet]
+        public async Task<IActionResult> CheckBalance()
+        {
+            var customerId = GetCurrentCustomerId();
+
+            var loan = await db.Loans
+                .Where(l => l.LoanApplication.CustomerId == customerId)
+                .OrderByDescending(l => l.DisbursedOn)
+                .FirstOrDefaultAsync();
+
+            if (loan == null)
+            {
+                TempData["Info"] = "You don't have any loans yet.";
+                return RedirectToAction("ShoppingPage", "Customer");
+            }
+
+            return RedirectToAction(nameof(Confirmation), new { loanId = loan.LoanId });
         }
 
     }

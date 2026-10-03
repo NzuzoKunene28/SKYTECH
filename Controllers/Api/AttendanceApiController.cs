@@ -52,9 +52,12 @@ namespace SkyTech.Controllers.Api
         {
             var staffId = GetStaffId();
 
+            // South African date, the same clock the shifts endpoints use.
+            var today = SaTime.Today;
+
             var rosterShift = await _db.RosterShifts
                 .FirstOrDefaultAsync(rs => rs.StaffId == staffId
-                                        && rs.WorkDate.Date == DateTime.Today);
+                                        && rs.WorkDate.Date == today);
 
             if (rosterShift == null)
                 return NotFound(new { message = "No shift scheduled for today." });
@@ -115,7 +118,7 @@ namespace SkyTech.Controllers.Api
                 StaffId = staffId
             };
 
-            attendance.CheckInTime = DateTime.Now;
+            attendance.CheckInTime = SaTime.Now;
             attendance.CheckInLat = req.Latitude;
             attendance.CheckInLng = req.Longitude;
             attendance.CheckInPhotoPath = photoPath;
@@ -134,9 +137,11 @@ namespace SkyTech.Controllers.Api
         {
             var staffId = GetStaffId();
 
+            var today = SaTime.Today;
+
             var rosterShift = await _db.RosterShifts
                 .FirstOrDefaultAsync(rs => rs.StaffId == staffId
-                                        && rs.WorkDate.Date == DateTime.Today);
+                                        && rs.WorkDate.Date == today);
 
             if (rosterShift == null)
                 return NotFound(new { message = "No shift scheduled for today." });
@@ -197,7 +202,7 @@ namespace SkyTech.Controllers.Api
 
             string photoPath = await SavePhotoBytes(photoBytes, req.Photo.FileName, staffId, "checkout");
 
-            attendance.CheckOutTime = DateTime.Now;
+            attendance.CheckOutTime = SaTime.Now;
             attendance.CheckOutLat = req.Latitude;
             attendance.CheckOutLng = req.Longitude;
             attendance.CheckOutPhotoPath = photoPath;

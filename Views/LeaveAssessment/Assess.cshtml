@@ -1,124 +1,152 @@
 ﻿@model SkyTech.ViewModels.AssessLeaveViewModel
 
+@using SkyTech.Models.SkytechWorkers
+
 @{
     ViewData["Title"] = "Assess Leave Request";
 
-    bool isPending = string.Equals(
-        Model.Status.ToString(),
-        "Pending",
-        StringComparison.OrdinalIgnoreCase);
+    bool isPending = Model.Status == LeaveRequestStatus.Pending;
+    bool blocked = Model.StaffingVerdict == "Blocked";
+    bool safe = Model.StaffingVerdict == "Safe";
 
-    int totalCalendarDays =
-        (Model.EndDate.Date - Model.StartDate.Date).Days + 1;
+    string verdictClass = blocked ? "verdict-blocked" : safe ? "verdict-safe" : "verdict-unknown";
+    string verdictIcon = blocked ? "fa-triangle-exclamation" : safe ? "fa-circle-check" : "fa-circle-info";
+    string verdictTitle = blocked ? "Understaffing risk" : safe ? "Staffing is covered" : "Staffing not checked";
+
+    string statusClass = Model.Status switch
+    {
+        LeaveRequestStatus.Approved => "status-approved",
+        LeaveRequestStatus.Rejected => "status-rejected",
+        _ => "status-pending"
+    };
+
+    string statusIcon = Model.Status switch
+    {
+        LeaveRequestStatus.Approved => "fa-circle-check",
+        LeaveRequestStatus.Rejected => "fa-circle-xmark",
+        _ => "fa-clock"
+    };
+
+    string[] nameParts = (Model.StaffName ?? "")
+        .Split(' ', StringSplitOptions.RemoveEmptyEntries);
+
+    string initials = nameParts.Length switch
+    {
+        >= 2 => $"{nameParts[0][0]}{nameParts[^1][0]}",
+        1 => nameParts[0][0].ToString(),
+        _ => "ST"
+    };
 }
 
 @section Styles {
     <style>
-        :root {
-            --assess-primary: #183153;
-            --assess-primary-light: #284d74;
-            --assess-accent: #c4922e;
-            --assess-success: #15803d;
-            --assess-danger: #b42318;
-            --assess-warning: #b45309;
-            --assess-background: #f4f6f8;
-            --assess-white: #ffffff;
-            --assess-text: #1f2937;
-            --assess-muted: #64748b;
-            --assess-border: #e2e8f0;
+        .assess-page {
+            width: min(1180px, calc(100% - 32px));
+            margin: 35px auto 60px;
         }
 
-        .assessment-page {
-            min-height: calc(100vh - 140px);
-            padding: 38px 20px 55px;
-            background:
-                radial-gradient(
-                    circle at top right,
-                    rgba(196, 146, 46, 0.09),
-                    transparent 28%
-                ),
-                var(--assess-background);
-        }
-
-        .assessment-container {
-            width: min(1100px, 100%);
-            margin: 0 auto;
-        }
-
-        .page-heading {
+        /* ── Header ─────────────────────────────────────────── */
+        .assess-hero {
+            position: relative;
             display: flex;
-            margin-bottom: 25px;
-            align-items: flex-end;
-            justify-content: space-between;
-            gap: 20px;
-        }
-
-        .heading-content {
-            display: flex;
+            min-height: 170px;
+            padding: 32px 35px;
+            margin-bottom: 22px;
+            overflow: hidden;
             align-items: center;
-            gap: 16px;
+            justify-content: space-between;
+            gap: 25px;
+            color: white;
+            background: linear-gradient(135deg, #126f73, #23989a);
+            border-radius: 24px;
+            box-shadow: 0 18px 45px rgba(18, 111, 115, .22);
         }
 
-        .heading-icon {
-            display: grid;
-            width: 56px;
-            height: 56px;
-            flex-shrink: 0;
-            color: var(--assess-white);
-            font-size: 23px;
-            background:
-                linear-gradient(
-                    135deg,
-                    var(--assess-primary),
-                    var(--assess-primary-light)
-                );
-            border-radius: 15px;
-            box-shadow: 0 10px 25px rgba(24, 49, 83, 0.2);
-            place-items: center;
+            .assess-hero::before,
+            .assess-hero::after {
+                position: absolute;
+                content: "";
+                border: 1px solid rgba(255, 255, 255, .12);
+                border-radius: 50%;
+            }
+
+            .assess-hero::before {
+                width: 270px;
+                height: 270px;
+                top: -175px;
+                right: -65px;
+            }
+
+            .assess-hero::after {
+                width: 170px;
+                height: 170px;
+                right: 105px;
+                bottom: -135px;
+            }
+
+        .hero-content, .hero-action {
+            position: relative;
+            z-index: 2;
         }
 
-        .page-heading h1 {
-            margin: 0 0 5px;
-            color: var(--assess-primary);
-            font-size: clamp(25px, 4vw, 34px);
-            font-weight: 800;
-            letter-spacing: -0.6px;
-        }
-
-        .page-heading p {
-            margin: 0;
-            color: var(--assess-muted);
-            font-size: 15px;
-        }
-
-        .back-link {
+        .hero-label {
             display: inline-flex;
-            padding: 11px 16px;
+            padding: 7px 12px;
+            margin-bottom: 14px;
             align-items: center;
             gap: 8px;
-            color: var(--assess-primary);
+            background: rgba(255, 255, 255, .13);
+            border: 1px solid rgba(255, 255, 255, .18);
+            border-radius: 30px;
+            font-size: 11px;
             font-weight: 700;
+            letter-spacing: .08em;
+            text-transform: uppercase;
+        }
+
+        .assess-hero h1 {
+            margin: 0 0 9px;
+            font-size: clamp(28px, 4vw, 40px);
+            font-weight: 800;
+            letter-spacing: -.04em;
+        }
+
+        .assess-hero p {
+            max-width: 650px;
+            margin: 0;
+            color: rgba(255, 255, 255, .82);
+            font-size: 14px;
+            line-height: 1.7;
+        }
+
+        .back-button {
+            display: inline-flex;
+            padding: 13px 18px;
+            align-items: center;
+            gap: 8px;
+            color: #126f73;
+            background: white;
+            border-radius: 12px;
+            font-size: 12px;
+            font-weight: 800;
             text-decoration: none;
-            background: var(--assess-white);
-            border: 1px solid var(--assess-border);
-            border-radius: 9px;
-            transition: 0.2s ease;
+            white-space: nowrap;
         }
 
-        .back-link:hover {
-            color: var(--assess-white);
-            background: var(--assess-primary);
-            border-color: var(--assess-primary);
-            transform: translateY(-1px);
-        }
+            .back-button:hover {
+                color: #0d5558;
+                text-decoration: none;
+            }
 
+        /* ── Messages ───────────────────────────────────────── */
         .message {
             display: flex;
-            margin-bottom: 20px;
-            padding: 15px 17px;
+            margin-bottom: 18px;
+            padding: 14px 16px;
             align-items: flex-start;
             gap: 11px;
-            border-radius: 10px;
+            border-radius: 12px;
+            font-size: 13px;
         }
 
         .message-success {
@@ -133,758 +161,1016 @@
             border: 1px solid #fecaca;
         }
 
-        .assessment-grid {
+        /* ── Grid + cards ───────────────────────────────────── */
+        .assess-grid {
             display: grid;
             align-items: start;
-            grid-template-columns: minmax(0, 1.55fr) minmax(300px, 0.8fr);
-            gap: 24px;
+            grid-template-columns: minmax(0, 1.5fr) minmax(310px, 1fr);
+            gap: 22px;
         }
 
-        .content-card {
+        .panel {
             overflow: hidden;
-            background: var(--assess-white);
-            border: 1px solid var(--assess-border);
-            border-radius: 15px;
-            box-shadow: 0 10px 32px rgba(15, 23, 42, 0.07);
+            background: white;
+            border: 1px solid #dfe7ef;
+            border-radius: 21px;
+            box-shadow: 0 14px 40px rgba(25, 50, 80, .08);
         }
 
-        .card-header {
+        .panel-head {
             display: flex;
-            padding: 20px 22px;
+            padding: 20px 24px;
             align-items: center;
             justify-content: space-between;
-            gap: 15px;
-            background:
-                linear-gradient(
-                    135deg,
-                    var(--assess-primary),
-                    var(--assess-primary-light)
-                );
+            gap: 14px;
+            border-bottom: 1px solid #edf1f5;
         }
 
-        .card-header h2 {
+        .panel-title {
             display: flex;
-            margin: 0;
             align-items: center;
-            gap: 10px;
-            color: var(--assess-white);
-            font-size: 18px;
-            font-weight: 750;
+            gap: 12px;
+        }
+
+        .panel-icon {
+            display: grid;
+            width: 43px;
+            min-width: 43px;
+            height: 43px;
+            color: #16888b;
+            background: #e9f8f8;
+            border-radius: 12px;
+            place-items: center;
+        }
+
+        .panel-title h2 {
+            margin: 0 0 3px;
+            color: #15233d;
+            font-size: 17px;
+            font-weight: 800;
+        }
+
+        .panel-title p {
+            margin: 0;
+            color: #748199;
+            font-size: 11px;
+        }
+
+        .panel-body {
+            padding: 22px 24px 24px;
         }
 
         .status-badge {
             display: inline-flex;
-            padding: 7px 12px;
+            padding: 7px 11px;
             align-items: center;
             gap: 6px;
-            font-size: 12px;
+            border-radius: 30px;
+            font-size: 10px;
             font-weight: 800;
-            text-transform: uppercase;
-            border-radius: 999px;
+            white-space: nowrap;
         }
 
         .status-pending {
-            color: #92400e;
-            background: #fef3c7;
+            color: #9b620f;
+            background: #fff6e5;
         }
 
         .status-approved {
-            color: #166534;
-            background: #dcfce7;
+            color: #08754a;
+            background: #e9faf2;
         }
 
         .status-rejected {
-            color: #991b1b;
-            background: #fee2e2;
+            color: #c63d4d;
+            background: #fff0f2;
         }
 
-        .card-body {
-            padding: 24px;
-        }
-
-        .staff-profile {
+        /* ── Employee strip ─────────────────────────────────── */
+        .employee-strip {
             display: flex;
-            margin-bottom: 24px;
-            padding-bottom: 22px;
+            padding: 16px 18px;
+            margin-bottom: 16px;
             align-items: center;
-            gap: 15px;
-            border-bottom: 1px solid var(--assess-border);
+            justify-content: space-between;
+            gap: 14px;
+            background: #f7fafc;
+            border: 1px solid #e3ebf2;
+            border-radius: 16px;
         }
 
-        .staff-avatar {
+        .employee-main {
+            display: flex;
+            align-items: center;
+            gap: 13px;
+        }
+
+        .employee-avatar {
             display: grid;
-            width: 58px;
-            height: 58px;
-            flex-shrink: 0;
-            color: var(--assess-white);
-            font-size: 21px;
+            width: 48px;
+            height: 48px;
+            color: #16888b;
+            background: #e1f4f4;
+            border-radius: 14px;
             font-weight: 800;
-            background:
-                linear-gradient(
-                    135deg,
-                    var(--assess-accent),
-                    #e2b85e
-                );
-            border-radius: 50%;
             place-items: center;
         }
 
-        .staff-profile h3 {
-            margin: 0 0 4px;
-            color: var(--assess-primary);
-            font-size: 19px;
+        .employee-name {
+            display: block;
+            color: #15233d;
+            font-size: 15px;
+            font-weight: 800;
         }
 
-        .staff-profile p {
-            margin: 0;
-            color: var(--assess-muted);
-            font-size: 14px;
+        .employee-role {
+            display: block;
+            margin-top: 2px;
+            color: #748199;
+            font-size: 11px;
         }
 
-        .details-grid {
+        .days-chip {
+            padding: 7px 12px;
+            color: #9b620f;
+            background: #fff6e5;
+            border-radius: 30px;
+            font-size: 10px;
+            font-weight: 800;
+            white-space: nowrap;
+        }
+
+        /* ── Info grid ──────────────────────────────────────── */
+        .info-grid {
             display: grid;
             grid-template-columns: repeat(2, minmax(0, 1fr));
-            gap: 14px;
+            gap: 12px;
         }
 
-        .detail-item {
-            min-height: 93px;
-            padding: 16px;
-            background: #f8fafc;
-            border: 1px solid var(--assess-border);
-            border-radius: 10px;
+        .info-item {
+            padding: 14px 16px;
+            background: white;
+            border: 1px solid #e3ebf2;
+            border-radius: 13px;
         }
 
-        .detail-label {
+            .info-item.full {
+                grid-column: 1 / -1;
+            }
+
+        .info-label {
             display: flex;
-            margin-bottom: 8px;
+            margin-bottom: 7px;
             align-items: center;
-            gap: 7px;
-            color: var(--assess-muted);
-            font-size: 12px;
-            font-weight: 750;
+            gap: 6px;
+            color: #748199;
+            font-size: 9px;
+            font-weight: 800;
+            letter-spacing: .05em;
             text-transform: uppercase;
-            letter-spacing: 0.4px;
         }
 
-        .detail-label i {
-            color: var(--assess-accent);
-        }
+            .info-label i {
+                color: #16888b;
+            }
 
-        .detail-value {
-            color: var(--assess-text);
-            font-size: 15px;
+        .info-value {
+            color: #15233d;
+            font-size: 13px;
             font-weight: 700;
             word-break: break-word;
         }
 
-        .date-range {
-            margin-top: 19px;
-            padding: 19px;
-            color: var(--assess-white);
-            background:
-                linear-gradient(
-                    135deg,
-                    var(--assess-primary),
-                    #254e76
-                );
-            border-radius: 12px;
+            .info-value.plain {
+                font-weight: 500;
+                line-height: 1.6;
+                white-space: pre-wrap;
+            }
+
+        .section-label {
+            margin: 22px 0 10px;
+            color: #6b778c;
+            font-size: 10px;
+            font-weight: 800;
+            letter-spacing: .06em;
+            text-transform: uppercase;
         }
 
-        .date-range-title {
-            margin-bottom: 15px;
-            color: #dbe7f3;
+        .doc-link {
+            display: inline-flex;
+            padding: 9px 13px;
+            align-items: center;
+            gap: 8px;
+            color: #106c70;
+            background: #e9f8f8;
+            border-radius: 10px;
             font-size: 12px;
             font-weight: 800;
-            text-transform: uppercase;
-            letter-spacing: 0.5px;
+            text-decoration: none;
         }
 
-        .date-line {
+            .doc-link:hover {
+                color: #0d5558;
+                text-decoration: none;
+            }
+
+        .doc-missing {
+            color: #9b620f;
+        }
+
+        /* ── Balance mini stats ─────────────────────────────── */
+        .mini-stats {
             display: grid;
-            align-items: center;
-            grid-template-columns: 1fr auto 1fr;
-            gap: 15px;
-        }
-
-        .date-block span {
-            display: block;
-            margin-bottom: 4px;
-            color: #cbd5e1;
-            font-size: 12px;
-        }
-
-        .date-block strong {
-            display: block;
-            color: var(--assess-white);
-            font-size: 16px;
-        }
-
-        .date-block:last-child {
-            text-align: right;
-        }
-
-        .date-arrow {
-            display: grid;
-            width: 35px;
-            height: 35px;
-            color: var(--assess-primary);
-            background: var(--assess-white);
-            border-radius: 50%;
-            place-items: center;
-        }
-
-        .leave-summary {
-            display: grid;
-            margin-top: 15px;
-            grid-template-columns: repeat(2, 1fr);
+            grid-template-columns: repeat(4, minmax(0, 1fr));
             gap: 10px;
         }
 
-        .summary-box {
+        .mini-stat {
             padding: 12px;
             text-align: center;
-            background: rgba(255, 255, 255, 0.1);
-            border: 1px solid rgba(255, 255, 255, 0.14);
-            border-radius: 8px;
+            background: #f7fafc;
+            border: 1px solid #e3ebf2;
+            border-radius: 12px;
         }
 
-        .summary-box strong {
+            .mini-stat strong {
+                display: block;
+                color: #15233d;
+                font-size: 18px;
+                font-weight: 800;
+            }
+
+            .mini-stat span {
+                display: block;
+                margin-top: 3px;
+                color: #748199;
+                font-size: 9px;
+                font-weight: 700;
+            }
+
+            .mini-stat.warn strong {
+                color: #c63d4d;
+            }
+
+        /* ── Staffing check ─────────────────────────────────── */
+        .staffing-intro {
+            margin: 0 0 16px;
+            color: #748199;
+            font-size: 11px;
+            line-height: 1.7;
+        }
+
+            .staffing-intro strong {
+                color: #15233d;
+            }
+
+        .verdict {
+            display: flex;
+            padding: 14px 16px;
+            margin-bottom: 16px;
+            align-items: flex-start;
+            gap: 12px;
+            border-radius: 14px;
+        }
+
+            .verdict i {
+                margin-top: 2px;
+                font-size: 16px;
+            }
+
+            .verdict strong {
+                display: block;
+                margin-bottom: 3px;
+                font-size: 12px;
+                font-weight: 800;
+            }
+
+            .verdict span {
+                display: block;
+                font-size: 11px;
+                line-height: 1.6;
+            }
+
+        .verdict-safe {
+            color: #08754a;
+            background: #e9faf2;
+            border: 1px solid #bdecd5;
+        }
+
+        .verdict-blocked {
+            color: #a8283a;
+            background: #fff0f2;
+            border: 1px solid #f6c5cc;
+        }
+
+        .verdict-unknown {
+            color: #9b620f;
+            background: #fff6e5;
+            border: 1px solid #f3dcae;
+        }
+
+        .metric-grid {
+            display: grid;
+            grid-template-columns: repeat(2, minmax(0, 1fr));
+            gap: 12px;
+        }
+
+        .metric {
+            padding: 14px 16px;
+            background: white;
+            border: 1px solid #e3ebf2;
+            border-radius: 14px;
+        }
+
+        .metric-icon {
+            display: grid;
+            width: 34px;
+            height: 34px;
+            margin-bottom: 10px;
+            color: #16888b;
+            background: #e9f8f8;
+            border-radius: 10px;
+            place-items: center;
+        }
+
+        .metric-label {
             display: block;
-            margin-bottom: 2px;
-            font-size: 20px;
+            color: #748199;
+            font-size: 9px;
+            font-weight: 800;
+            letter-spacing: .04em;
+            text-transform: uppercase;
         }
 
-        .summary-box span {
-            color: #dbe7f3;
+        .metric-value {
+            display: block;
+            margin-top: 4px;
+            color: #15233d;
+            font-size: 24px;
+            font-weight: 800;
+        }
+
+        .metric.bad .metric-value {
+            color: #c63d4d;
+        }
+
+        .metric.bad .metric-icon {
+            color: #c63d4d;
+            background: #fff0f2;
+        }
+
+        .minimum-note {
+            margin: 12px 0 0;
+            color: #748199;
+            font-size: 10px;
+            line-height: 1.6;
+        }
+
+        .overlap-list {
+            display: grid;
+            gap: 8px;
+        }
+
+        .overlap-item {
+            display: flex;
+            padding: 10px 12px;
+            align-items: center;
+            justify-content: space-between;
+            gap: 10px;
+            background: #f7fafc;
+            border-radius: 11px;
             font-size: 11px;
         }
 
-        .decision-card {
-            position: sticky;
-            top: 92px;
+            .overlap-item strong {
+                color: #15233d;
+            }
+
+            .overlap-item span {
+                color: #748199;
+                font-size: 10px;
+            }
+
+        .day-table {
+            max-height: 260px;
+            overflow-y: auto;
+            border: 1px solid #e3ebf2;
+            border-radius: 13px;
         }
 
-        .decision-header {
-            padding: 20px 22px;
-            color: var(--assess-white);
-            background:
-                linear-gradient(
-                    135deg,
-                    #805d18,
-                    var(--assess-accent)
-                );
-        }
-
-        .decision-header h2 {
-            display: flex;
-            margin: 0 0 5px;
+        .day-row {
+            display: grid;
+            padding: 10px 13px;
             align-items: center;
-            gap: 9px;
-            font-size: 18px;
+            grid-template-columns: 1.1fr 1.2fr 1fr auto;
+            gap: 8px;
+            border-bottom: 1px solid #edf1f5;
+            font-size: 10px;
+            color: #4d596d;
         }
 
-        .decision-header p {
-            margin: 0;
-            color: #fff8e7;
-            font-size: 13px;
+            .day-row:last-child {
+                border-bottom: 0;
+            }
+
+            .day-row.day-short {
+                background: #fff7f8;
+            }
+
+        .day-date {
+            color: #15233d;
+            font-weight: 800;
         }
 
-        .form-group {
-            margin-bottom: 20px;
+        .day-chip {
+            padding: 4px 9px;
+            border-radius: 20px;
+            font-size: 9px;
+            font-weight: 800;
+        }
+
+            .day-chip.ok {
+                color: #08754a;
+                background: #e9faf2;
+            }
+
+            .day-chip.short {
+                color: #c63d4d;
+                background: #ffe3e7;
+            }
+
+        /* ── Decision ───────────────────────────────────────── */
+        .decision-panel {
+            margin-top: 22px;
         }
 
         .form-label {
             display: block;
             margin-bottom: 8px;
-            color: var(--assess-primary);
-            font-size: 14px;
-            font-weight: 750;
+            color: #15233d;
+            font-size: 13px;
+            font-weight: 800;
         }
 
         .form-control {
             width: 100%;
-            min-height: 125px;
+            min-height: 110px;
             padding: 13px 14px;
-            color: var(--assess-text);
+            color: #1f2937;
             font-family: inherit;
-            font-size: 14px;
+            font-size: 13px;
             line-height: 1.5;
             resize: vertical;
             background: #f8fafc;
             border: 1px solid #cbd5e1;
-            border-radius: 9px;
+            border-radius: 12px;
             outline: none;
-            transition: 0.2s ease;
         }
 
-        .form-control:focus {
-            background: var(--assess-white);
-            border-color: var(--assess-primary-light);
-            box-shadow: 0 0 0 3px rgba(40, 77, 116, 0.13);
-        }
+            .form-control:focus {
+                background: white;
+                border-color: #16888b;
+                box-shadow: 0 0 0 3px rgba(22, 136, 139, .14);
+            }
 
         .character-count {
             display: block;
             margin-top: 6px;
-            color: var(--assess-muted);
-            font-size: 12px;
+            color: #748199;
+            font-size: 11px;
             text-align: right;
         }
 
         .decision-notice {
             display: flex;
-            margin-bottom: 18px;
-            padding: 13px;
+            margin: 14px 0 18px;
+            padding: 13px 14px;
             align-items: flex-start;
             gap: 9px;
             color: #475569;
-            font-size: 12px;
-            line-height: 1.5;
+            font-size: 11px;
+            line-height: 1.6;
             background: #f8fafc;
-            border: 1px solid var(--assess-border);
-            border-radius: 8px;
+            border: 1px solid #e3ebf2;
+            border-radius: 11px;
         }
 
-        .decision-notice i {
-            margin-top: 2px;
-            color: var(--assess-accent);
-        }
+            .decision-notice i {
+                margin-top: 2px;
+                color: #16888b;
+            }
 
-        .button-stack {
+        .button-row {
             display: grid;
-            gap: 10px;
+            grid-template-columns: 1fr 1fr;
+            gap: 12px;
         }
 
         .action-button {
             display: inline-flex;
-            width: 100%;
-            min-height: 46px;
+            min-height: 48px;
             padding: 11px 16px;
             align-items: center;
             justify-content: center;
             gap: 9px;
-            color: var(--assess-white);
+            color: white;
             font-family: inherit;
-            font-size: 14px;
+            font-size: 13px;
             font-weight: 800;
             cursor: pointer;
             border: none;
-            border-radius: 9px;
-            transition: 0.2s ease;
+            border-radius: 12px;
+            transition: .2s ease;
         }
 
-        .action-button:hover:not(:disabled) {
-            transform: translateY(-1px);
-            box-shadow: 0 7px 16px rgba(15, 23, 42, 0.16);
-        }
+            .action-button:hover:not(:disabled) {
+                transform: translateY(-1px);
+                box-shadow: 0 8px 18px rgba(15, 23, 42, .16);
+            }
+
+            .action-button:disabled {
+                cursor: not-allowed;
+                opacity: .5;
+            }
 
         .approve-button {
-            background: var(--assess-success);
-        }
-
-        .approve-button:hover:not(:disabled) {
-            background: #116932;
+            background: #15803d;
         }
 
         .reject-button {
-            background: var(--assess-danger);
-        }
-
-        .reject-button:hover:not(:disabled) {
-            background: #8f1c13;
-        }
-
-        .action-button:disabled {
-            cursor: not-allowed;
-            opacity: 0.55;
+            background: #b42318;
         }
 
         .processed-message {
-            padding: 18px;
+            padding: 20px;
             color: #475569;
+            font-size: 12px;
+            line-height: 1.7;
             text-align: center;
             background: #f8fafc;
             border: 1px dashed #cbd5e1;
-            border-radius: 10px;
+            border-radius: 14px;
         }
 
-        .processed-message i {
-            display: block;
-            margin-bottom: 8px;
-            color: var(--assess-accent);
-            font-size: 25px;
-        }
-
-        @@media (max-width: 850px) {
-            .assessment-grid {
-                grid-template-columns: 1fr;
+            .processed-message i {
+                display: block;
+                margin-bottom: 8px;
+                color: #16888b;
+                font-size: 24px;
             }
 
-            .decision-card {
-                position: static;
+        .processed-note {
+            margin-top: 10px;
+            color: #15233d;
+            font-style: italic;
+        }
+
+        @@media (max-width: 960px) {
+            .assess-grid {
+                grid-template-columns: 1fr;
             }
         }
 
         @@media (max-width: 620px) {
-            .assessment-page {
-                padding: 25px 14px 40px;
+            .assess-page {
+                width: min(100% - 20px, 1180px);
+                margin-top: 18px;
             }
 
-            .page-heading {
-                align-items: stretch;
+            .assess-hero {
+                padding: 26px 22px;
                 flex-direction: column;
+                align-items: flex-start;
             }
 
-            .back-link {
-                align-self: flex-start;
-            }
-
-            .details-grid {
+            .info-grid, .metric-grid, .button-row {
                 grid-template-columns: 1fr;
             }
 
-            .date-line {
-                grid-template-columns: 1fr;
+            .mini-stats {
+                grid-template-columns: repeat(2, 1fr);
             }
 
-            .date-arrow {
-                transform: rotate(90deg);
+            .day-row {
+                grid-template-columns: 1fr 1fr;
             }
 
-            .date-block:last-child {
-                text-align: left;
-            }
-
-            .card-body {
-                padding: 18px;
+            .employee-strip {
+                flex-direction: column;
+                align-items: flex-start;
             }
         }
     </style>
 }
 
-<div class="assessment-page">
-    <div class="assessment-container">
+<div class="assess-page">
 
-        <div class="page-heading">
-            <div class="heading-content">
-                <div class="heading-icon">
-                    <i class="fa-solid fa-clipboard-check"></i>
-                </div>
-
-                <div>
-                    <h1>Assess Leave Request</h1>
-                    <p>
-                        Review the employee's request before making a decision.
-                    </p>
-                </div>
+    <header class="assess-hero">
+        <div class="hero-content">
+            <div class="hero-label">
+                <i class="fa-solid fa-clipboard-check"></i>
+                HR Leave Management
             </div>
 
-            <a asp-controller="LeaveAssessment"
-               asp-action="PendingRequests"
-               class="back-link">
+            <h1>Assess Leave Request</h1>
 
-                <i class="fa-solid fa-arrow-left"></i>
-                Pending requests
-            </a>
+            <p>
+                Review the employee's leave information, supporting evidence
+                and staffing impact before recording an HR decision.
+            </p>
         </div>
 
-        @if (TempData["SuccessMessage"] != null)
-        {
-            <div class="message message-success">
-                <i class="fa-solid fa-circle-check"></i>
+        <div class="hero-action">
+            <a asp-controller="LeaveAssessment"
+               asp-action="PendingRequests"
+               class="back-button">
+                <i class="fa-solid fa-arrow-left"></i>
+                Pending Requests
+            </a>
+        </div>
+    </header>
 
-                <div>
-                    @TempData["SuccessMessage"]
+    @if (TempData["SuccessMessage"] != null)
+    {
+        <div class="message message-success">
+            <i class="fa-solid fa-circle-check"></i>
+            <div>@TempData["SuccessMessage"]</div>
+        </div>
+    }
+
+    @if (TempData["ErrorMessage"] != null)
+    {
+        <div class="message message-danger">
+            <i class="fa-solid fa-circle-exclamation"></i>
+            <div>@TempData["ErrorMessage"]</div>
+        </div>
+    }
+
+    <div class="assess-grid">
+
+        <!-- ═════════════ Leave request ═════════════ -->
+        <section class="panel">
+            <div class="panel-head">
+                <div class="panel-title">
+                    <div class="panel-icon"><i class="fa-solid fa-file-lines"></i></div>
+                    <div>
+                        <h2>Leave Request</h2>
+                        <p>Employee and requested leave information</p>
+                    </div>
                 </div>
+
+                <span class="status-badge @statusClass">
+                    <i class="fa-solid @statusIcon"></i>
+                    @Model.Status
+                </span>
             </div>
-        }
 
-        @if (TempData["ErrorMessage"] != null)
-        {
-            <div class="message message-danger">
-                <i class="fa-solid fa-circle-exclamation"></i>
+            <div class="panel-body">
 
-                <div>
-                    @TempData["ErrorMessage"]
-                </div>
-            </div>
-        }
-
-        <div asp-validation-summary="ModelOnly"
-             class="message message-danger"></div>
-
-        <div class="assessment-grid">
-
-            <!-- Request details -->
-            <section class="content-card">
-
-                <div class="card-header">
-                    <h2>
-                        <i class="fa-solid fa-file-lines"></i>
-                        Request Details
-                    </h2>
-
-                    @{
-                        string statusClass =
-                            Model.Status.ToString() switch
-                            {
-                                "Approved" => "status-approved",
-                                "Rejected" => "status-rejected",
-                                _ => "status-pending"
-                            };
-
-                        string statusIcon =
-                            Model.Status.ToString() switch
-                            {
-                                "Approved" => "fa-circle-check",
-                                "Rejected" => "fa-circle-xmark",
-                                _ => "fa-clock"
-                            };
-                    }
-
-                    <span class="status-badge @statusClass">
-                        <i class="fa-solid @statusIcon"></i>
-                        @Model.Status
-                    </span>
-                </div>
-
-                <div class="card-body">
-
-                    <div class="staff-profile">
-                        <div class="staff-avatar">
-                            @{
-                                string[] names =
-                                    (Model.StaffName ?? "")
-                                    .Split(
-                                        ' ',
-                                        StringSplitOptions
-                                            .RemoveEmptyEntries);
-
-                                string initials = names.Length switch
-                                {
-                                    >= 2 =>
-                                        $"{names[0][0]}{names[^1][0]}",
-                                    1 => names[0][0].ToString(),
-                                    _ => "ST"
-                                };
-                            }
-
-                            @initials.ToUpper()
-                        </div>
-
+                <div class="employee-strip">
+                    <div class="employee-main">
+                        <div class="employee-avatar">@initials.ToUpper()</div>
                         <div>
-                            <h3>@Model.StaffName</h3>
-
-                            <p>
-                                @Model.PositionName
-                                <span>&middot;</span>
-                                @Model.DepartmentName
-                            </p>
+                            <span class="employee-name">@Model.StaffName</span>
+                            <span class="employee-role">@Model.PositionName &middot; @Model.DepartmentName</span>
                         </div>
                     </div>
 
-                    <div class="details-grid">
-
-                        <div class="detail-item">
-                            <div class="detail-label">
-                                <i class="fa-solid fa-layer-group"></i>
-                                Department
-                            </div>
-
-                            <div class="detail-value">
-                                @Model.DepartmentName
-                            </div>
-                        </div>
-
-                        <div class="detail-item">
-                            <div class="detail-label">
-                                <i class="fa-solid fa-user-tie"></i>
-                                Position
-                            </div>
-
-                            <div class="detail-value">
-                                @Model.PositionName
-                            </div>
-                        </div>
-
-                        <div class="detail-item">
-                            <div class="detail-label">
-                                <i class="fa-solid fa-umbrella-beach"></i>
-                                Leave Type
-                            </div>
-
-                            <div class="detail-value">
-                                @Model.LeaveTypeName
-                            </div>
-                        </div>
-
-                        <div class="detail-item">
-                            <div class="detail-label">
-                                <i class="fa-solid fa-paper-plane"></i>
-                                Submitted
-                            </div>
-
-                            <div class="detail-value">
-                                @Model.SubmittedAt.ToString(
-                                    "dd MMM yyyy, HH:mm")
-                            </div>
-                        </div>
-
-                    </div>
-
-                    <div class="date-range">
-                        <div class="date-range-title">
-                            Requested leave period
-                        </div>
-
-                        <div class="date-line">
-
-                            <div class="date-block">
-                                <span>Starting date</span>
-
-                                <strong>
-                                    @Model.StartDate.ToString(
-                                        "ddd, dd MMM yyyy")
-                                </strong>
-                            </div>
-
-                            <div class="date-arrow">
-                                <i class="fa-solid fa-arrow-right"></i>
-                            </div>
-
-                            <div class="date-block">
-                                <span>Returning after</span>
-
-                                <strong>
-                                    @Model.EndDate.ToString(
-                                        "ddd, dd MMM yyyy")
-                                </strong>
-                            </div>
-
-                        </div>
-
-                        <div class="leave-summary">
-
-                            <div class="summary-box">
-                                <strong>
-                                    @Model.WorkingDaysRequested
-                                </strong>
-
-                                <span>Working days requested</span>
-                            </div>
-
-                            <div class="summary-box">
-                                <strong>@totalCalendarDays</strong>
-                                <span>Total calendar days</span>
-                            </div>
-
-                        </div>
-                    </div>
-
-                </div>
-            </section>
-
-            <!-- HR decision -->
-            <aside class="content-card decision-card">
-
-                <div class="decision-header">
-                    <h2>
-                        <i class="fa-solid fa-gavel"></i>
-                        HR Decision
-                    </h2>
-
-                    <p>
-                        Approve or reject this employee's request.
-                    </p>
+                    <span class="days-chip">@Model.WorkingDaysRequested working day(s)</span>
                 </div>
 
-                <div class="card-body">
+                <div class="info-grid">
+                    <div class="info-item">
+                        <div class="info-label"><i class="fa-solid fa-building-user"></i> Department</div>
+                        <div class="info-value">@Model.DepartmentName</div>
+                    </div>
 
-                    @if (isPending)
+                    <div class="info-item">
+                        <div class="info-label"><i class="fa-solid fa-user-tie"></i> Position</div>
+                        <div class="info-value">@Model.PositionName</div>
+                    </div>
+
+                    <div class="info-item">
+                        <div class="info-label"><i class="fa-regular fa-calendar-check"></i> Leave type</div>
+                        <div class="info-value">@Model.LeaveTypeName</div>
+                    </div>
+
+                    <div class="info-item">
+                        <div class="info-label"><i class="fa-solid fa-business-time"></i> Working days</div>
+                        <div class="info-value">@Model.WorkingDaysRequested day(s)</div>
+                    </div>
+
+                    <div class="info-item">
+                        <div class="info-label"><i class="fa-regular fa-calendar"></i> Start date</div>
+                        <div class="info-value">@Model.StartDate.ToString("ddd, dd MMM yyyy")</div>
+                    </div>
+
+                    <div class="info-item">
+                        <div class="info-label"><i class="fa-regular fa-calendar"></i> End date</div>
+                        <div class="info-value">@Model.EndDate.ToString("ddd, dd MMM yyyy")</div>
+                    </div>
+
+                    <div class="info-item">
+                        <div class="info-label"><i class="fa-solid fa-calendar-days"></i> Calendar days</div>
+                        <div class="info-value">@Model.CalendarDays day(s)</div>
+                    </div>
+
+                    <div class="info-item">
+                        <div class="info-label"><i class="fa-regular fa-clock"></i> Submitted</div>
+                        <div class="info-value">@Model.SubmittedAt.ToString("dd MMM yyyy, HH:mm")</div>
+                    </div>
+
+                    <div class="info-item">
+                        <div class="info-label"><i class="fa-regular fa-envelope"></i> Email</div>
+                        <div class="info-value">@(string.IsNullOrWhiteSpace(Model.StaffEmail) ? "—" : Model.StaffEmail)</div>
+                    </div>
+
+                    <div class="info-item">
+                        <div class="info-label"><i class="fa-solid fa-phone"></i> Phone</div>
+                        <div class="info-value">@(string.IsNullOrWhiteSpace(Model.StaffPhone) ? "—" : Model.StaffPhone)</div>
+                    </div>
+
+                    @if (Model.EmployedSince.HasValue)
                     {
-                        <form method="post"
-                              id="decisionForm">
+                        <div class="info-item full">
+                            <div class="info-label"><i class="fa-solid fa-id-badge"></i> Employed since</div>
+                            <div class="info-value">@Model.EmployedSince.Value.ToString("dd MMM yyyy")</div>
+                        </div>
+                    }
+                </div>
 
-                            @Html.AntiForgeryToken()
+                <div class="section-label">Reason for leave</div>
+                <div class="info-item full">
+                    <div class="info-value plain">@(string.IsNullOrWhiteSpace(Model.Reason) ? "No reason was given." : Model.Reason)</div>
+                </div>
 
-                            <input type="hidden"
-                                   name="leaveRequestId"
-                                   value="@Model.LeaveRequestId" />
-
-                            <div class="form-group">
-                                <label for="reviewNote"
-                                       class="form-label">
-
-                                    Review note
-                                </label>
-
-                                <textarea id="reviewNote"
-                                          name="reviewNote"
-                                          maxlength="500"
-                                          class="form-control"
-                                          placeholder="Add feedback about your decision..."></textarea>
-
-                                <span class="character-count">
-                                    <span id="characterTotal">0</span>/500
-                                </span>
-                            </div>
-
-                            <div class="decision-notice">
-                                <i class="fa-solid fa-circle-info"></i>
-
-                                <span>
-                                    Approving this request will remove
-                                    the employee's roster shifts that
-                                    fall within the approved leave dates.
-                                </span>
-                            </div>
-
-                            <div class="button-stack">
-
-                                <button type="submit"
-                                        id="approveButton"
-                                        formaction="@Url.Action(
-                                            "Approve",
-                                            "LeaveAssessment")"
-                                        formmethod="post"
-                                        class="action-button approve-button">
-
-                                    <i class="fa-solid fa-check"></i>
-                                    Approve Request
-                                </button>
-
-                                <button type="submit"
-                                        id="rejectButton"
-                                        formaction="@Url.Action(
-                                            "Reject",
-                                            "LeaveAssessment")"
-                                        formmethod="post"
-                                        class="action-button reject-button">
-
-                                    <i class="fa-solid fa-xmark"></i>
-                                    Reject Request
-                                </button>
-
-                            </div>
-                        </form>
+                <div class="section-label">Supporting evidence</div>
+                <div class="info-item full">
+                    @if (!string.IsNullOrWhiteSpace(Model.SupportingDocumentUrl))
+                    {
+                        <a class="doc-link" href="@Model.SupportingDocumentUrl" target="_blank" rel="noopener">
+                            <i class="fa-solid fa-paperclip"></i>
+                            View document
+                            @if (!string.IsNullOrWhiteSpace(Model.SupportingDocumentName))
+                            {
+                                <span>(@Model.SupportingDocumentName)</span>
+                            }
+                        </a>
+                    }
+                    else if (Model.DocumentRequired)
+                    {
+                        <div class="info-value doc-missing">
+                            <i class="fa-solid fa-triangle-exclamation"></i>
+                            A supporting document is required for this leave type, but none was attached.
+                        </div>
                     }
                     else
                     {
-                        <div class="processed-message">
-                            <i class="fa-solid fa-lock"></i>
+                        <div class="info-value plain">No document attached (not required for this leave type).</div>
+                    }
+                </div>
 
-                            This request has already been
-                            <strong>@Model.Status</strong>
-                            and cannot be assessed again.
+                <div class="section-label">Leave balance</div>
+                @if (!Model.RequiresBalance)
+                {
+                    <div class="info-item full">
+                        <div class="info-value plain">This leave type doesn't use a leave balance.</div>
+                    </div>
+                }
+                else if (!Model.HasBalance)
+                {
+                    <div class="info-item full">
+                        <div class="info-value doc-missing">
+                            <i class="fa-solid fa-triangle-exclamation"></i>
+                            No active leave balance was found for this employee and leave type.
                         </div>
+                    </div>
+                }
+                else
+                {
+                    <div class="mini-stats">
+                        <div class="mini-stat"><strong>@Model.BalanceAllocated</strong><span>Allocated</span></div>
+                        <div class="mini-stat"><strong>@Model.BalanceUsed</strong><span>Used</span></div>
+                        <div class="mini-stat"><strong>@Model.BalanceAvailable</strong><span>Available (@Model.BalanceOtherPending other pending)</span></div>
+                        <div class="mini-stat @(Model.BalanceAfterApproval < 0 ? "warn" : "")"><strong>@Model.BalanceAfterApproval</strong><span>After this request</span></div>
+                    </div>
+                }
+            </div>
+        </section>
+
+        <!-- ═════════════ Staffing check ═════════════ -->
+        <section class="panel">
+            <div class="panel-head">
+                <div class="panel-title">
+                    <div class="panel-icon"><i class="fa-solid fa-people-group"></i></div>
+                    <div>
+                        <h2>Staffing Check</h2>
+                        <p>Department capacity during this period</p>
+                    </div>
+                </div>
+            </div>
+
+            <div class="panel-body">
+
+                <p class="staffing-intro">
+                    Staffing is checked for the <strong>@Model.DepartmentName</strong> department
+                    during the employee's requested leave dates.
+                </p>
+
+                <div class="verdict @verdictClass">
+                    <i class="fa-solid @verdictIcon"></i>
+                    <div>
+                        <strong>@verdictTitle</strong>
+                        <span>@Model.StaffingMessage</span>
+                    </div>
+                </div>
+
+                <div class="metric-grid">
+                    <div class="metric">
+                        <div class="metric-icon"><i class="fa-solid fa-users"></i></div>
+                        <span class="metric-label">Active staff</span>
+                        <span class="metric-value">@Model.ActiveStaff</span>
+                    </div>
+
+                    <div class="metric">
+                        <div class="metric-icon"><i class="fa-solid fa-person-walking-luggage"></i></div>
+                        <span class="metric-label">Already approved</span>
+                        <span class="metric-value">@Model.AlreadyApprovedPeak</span>
+                    </div>
+
+                    <div class="metric">
+                        <div class="metric-icon"><i class="fa-solid fa-gauge-high"></i></div>
+                        <span class="metric-label">Maximum allowed</span>
+                        <span class="metric-value">@Model.MaximumAllowedOnLeave</span>
+                    </div>
+
+                    <div class="metric @(Model.MoreCanBeApproved < 1 && Model.MinimumConfigured ? "bad" : "")">
+                        <div class="metric-icon"><i class="fa-solid fa-user-plus"></i></div>
+                        <span class="metric-label">More can be approved</span>
+                        <span class="metric-value">@Model.MoreCanBeApproved</span>
+                    </div>
+                </div>
+
+                <p class="minimum-note">
+                    @if (Model.MinimumConfigured)
+                    {
+                        <text>
+                            The department needs at least <strong>@Model.MinimumStaffRequired</strong> staff
+                            at work at all times. "Already approved" is the most people from this
+                            department on approved leave on any one day of this period.
+                        </text>
+                    }
+                    else
+                    {
+                        <text>No minimum staffing level is configured for this department.</text>
                     }
 
-                </div>
-            </aside>
+                    @if (Model.OverlappingPendingCount > 0)
+                    {
+                        <br />
+                        <text>
+                            <strong>@Model.OverlappingPendingCount</strong> other pending request(s) from this
+                            department overlap these dates and are not counted above.
+                        </text>
+                    }
+                </p>
 
-        </div>
+                @if (Model.OverlappingApprovedLeaves.Any())
+                {
+                    <div class="section-label">Already on approved leave</div>
+                    <div class="overlap-list">
+                        @foreach (var other in Model.OverlappingApprovedLeaves)
+                        {
+                            <div class="overlap-item">
+                                <div>
+                                    <strong>@other.StaffName</strong>
+                                    <span>&middot; @other.LeaveTypeName</span>
+                                </div>
+                                <span>@other.StartDate.ToString("dd MMM") – @other.EndDate.ToString("dd MMM")</span>
+                            </div>
+                        }
+                    </div>
+                }
+
+                @if (Model.StaffingDays.Any())
+                {
+                    <div class="section-label">Day by day (if approved)</div>
+                    <div class="day-table">
+                        @foreach (var day in Model.StaffingDays)
+                        {
+                            <div class="day-row @(day.IsUnderstaffed ? "day-short" : "")">
+                                <span class="day-date">@day.Date.ToString("ddd, dd MMM")</span>
+                                <span title="@string.Join(", ", day.OtherOnLeaveNames)">@day.OtherOnLeaveCount already on leave</span>
+                                <span>@day.RemainingStaff of @Model.ActiveStaff in</span>
+                                @if (day.IsUnderstaffed)
+                                {
+                                    <span class="day-chip short">Short</span>
+                                }
+                                else
+                                {
+                                    <span class="day-chip ok">OK</span>
+                                }
+                            </div>
+                        }
+                    </div>
+                }
+            </div>
+        </section>
     </div>
+
+    <!-- ═════════════ HR decision ═════════════ -->
+    <section class="panel decision-panel">
+        <div class="panel-head">
+            <div class="panel-title">
+                <div class="panel-icon"><i class="fa-solid fa-gavel"></i></div>
+                <div>
+                    <h2>HR Decision</h2>
+                    <p>Approve or reject this employee's request</p>
+                </div>
+            </div>
+        </div>
+
+        <div class="panel-body">
+            @if (isPending)
+            {
+                <form method="post" id="decisionForm">
+
+                    @Html.AntiForgeryToken()
+
+                    <input type="hidden" name="leaveRequestId" value="@Model.LeaveRequestId" />
+
+                    <label for="reviewNote" class="form-label">Review note</label>
+
+                    <textarea id="reviewNote"
+                              name="reviewNote"
+                              maxlength="500"
+                              class="form-control"
+                              placeholder="Add feedback about your decision..."></textarea>
+
+                    <span class="character-count"><span id="characterTotal">0</span>/500</span>
+
+                    <div class="decision-notice">
+                        <i class="fa-solid fa-circle-info"></i>
+                        <span>
+                            @if (blocked)
+                            {
+                                <text>
+                                    <strong>Approval is blocked</strong> because of the staffing shortfall shown above.
+                                    You can still reject this request, and a reason is required when you do.
+                                </text>
+                            }
+                            else
+                            {
+                                <text>
+                                    Approving this request will remove the employee's roster shifts that fall
+                                    within the approved leave dates and notify them on their phone.
+                                </text>
+                            }
+                        </span>
+                    </div>
+
+                    <div class="button-row">
+                        <button type="submit"
+                                id="approveButton"
+                                formaction="@Url.Action("Approve", "LeaveAssessment")"
+                                formmethod="post"
+                                class="action-button approve-button"
+                            @(blocked ? "disabled" : "")
+                                title="@(blocked ? "Blocked: approving would understaff this department" : "")">
+                            <i class="fa-solid fa-check"></i>
+                            Approve Request
+                        </button>
+
+                        <button type="submit"
+                                id="rejectButton"
+                                formaction="@Url.Action("Reject", "LeaveAssessment")"
+                                formmethod="post"
+                                class="action-button reject-button">
+                            <i class="fa-solid fa-xmark"></i>
+                            Reject Request
+                        </button>
+                    </div>
+                </form>
+            }
+            else
+            {
+                <div class="processed-message">
+                    <i class="fa-solid fa-lock"></i>
+                    This request has already been <strong>@Model.Status</strong>
+                    @if (Model.ReviewedAt.HasValue)
+                    {
+                        <text> on @Model.ReviewedAt.Value.ToString("dd MMM yyyy, HH:mm")</text>
+                    }
+                    and cannot be assessed again.
+
+                    @if (!string.IsNullOrWhiteSpace(Model.ReviewNote))
+                    {
+                        <div class="processed-note">"@Model.ReviewNote"</div>
+                    }
+                </div>
+            }
+        </div>
+    </section>
 </div>
 
 @section Scripts {
@@ -892,25 +1178,15 @@
 
     <script>
         document.addEventListener("DOMContentLoaded", function () {
-            const form =
-                document.getElementById("decisionForm");
-
-            const reviewNote =
-                document.getElementById("reviewNote");
-
-            const characterTotal =
-                document.getElementById("characterTotal");
-
-            const approveButton =
-                document.getElementById("approveButton");
-
-            const rejectButton =
-                document.getElementById("rejectButton");
+            const form = document.getElementById("decisionForm");
+            const reviewNote = document.getElementById("reviewNote");
+            const characterTotal = document.getElementById("characterTotal");
+            const approveButton = document.getElementById("approveButton");
+            const rejectButton = document.getElementById("rejectButton");
 
             if (reviewNote && characterTotal) {
                 reviewNote.addEventListener("input", function () {
-                    characterTotal.textContent =
-                        reviewNote.value.length.toString();
+                    characterTotal.textContent = reviewNote.value.length.toString();
                 });
             }
 
@@ -919,61 +1195,41 @@
             }
 
             if (approveButton) {
-                approveButton.addEventListener(
-                    "click",
-                    function (event) {
-                        const confirmed = window.confirm(
-                            "Approve this leave request? " +
-                            "The employee's roster shifts during " +
-                            "the leave period will be removed."
-                        );
+                approveButton.addEventListener("click", function (event) {
+                    const confirmed = window.confirm(
+                        "Approve this leave request? " +
+                        "The employee's roster shifts during " +
+                        "the leave period will be removed."
+                    );
 
-                        if (!confirmed) {
-                            event.preventDefault();
-                        }
+                    if (!confirmed) {
+                        event.preventDefault();
                     }
-                );
+                });
             }
 
             if (rejectButton) {
-                rejectButton.addEventListener(
-                    "click",
-                    function (event) {
-                        if (
-                            reviewNote &&
-                            reviewNote.value.trim() === ""
-                        ) {
-                            event.preventDefault();
-
-                            alert(
-                                "Please enter a reason before " +
-                                "rejecting this leave request."
-                            );
-
-                            reviewNote.focus();
-                            return;
-                        }
-
-                        const confirmed = window.confirm(
-                            "Are you sure you want to reject " +
-                            "this leave request?"
-                        );
-
-                        if (!confirmed) {
-                            event.preventDefault();
-                        }
+                rejectButton.addEventListener("click", function (event) {
+                    if (reviewNote && reviewNote.value.trim() === "") {
+                        event.preventDefault();
+                        alert("Please enter a reason before rejecting this leave request.");
+                        reviewNote.focus();
+                        return;
                     }
-                );
+
+                    const confirmed = window.confirm(
+                        "Are you sure you want to reject this leave request?"
+                    );
+
+                    if (!confirmed) {
+                        event.preventDefault();
+                    }
+                });
             }
 
             form.addEventListener("submit", function () {
-                if (approveButton) {
-                    approveButton.disabled = true;
-                }
-
-                if (rejectButton) {
-                    rejectButton.disabled = true;
-                }
+                if (approveButton) { approveButton.disabled = true; }
+                if (rejectButton) { rejectButton.disabled = true; }
             });
         });
     </script>
