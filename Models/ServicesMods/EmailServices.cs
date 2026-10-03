@@ -402,6 +402,28 @@ Send(
                 "SkyTech Team");
 
 
+        //=======Loan application decision====
+
+        public void LoanApplicationApproved(string toEmail, string firstName, decimal amount) =>
+        Send(toEmail,
+        "SkyTech - Loan Application Approved",
+        $"Dear {firstName},\n\n" +
+        "Good news! Your loan application with SkyTech has been approved for " +
+        $"{amount:C}.\n" +
+        "Please visit your branch with your collateral to complete the disbursement process.\n\n" +
+        "Warm Regards,\nSkyTech Team");
+
+        public void LoanApplicationRejected(string toEmail, string firstName, string reason) =>
+            Send(toEmail,
+                "SkyTech - Loan Application Outcome",
+                $"Dear {firstName},\n\n" +
+                "Thank you for applying for a loan with SkyTech. " +
+                "Unfortunately, your application was not successful.\n\n" +
+                $"Reason: {reason}\n\n" +
+                "You can view full details of this decision by logging in to your account.\n\n" +
+                "Kind Regards,\nSkyTech Team");
+
+
     }
 
 

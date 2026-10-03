@@ -526,11 +526,30 @@ namespace SkyTech.Controllers
         }
 
 
+        //[HttpGet]
+        //public async Task<IActionResult> ApplicationDetails(int id)
+        //{
+        //    var application = await GetOwnedApplicationAsync(id, includeCollateral: true);
+        //    if (application == null) return NotFound();
+
+        //    return View(application);
+        //}
+
         [HttpGet]
         public async Task<IActionResult> ApplicationDetails(int id)
         {
             var application = await GetOwnedApplicationAsync(id, includeCollateral: true);
             if (application == null) return NotFound();
+
+            if (application.Status == LoanApplicationStatus.Rejected)
+            {
+                var rejection = await _db.LoanAssessments
+                    .Where(a => a.LoanApplicationId == id && a.Decision == LoanApplicationStatus.Rejected)
+                    .OrderByDescending(a => a.CompletedOn)
+                    .FirstOrDefaultAsync();
+
+                ViewBag.RejectionReason = rejection?.DecisionNotes;
+            }
 
             return View(application);
         }

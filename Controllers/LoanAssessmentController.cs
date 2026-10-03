@@ -25,20 +25,23 @@ namespace SkyTech.Controllers
         private readonly ICollateralVerificationService _verificationService;
         private readonly IFraudDetectionService _fraudService;
         private readonly IWebHostEnvironment _env;
+        private readonly EmailServices _emailService;
 
-       
+
         private const int CreditQualifyingThreshold = 600;
 
         public LoanAssessmentController(
             ApplicationDbContext db,
             ICollateralVerificationService verificationService,
             IFraudDetectionService fraudService,
-            IWebHostEnvironment env)
+            IWebHostEnvironment env,
+            EmailServices emailService)
         {
             _db = db;
             _verificationService = verificationService;
             _fraudService = fraudService;
             _env = env;
+            _emailService = emailService;
         }
 
         /// <summary>Resolves the OwnerId of the currently logged-in shop owner.
@@ -269,11 +272,13 @@ namespace SkyTech.Controllers
             if (!allowedDecisions.Contains(decision))
                 return BadRequest(new { success = false, message = "Invalid decision status." });
 
+            if (decision == LoanApplicationStatus.Rejected && string.IsNullOrWhiteSpace(notes))
+                ModelState.AddModelError(string.Empty, "A reason is required when rejecting an application.");
+
             var assessment = await _db.LoanAssessments
                 .Include(a => a.LoanApplication)
                 .Include(a => a.FraudFlags)
                 .FirstOrDefaultAsync(a => a.LoanAssessmentId == loanAssessmentId);
-            // ← dropped .Include(a => a.CollateralVerifications), no longer needed here
 
             if (assessment is null) return NotFound();
 
@@ -307,6 +312,27 @@ namespace SkyTech.Controllers
             assessment.LoanApplication.Status = decision;
 
             await _db.SaveChangesAsync();
+
+            // ── Notify the customer of the decision ──
+            var customer = await _db.Customers.FindAsync(assessment.LoanApplication.CustomerId);
+
+            if (customer != null)
+            {
+                if (decision == LoanApplicationStatus.Approved)
+                {
+                    _emailService.LoanApplicationApproved(
+                        customer.Email,
+                        customer.FirstName,
+                        assessment.LoanApplication.RequestedAmount);
+                }
+                else if (decision == LoanApplicationStatus.Rejected)
+                {
+                    _emailService.LoanApplicationRejected(
+                        customer.Email,
+                        customer.FirstName,
+                        notes ?? "Not specified");
+                }
+            }
 
             return RedirectToAction(nameof(AssessmentComplete), new { id = loanAssessmentId });
         }

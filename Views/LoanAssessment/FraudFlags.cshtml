@@ -451,12 +451,14 @@
         <div class="modal-title">Dismiss this fraud flag?</div>
 
         <p class="modal-text">
-            Please give a short reason. This will be kept on record for audit purposes.
+            This flag will remain on record. Explain what you found that the system
+            couldn't know — e.g. you verified it with the customer, confirmed it with
+            another branch, or found the match was a past settled loan.
         </p>
 
-        <label class="modal-field-label" for="dismissReasonInput">Reason</label>
-        <textarea id="dismissReasonInput" class="modal-textarea" placeholder="e.g. Verified manually, not a genuine match"></textarea>
-        <div class="modal-error" id="dismissError">A reason is required to dismiss this flag.</div>
+        <label class="modal-field-label" for="dismissReasonInput">Your explanation</label>
+        <textarea id="dismissReasonInput" class="modal-textarea" placeholder="e.g. Called the customer — confirmed this was their previous settled loan, not a new duplicate"></textarea>
+        <div class="modal-error" id="dismissError">Please explain what you verified before dismissing this flag.</div>
 
         <div class="modal-actions">
             <button type="button" class="modal-btn modal-btn-cancel" id="dismissCancelBtn">Cancel</button>
