@@ -7,6 +7,7 @@ using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
 using SkyTech.Models;
 using SkyTech.Models.SkytechWorkers;
+using SkyTech.Services;
 
 namespace SkyTech.Controllers.Api
 {
@@ -23,25 +24,6 @@ namespace SkyTech.Controllers.Api
         }
 
         private int GetStaffId() => int.Parse(User.FindFirstValue("UserId")!);
-
-        // "Today" in South Africa, regardless of the server's own clock.
-        // Azure App Service runs in UTC, so DateTime.Today is wrong between
-        // 00:00 and 02:00 SAST. Falls back to server time if the zone can't
-        // be found on this host.
-        private static DateTime GetToday()
-        {
-            foreach (var id in new[] { "Africa/Johannesburg", "South Africa Standard Time" })
-            {
-                try
-                {
-                    var tz = TimeZoneInfo.FindSystemTimeZoneById(id);
-                    return TimeZoneInfo.ConvertTimeFromUtc(DateTime.UtcNow, tz).Date;
-                }
-                catch (TimeZoneNotFoundException) { }
-                catch (InvalidTimeZoneException) { }
-            }
-            return DateTime.Today;
-        }
 
         // Shape used for "today" when there is no real RosterShift row
         // (approved leave, or a shift swapped away). Same field names as a
@@ -69,7 +51,7 @@ namespace SkyTech.Controllers.Api
         public IActionResult GetCurrent()
         {
             var staffId = GetStaffId();
-            var today = GetToday();
+            var today = SaTime.Today;
 
             var rosterShift = _db.RosterShifts
                 .Include(rs => rs.Branch)
@@ -156,7 +138,7 @@ namespace SkyTech.Controllers.Api
         public IActionResult GetRoster([FromQuery] DateTime? startDate)
         {
             var staffId = GetStaffId();
-            var today = GetToday();
+            var today = SaTime.Today;
             var referenceDate = (startDate ?? today).Date;
 
             int daysSinceMonday = ((int)referenceDate.DayOfWeek + 6) % 7;
