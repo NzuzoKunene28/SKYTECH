@@ -21,7 +21,8 @@ namespace SkyTech.Models.ViewModels
 
         [Required(ErrorMessage = "Select a payment method.")]
         [Display(Name = "Payment Method")]
-        public PaymentMethod PaymentMethod { get; set; } = PaymentMethod.Cash;
+        public PaymentMethod PaymentMethod { get; set; } = PaymentMethod.Card;
+
 
         [Required(ErrorMessage = "Enter your transfer reference to confirm this is your loan.")]
         [Display(Name = "Transfer Reference")]

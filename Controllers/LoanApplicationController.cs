@@ -50,13 +50,25 @@ namespace SkyTech.Controllers
         [HttpGet]
         public async Task<IActionResult> Apply()
         {
+            int? customerId = HttpContext.Session.GetInt32("UserId");
+
+            // ── NEW: block if the customer already has an active (unsettled) loan ──
+            var hasActiveLoan = await _db.Loans
+                .AnyAsync(l => l.LoanApplication.CustomerId == customerId && l.Status == LoanRepaymentStatus.Active);
+
+            if (hasActiveLoan)
+            {
+                TempData["Error"] = "You have an active loan that must be settled before applying for a new one.";
+                return RedirectToAction("CheckBalance", "LoanRepayment");
+            }
+
             var model = new LoanApplyViewModel
             {
                 AvailableBranches = await _db.Branches
                     .Select(b => new SelectListItem
                     {
                         Value = b.BranchId.ToString(),
-                        Text = b.BranchName // ASSUMPTION: adjust to the actual display property on Branch
+                        Text = b.BranchName
                     })
                     .ToListAsync()
             };
@@ -67,6 +79,27 @@ namespace SkyTech.Controllers
         [ValidateAntiForgeryToken]
         public async Task<IActionResult> Apply(LoanApplyViewModel model)
         {
+
+            int? customerId = HttpContext.Session.GetInt32("UserId");
+
+            // ── NEW: re-check on POST too, in case they opened the form in two tabs ──
+            var hasActiveLoan = await _db.Loans
+                .AnyAsync(l => l.LoanApplication.CustomerId == customerId && l.Status == LoanRepaymentStatus.Active);
+
+            if (hasActiveLoan)
+            {
+                TempData["Error"] = "You have an active loan that must be settled before applying for a new one.";
+                return RedirectToAction("CheckBalance", "LoanRepayment");
+            }
+
+            if (!ModelState.IsValid)
+            {
+                model.AvailableBranches = await _db.Branches
+                    .Select(b => new SelectListItem { Value = b.BranchId.ToString(), Text = b.BranchName })
+                    .ToListAsync();
+                return View(model);
+            }
+
             //branch selection
             if (!ModelState.IsValid)
             {
@@ -89,7 +122,7 @@ namespace SkyTech.Controllers
                 return View(model);
             }
 
-            int? customerId = HttpContext.Session.GetInt32("UserId");
+            //int? customerId = HttpContext.Session.GetInt32("UserId");
             var proofPath = await SaveUploadAsync(model.ProofOfIncomeDoc, "proof-of-income");
 
             var application = new LoanApplication
@@ -117,7 +150,6 @@ namespace SkyTech.Controllers
                 id = application.LoanApplicationId
             });
         }
-
         // ---------- Step 4: Display eligibility result ----------
         [HttpGet]
         public async Task<IActionResult> EligibilityLoading(int id)

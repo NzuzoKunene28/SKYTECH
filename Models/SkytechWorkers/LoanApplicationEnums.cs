@@ -134,9 +134,8 @@ namespace SkyTech.Models.SkytechWorkers
 
     public enum PaymentMethod
     {
-        Cash = 0,
-        Card = 1,
-        EFT = 2
+        Card = 0,
+        EFT = 1
     }
 
 }

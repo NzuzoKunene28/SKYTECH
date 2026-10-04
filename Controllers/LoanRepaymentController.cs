@@ -46,7 +46,7 @@ namespace SkyTech.Controllers
             if (loan == null)
             {
                 TempData["Info"] = "You don't have an active loan to repay right now.";
-                return RedirectToAction("ShoppingPage", "Customer");
+                return RedirectToAction("Apply", "LoanApplication");
             }
 
             return RedirectToAction(nameof(RepayLoan), new { loanId = loan.LoanId });
@@ -122,12 +122,13 @@ namespace SkyTech.Controllers
                     if (customer != null && !string.IsNullOrWhiteSpace(customer.Email))
                     {
                         _emailServices.LoanSettled(
-                            customer.Email,
-                            customer.FirstName,
-                            loan.LoanApplication.CollateralItems.Any()
-                                ? string.Join(", ", loan.LoanApplication.CollateralItems.Select(c => c.Description))
-                                : "your item",
-                            collectionDate);
+                          customer.Email,
+   customer.FirstName,
+   loan.LoanApplication.CollateralItems.Any()
+       ? string.Join(", ", loan.LoanApplication.CollateralItems.Select(c => c.Description))
+       : "your item",
+   collectionDate,
+   loan.CollectionToken);
 
                         Console.WriteLine("DEBUG: LoanSettled call completed without throwing.");
                     }

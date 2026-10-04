@@ -15,11 +15,13 @@ namespace SkyTech.Controllers
         private readonly ApplicationDbContext _db;
         private readonly PayStackTransferService _transferService;
         private readonly bool _simulateTransfers;
+        private readonly EmailServices _services;
 
-        public LoanDisbursementController(ApplicationDbContext db, PayStackTransferService transferService, IConfiguration config)
+        public LoanDisbursementController(ApplicationDbContext db, EmailServices services, PayStackTransferService transferService, IConfiguration config)
         {
             _db = db;
             _transferService = transferService;
+            _services = services;
             _simulateTransfers = config.GetValue<bool>("PayStack:SimulateTransfers");
         }
 
@@ -126,7 +128,23 @@ namespace SkyTech.Controllers
          
                   _db.LoanDisbursements.Add(disbursement);
                   application.Status = LoanApplicationStatus.Disbursed;
-                  await _db.SaveChangesAsync();
+
+
+                // ── Create the repayment record (UC-05) ──
+                var loan = new Loan
+                {
+                    LoanApplicationId = application.LoanApplicationId,
+                    PrincipalAmount = application.RequestedAmount,
+                    InterestRate = 0.05m, // ASSUMPTION — confirm with team
+                    TotalRepayable = application.RequestedAmount * 1.05m,
+                    OutstandingBalance = application.RequestedAmount * 1.05m,
+                    DisbursedOn = DateTime.UtcNow,
+                    DueDate = DateTime.UtcNow.AddMonths(6),
+                    Status = LoanRepaymentStatus.Active
+                };
+                _db.Loans.Add(loan);
+
+                await _db.SaveChangesAsync();
          
                   await SendDisbursementReceiptAsync(application, disbursement, model.BankCode);
          
@@ -167,7 +185,21 @@ namespace SkyTech.Controllers
               if (transferResult.Success)
               {
                   application.Status = LoanApplicationStatus.Disbursed;
-              }
+
+                // ── Create the repayment record (UC-05) ──
+                var loan = new Loan
+                {
+                    LoanApplicationId = application.LoanApplicationId,
+                    PrincipalAmount = application.RequestedAmount,
+                    InterestRate = 0.05m, // ASSUMPTION — confirm with team
+                    TotalRepayable = application.RequestedAmount * 1.05m,
+                    OutstandingBalance = application.RequestedAmount * 1.05m,
+                    DisbursedOn = DateTime.UtcNow,
+                    DueDate = DateTime.UtcNow.AddMonths(6),
+                    Status = LoanRepaymentStatus.Active
+                };
+                _db.Loans.Add(loan);
+            }
          
               await _db.SaveChangesAsync();
          
@@ -191,8 +223,8 @@ namespace SkyTech.Controllers
               var bankName = banks
                   .Select(b => (dynamic)b)
                   .FirstOrDefault(b => b.code == bankCode)?.name ?? bankCode;
-         
-              _emailService.LoanDisbursed(
+
+            _services.LoanDisbursed(
                   customer.Email,
                   customer.FirstName,
                   application.LoanApplicationId,

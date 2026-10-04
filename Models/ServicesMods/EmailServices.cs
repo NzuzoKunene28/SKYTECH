@@ -3,6 +3,8 @@ using SkyTech.Models.JobPostServices;
 using SkyTech.Services;
 using System.Net;
 using System.Net.Mail;
+using System.Net.Mime;
+using QRCoder;
 
 namespace SkyTech.Models
 {
@@ -49,6 +51,49 @@ namespace SkyTech.Models
                 throw; // re-throw so callers' catch blocks still work as before
             }
         }
+
+
+        // ── Same as Send, but with an inline embedded image — used for the
+        // loan settlement QR code. Kept separate from Send/SendWithAttachment
+        // so every existing call site is untouched. ──
+        private void SendWithInlineImage(string toEmail, string subject, string htmlBody, byte[] imageBytes, string contentId)
+        {
+            var fromAddress = new MailAddress(fromEmail, "Spaza Connect");
+            var toAddress = new MailAddress(toEmail);
+
+            using var smtp = new SmtpClient
+            {
+                Host = "smtp.office365.com",
+                Port = 587,
+                EnableSsl = true,
+                Credentials = new NetworkCredential(fromEmail, fromPassword)
+            };
+            using var message = new MailMessage(fromAddress, toAddress)
+            {
+                Subject = subject,
+                IsBodyHtml = true
+            };
+
+            var htmlView = AlternateView.CreateAlternateViewFromString(htmlBody, null, "text/html");
+            var qrImage = new LinkedResource(new MemoryStream(imageBytes), "image/png")
+            {
+                ContentId = contentId
+            };
+            htmlView.LinkedResources.Add(qrImage);
+            message.AlternateViews.Add(htmlView);
+
+            try
+            {
+                smtp.Send(message);
+                Console.WriteLine($"DEBUG: Email with inline image sent successfully to {toEmail}");
+            }
+            catch (Exception ex)
+            {
+                Console.WriteLine($"DEBUG: SMTP SEND FAILED: {ex.GetType().Name} - {ex.Message}");
+                throw;
+            }
+        }
+
 
         // ── Same as Send, but with a file attached — used for the lease
         // payment confirmation PDF. Kept separate from Send rather than
@@ -299,16 +344,28 @@ Send(
 
 
         // ── Loan Repayment ───────────────────────────────
-        public void LoanSettled(string toEmail, string firstName, string collateralSummary, DateTime collectionDate) =>
-            Send(toEmail,
-                "SkyTech - Loan Settled",
-                $"Dear {firstName},\n\n" +
-                "Congratulations! Your loan has been fully settled.\n\n" +
-                $"Your collateral ({collateralSummary}) is now ready for collection.\n\n" +
-                $"Please visit the branch on or after {collectionDate:dddd, dd MMMM yyyy} to collect your item.\n\n" +
-                "Thank you for banking with SkyTech.\n\n" +
-                "Warm Regards,\n" +
-                "SkyTech Team");
+        public void LoanSettled(string toEmail, string firstName, string collateralSummary, DateTime collectionDate, string collectionToken)
+        {
+            using var qrGenerator = new QRCodeGenerator();
+            using var qrData = qrGenerator.CreateQrCode(collectionToken, QRCodeGenerator.ECCLevel.Q);
+            using var qrCode = new PngByteQRCode(qrData);
+            var qrBytes = qrCode.GetGraphic(20);
+
+            var htmlBody = $@"
+        <div style='font-family: Arial, sans-serif; color:#0e1b35;'>
+            <p>Dear {firstName},</p>
+            <p>Congratulations! Your loan has been fully settled.</p>
+            <p>Your collateral (<strong>{collateralSummary}</strong>) is now ready for collection.</p>
+            <p>Please visit the branch on or after <strong>{collectionDate:dddd, dd MMMM yyyy}</strong> to collect your item.</p>
+            <p><strong>Show this QR code at the branch:</strong></p>
+            <img src='cid:collectionqr' alt='Collection QR Code' style='width:220px;height:220px;' />
+            <p style='font-family: monospace; font-size: 13px; background:#f0f4fc; padding:8px 12px; border-radius:6px; display:inline-block;'>{collectionToken}</p>
+            <p>Thank you for banking with SkyTech.</p>
+            <p>Warm Regards,<br/>SkyTech Team</p>
+        </div>";
+
+            SendWithInlineImage(toEmail, "SkyTech - Loan Settled", htmlBody, qrBytes, "collectionqr");
+        }
 
 
         // ── Lease Management ───────────────────────────────
